@@ -33,8 +33,7 @@ class WeatherLocationNotifier extends Notifier<WeatherLocation> {
 /// Resolves the actual coordinates to use for weather fetching.
 /// GPS mode → Geolocator; city mode → stored coords; GPS failure → Tokyo.
 final resolvedWeatherCoordsProvider =
-    FutureProvider.autoDispose<({double latitude, double longitude})>(
-        (ref) async {
+    FutureProvider<({double latitude, double longitude})>((ref) async {
   final location = ref.watch(weatherLocationProvider);
 
   if (!location.useCurrentLocation) {
@@ -54,6 +53,12 @@ final resolvedWeatherCoordsProvider =
 
     // Check / request permission
     var permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.deniedForever) {
+      return (
+        latitude: AppConstants.defaultLatitude,
+        longitude: AppConstants.defaultLongitude,
+      );
+    }
     if (permission == LocationPermission.denied) {
       permission = await Geolocator.requestPermission();
       if (permission == LocationPermission.denied ||

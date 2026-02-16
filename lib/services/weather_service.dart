@@ -113,5 +113,7 @@ class WeatherService {
   void clearCache() {
     _cache = null;
     _cacheTime = null;
+    _cachedLat = null;
+    _cachedLon = null;
   }
 }
