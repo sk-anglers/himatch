@@ -4,7 +4,7 @@ import 'package:uuid/uuid.dart';
 
 /// Local booking page state for offline-first development.
 ///
-/// Manages booking pages (like Calendly) where users can share
+/// Manages shareable booking pages where users can publish
 /// availability and receive bookings from others.
 final bookingPagesProvider =
     NotifierProvider<BookingPagesNotifier, List<BookingPage>>(

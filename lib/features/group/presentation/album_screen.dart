@@ -239,7 +239,7 @@ class _AlbumScreenState extends ConsumerState<AlbumScreen> {
           groupId: widget.groupId,
           uploadedBy: 'local-user',
           uploaderName: 'あなた',
-          imageUrl: 'https://picsum.photos/seed/${DateTime.now().millisecondsSinceEpoch}/400/400',
+          imageUrl: 'asset://demo_photo_${DateTime.now().millisecondsSinceEpoch}',
           caption: 'デモ写真',
         );
     ScaffoldMessenger.of(context).showSnackBar(

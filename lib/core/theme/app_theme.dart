@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 abstract class AppColors {
-  // Primary - Purple (differentiation from TimeTree green, ShiftBoard blue)
+  // Primary - Purple
   static const Color primary = Color(0xFF6C5CE7);
   static const Color primaryLight = Color(0xFFA29BFE);
   static const Color primaryDark = Color(0xFF4834D4);

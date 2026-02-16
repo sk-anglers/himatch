@@ -5,7 +5,7 @@ import 'package:himatch/core/theme/app_theme.dart';
 
 /// Booking page management screen.
 /// Users can create, manage, and share booking pages
-/// for external scheduling (Calendly-like functionality).
+/// for external scheduling with shareable booking pages.
 class BookingScreen extends ConsumerStatefulWidget {
   const BookingScreen({super.key});
 

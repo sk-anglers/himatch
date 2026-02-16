@@ -4,7 +4,7 @@ import 'package:himatch/core/theme/app_theme.dart';
 import 'package:himatch/models/chat_message.dart';
 import 'package:himatch/features/chat/presentation/providers/chat_providers.dart';
 
-/// Group chat screen (LINE / iMessage style).
+/// Group chat screen with bubble-based messaging layout.
 ///
 /// Displays a real-time message list with bubbles, reactions, and
 /// a compose bar at the bottom.
