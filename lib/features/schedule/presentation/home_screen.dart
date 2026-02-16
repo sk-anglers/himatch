@@ -1,21 +1,25 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:himatch/features/schedule/presentation/calendar_tab.dart';
 import 'package:himatch/features/group/presentation/groups_tab.dart';
 import 'package:himatch/features/suggestion/presentation/suggestions_tab.dart';
 import 'package:himatch/features/profile/presentation/profile_tab.dart';
+import 'package:himatch/features/group/presentation/providers/notification_providers.dart';
 
-class HomeScreen extends StatefulWidget {
+class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
 
   @override
-  State<HomeScreen> createState() => _HomeScreenState();
+  ConsumerState<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
+class _HomeScreenState extends ConsumerState<HomeScreen> {
   int _selectedIndex = 0;
 
   @override
   Widget build(BuildContext context) {
+    final totalNotifications = ref.watch(totalGroupNotificationsProvider);
+
     return Scaffold(
       appBar: AppBar(
         title: const Text(
@@ -51,23 +55,31 @@ class _HomeScreenState extends State<HomeScreen> {
         onDestinationSelected: (index) {
           setState(() => _selectedIndex = index);
         },
-        destinations: const [
-          NavigationDestination(
+        destinations: [
+          const NavigationDestination(
             icon: Icon(Icons.calendar_month_outlined),
             selectedIcon: Icon(Icons.calendar_month),
             label: 'カレンダー',
           ),
-          NavigationDestination(
+          const NavigationDestination(
             icon: Icon(Icons.lightbulb_outline),
             selectedIcon: Icon(Icons.lightbulb),
             label: '提案',
           ),
           NavigationDestination(
-            icon: Icon(Icons.group_outlined),
-            selectedIcon: Icon(Icons.group),
+            icon: Badge(
+              isLabelVisible: totalNotifications > 0,
+              label: Text('$totalNotifications'),
+              child: const Icon(Icons.group_outlined),
+            ),
+            selectedIcon: Badge(
+              isLabelVisible: totalNotifications > 0,
+              label: Text('$totalNotifications'),
+              child: const Icon(Icons.group),
+            ),
             label: 'グループ',
           ),
-          NavigationDestination(
+          const NavigationDestination(
             icon: Icon(Icons.person_outline),
             selectedIcon: Icon(Icons.person),
             label: 'マイページ',

@@ -13,6 +13,8 @@ import 'package:himatch/features/group/presentation/poll_screen.dart';
 import 'package:himatch/features/group/presentation/album_screen.dart';
 import 'package:himatch/features/group/presentation/board_screen.dart';
 import 'package:himatch/features/expense/presentation/expense_screen.dart';
+import 'package:himatch/features/chat/presentation/providers/chat_providers.dart';
+import 'package:himatch/features/group/presentation/providers/notification_providers.dart';
 
 class GroupDetailScreen extends ConsumerWidget {
   final Group group;
@@ -102,6 +104,7 @@ class GroupDetailScreen extends ConsumerWidget {
                 icon: Icons.chat_bubble_outline,
                 label: 'チャット',
                 color: AppColors.primary,
+                badgeCount: ref.watch(unreadCountProvider(group.id)),
                 onTap: () => Navigator.of(context).push(
                   MaterialPageRoute(
                     builder: (_) => ChatScreen(
@@ -129,6 +132,7 @@ class GroupDetailScreen extends ConsumerWidget {
                 icon: Icons.checklist,
                 label: 'ToDo',
                 color: AppColors.typeClass,
+                badgeCount: ref.watch(incompleteTodoCountProvider(group.id)),
                 onTap: () => Navigator.of(context).push(
                   MaterialPageRoute(
                     builder: (_) => TodoListScreen(
@@ -142,6 +146,7 @@ class GroupDetailScreen extends ConsumerWidget {
                 icon: Icons.poll_outlined,
                 label: '投票',
                 color: AppColors.warning,
+                badgeCount: ref.watch(unvotedPollCountProvider(group.id)),
                 onTap: () => Navigator.of(context).push(
                   MaterialPageRoute(
                     builder: (_) => PollScreen(
@@ -296,12 +301,14 @@ class _FeatureButton extends StatelessWidget {
   final String label;
   final Color color;
   final VoidCallback onTap;
+  final int badgeCount;
 
   const _FeatureButton({
     required this.icon,
     required this.label,
     required this.color,
     required this.onTap,
+    this.badgeCount = 0,
   });
 
   @override
@@ -317,7 +324,11 @@ class _FeatureButton extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(icon, color: color, size: 24),
+            Badge(
+              isLabelVisible: badgeCount > 0,
+              label: Text('$badgeCount'),
+              child: Icon(icon, color: color, size: 24),
+            ),
             const SizedBox(height: 4),
             Text(
               label,
