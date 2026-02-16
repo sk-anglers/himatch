@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:himatch/core/constants/demo_data.dart';
 import 'package:himatch/models/group.dart';
 import 'package:uuid/uuid.dart';
 
@@ -20,7 +21,7 @@ class LocalGroupsNotifier extends Notifier<List<Group>> {
   static const _inviteChars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
 
   @override
-  List<Group> build() => [];
+  List<Group> build() => List.of(DemoData.groups);
 
   Group createGroup({
     required String name,
@@ -90,7 +91,10 @@ class LocalGroupMembersNotifier
   static const _uuid = Uuid();
 
   @override
-  Map<String, List<GroupMember>> build() => {};
+  Map<String, List<GroupMember>> build() => {
+    for (final entry in DemoData.members.entries)
+      entry.key: List.of(entry.value),
+  };
 
   void addMember({
     required String groupId,

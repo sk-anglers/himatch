@@ -1,7 +1,9 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:himatch/core/constants/demo_data.dart';
 import 'package:himatch/models/schedule.dart';
 import 'package:himatch/models/suggestion.dart';
 import 'package:himatch/features/suggestion/domain/suggestion_engine.dart';
+import 'package:himatch/features/suggestion/presentation/providers/weather_providers.dart';
 import 'package:himatch/features/schedule/presentation/providers/calendar_providers.dart';
 import 'package:himatch/features/group/presentation/providers/group_providers.dart';
 
@@ -20,7 +22,8 @@ class LocalSuggestionsNotifier extends Notifier<List<Suggestion>> {
   List<Suggestion> build() => [];
 
   /// Run the suggestion engine against local data.
-  void refreshSuggestions() {
+  /// Fetches weather data asynchronously before running the engine.
+  Future<void> refreshSuggestions() async {
     final engine = ref.read(suggestionEngineProvider);
     final groups = ref.read(localGroupsProvider);
     final schedules = ref.read(localSchedulesProvider);
@@ -30,6 +33,10 @@ class LocalSuggestionsNotifier extends Notifier<List<Suggestion>> {
       return;
     }
 
+    // Fetch weather data (graceful: empty map on failure)
+    final weatherService = ref.read(weatherServiceProvider);
+    final weatherData = await weatherService.fetchForecast();
+
     final allSuggestions = <Suggestion>[];
 
     for (final group in groups) {
@@ -37,28 +44,46 @@ class LocalSuggestionsNotifier extends Notifier<List<Suggestion>> {
           ref.read(localGroupMembersProvider)[group.id] ?? [];
       if (members.length < 2) continue;
 
-      // Build memberSchedules map
-      // In offline mode, all local schedules belong to 'local-user'
-      // Simulate other members having no schedules (fully free)
+      // Build memberSchedules map using demo data for realistic variety
+      final allDemoSchedules = DemoData.generateAllMemberSchedules();
       final memberSchedules = <String, List<Schedule>>{};
       for (final member in members) {
         if (member.userId == 'local-user') {
           memberSchedules[member.userId] = schedules;
         } else {
-          memberSchedules[member.userId] = [];
+          memberSchedules[member.userId] =
+              allDemoSchedules[member.userId] ?? [];
         }
       }
 
       final suggestions = engine.generateSuggestions(
         memberSchedules: memberSchedules,
         groupId: group.id,
+        weatherData: weatherData.isNotEmpty ? weatherData : null,
       );
       allSuggestions.addAll(suggestions);
     }
 
-    // Sort all suggestions by score
-    allSuggestions.sort((a, b) => b.score.compareTo(a.score));
-    state = allSuggestions;
+    // Deduplicate: keep only the best suggestion per (groupId, date)
+    final bestPerDayGroup = <String, Suggestion>{};
+    for (final s in allSuggestions) {
+      final key =
+          '${s.groupId}_${s.suggestedDate.year}-${s.suggestedDate.month}-${s.suggestedDate.day}';
+      final existing = bestPerDayGroup[key];
+      if (existing == null || s.score > existing.score) {
+        bestPerDayGroup[key] = s;
+      }
+    }
+
+    final deduped = bestPerDayGroup.values.toList();
+
+    // Sort by date ascending, then by score descending within the same day
+    deduped.sort((a, b) {
+      final dateCompare = a.suggestedDate.compareTo(b.suggestedDate);
+      if (dateCompare != 0) return dateCompare;
+      return b.score.compareTo(a.score);
+    });
+    state = deduped;
   }
 
   void updateStatus(String id, SuggestionStatus status) {

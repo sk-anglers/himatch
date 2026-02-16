@@ -37,7 +37,11 @@ abstract class Schedule with _$Schedule {
     @Default(Visibility.friends) Visibility visibility,
     String? color,
     String? memo,
+    String? location,
     @JsonKey(name: 'shift_pattern_id') String? shiftPatternId,
+    @JsonKey(name: 'shift_type_id') String? shiftTypeId,
+    @JsonKey(name: 'workplace_id') String? workplaceId,
+    @Default([]) List<int> reminders,
     @JsonKey(name: 'created_at') DateTime? createdAt,
     @JsonKey(name: 'updated_at') DateTime? updatedAt,
   }) = _Schedule;

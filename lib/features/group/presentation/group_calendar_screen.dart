@@ -5,8 +5,11 @@ import 'package:himatch/core/theme/app_theme.dart';
 import 'package:himatch/core/utils/date_utils.dart';
 import 'package:himatch/models/group.dart';
 import 'package:himatch/models/schedule.dart';
+import 'package:himatch/models/shift_type.dart';
 import 'package:himatch/features/group/presentation/providers/group_providers.dart';
 import 'package:himatch/features/schedule/presentation/providers/calendar_providers.dart';
+import 'package:himatch/features/schedule/presentation/providers/shift_type_providers.dart';
+import 'package:himatch/features/schedule/presentation/widgets/shift_badge.dart';
 
 /// Member colors for overlay display (up to 8 distinct colors).
 const _memberColors = [
@@ -23,8 +26,13 @@ const _memberColors = [
 /// Shows a calendar overlay of all group members' schedules.
 class GroupCalendarScreen extends ConsumerStatefulWidget {
   final Group group;
+  final String? initialMode;
 
-  const GroupCalendarScreen({super.key, required this.group});
+  const GroupCalendarScreen({
+    super.key,
+    required this.group,
+    this.initialMode,
+  });
 
   @override
   ConsumerState<GroupCalendarScreen> createState() =>
@@ -47,6 +55,7 @@ class _GroupCalendarScreenState extends ConsumerState<GroupCalendarScreen> {
     final membersMap = ref.watch(localGroupMembersProvider);
     final members = membersMap[widget.group.id] ?? [];
     final mySchedules = ref.watch(localSchedulesProvider);
+    final shiftTypeMap = ref.watch(shiftTypeMapProvider);
 
     // Build member schedule map: userId -> List<Schedule>
     // In demo mode, only local-user has real schedules, others are "fully free"
@@ -87,6 +96,11 @@ class _GroupCalendarScreenState extends ConsumerState<GroupCalendarScreen> {
               markerBuilder: (context, day, events) {
                 if (events.isEmpty) return null;
 
+                // シフト付きイベントをバッジ表示
+                final shiftEvents = events
+                    .where((e) => e.shiftTypeId != null)
+                    .toList();
+
                 // Group events by userId to show colored dots
                 final userIds = events.map((e) => e.userId).toSet();
                 final memberList = members.toList();
@@ -94,22 +108,42 @@ class _GroupCalendarScreenState extends ConsumerState<GroupCalendarScreen> {
                 return Row(
                   mainAxisSize: MainAxisSize.min,
                   mainAxisAlignment: MainAxisAlignment.center,
-                  children: userIds.take(4).map((userId) {
-                    final idx = memberList
-                        .indexWhere((m) => m.userId == userId);
-                    final color = idx >= 0 && idx < _memberColors.length
-                        ? _memberColors[idx]
-                        : AppColors.textHint;
-                    return Container(
-                      width: 6,
-                      height: 6,
-                      margin: const EdgeInsets.symmetric(horizontal: 1),
-                      decoration: BoxDecoration(
-                        color: color,
-                        shape: BoxShape.circle,
-                      ),
-                    );
-                  }).toList(),
+                  children: [
+                    // シフトバッジ（local-userのみ、最大1つ）
+                    ...shiftEvents
+                        .where((e) => e.userId == 'local-user')
+                        .take(1)
+                        .map((e) {
+                      final st = shiftTypeMap[e.shiftTypeId];
+                      if (st == null) return const SizedBox.shrink();
+                      return Padding(
+                        padding: const EdgeInsets.only(right: 2),
+                        child: ShiftBadge(shiftType: st, size: 14),
+                      );
+                    }),
+                    // 他メンバーはドット
+                    ...userIds
+                        .where((uid) =>
+                            uid != 'local-user' ||
+                            shiftEvents.every((e) => e.userId != 'local-user'))
+                        .take(3)
+                        .map((userId) {
+                      final idx = memberList
+                          .indexWhere((m) => m.userId == userId);
+                      final color = idx >= 0 && idx < _memberColors.length
+                          ? _memberColors[idx]
+                          : AppColors.textHint;
+                      return Container(
+                        width: 6,
+                        height: 6,
+                        margin: const EdgeInsets.symmetric(horizontal: 1),
+                        decoration: BoxDecoration(
+                          color: color,
+                          shape: BoxShape.circle,
+                        ),
+                      );
+                    }),
+                  ],
                 );
               },
               defaultBuilder: (context, day, focusedDay) {
@@ -229,6 +263,7 @@ class _GroupCalendarScreenState extends ConsumerState<GroupCalendarScreen> {
                     day: _selectedDay!,
                     members: members,
                     memberSchedules: memberSchedules,
+                    shiftTypeMap: shiftTypeMap,
                   ),
           ),
         ],
@@ -408,11 +443,13 @@ class _MemberDaySchedules extends StatelessWidget {
   final DateTime day;
   final List<GroupMember> members;
   final Map<String, List<Schedule>> memberSchedules;
+  final Map<String, ShiftType> shiftTypeMap;
 
   const _MemberDaySchedules({
     required this.day,
     required this.members,
     required this.memberSchedules,
+    required this.shiftTypeMap,
   });
 
   @override
@@ -488,35 +525,40 @@ class _MemberDaySchedules extends StatelessWidget {
                           ),
                         )
                       else
-                        ...schedules.map((s) => Padding(
-                              padding:
-                                  const EdgeInsets.only(bottom: 2),
-                              child: Row(
-                                children: [
-                                  _TypeDot(type: s.scheduleType),
-                                  const SizedBox(width: 6),
-                                  Text(
-                                    s.isAllDay
-                                        ? '終日'
-                                        : '${AppDateUtils.formatTime(s.startTime)}-${AppDateUtils.formatTime(s.endTime)}',
-                                    style: const TextStyle(
-                                      fontSize: 12,
-                                      color: AppColors.textSecondary,
-                                    ),
-                                  ),
-                                  const SizedBox(width: 6),
-                                  Expanded(
-                                    child: Text(
-                                      s.title,
-                                      style: const TextStyle(
-                                        fontSize: 13,
-                                      ),
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
-                                  ),
-                                ],
+                        ...schedules.map((s) {
+                        final st = s.shiftTypeId != null
+                            ? shiftTypeMap[s.shiftTypeId]
+                            : null;
+                        return Padding(
+                          padding: const EdgeInsets.only(bottom: 2),
+                          child: Row(
+                            children: [
+                              if (st != null)
+                                ShiftBadge(shiftType: st, size: 16)
+                              else
+                                _TypeDot(type: s.scheduleType),
+                              const SizedBox(width: 6),
+                              Text(
+                                s.isAllDay
+                                    ? '終日'
+                                    : '${AppDateUtils.formatTime(s.startTime)}-${AppDateUtils.formatTime(s.endTime)}',
+                                style: const TextStyle(
+                                  fontSize: 12,
+                                  color: AppColors.textSecondary,
+                                ),
                               ),
-                            )),
+                              const SizedBox(width: 6),
+                              Expanded(
+                                child: Text(
+                                  s.title,
+                                  style: const TextStyle(fontSize: 13),
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                            ],
+                          ),
+                        );
+                      }),
                     ],
                   ),
                 ),
