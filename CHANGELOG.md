@@ -8,6 +8,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- 天気予報の地域設定機能: GPS現在地 or 都市名検索で天気取得エリアを変更可能
+  - WeatherLocation モデル + WeatherLocationNotifier (Riverpod)
+  - GeocodingService: Open-Meteo Geocoding API による都市名検索
+  - resolvedWeatherCoordsProvider: GPS/手動設定の座標解決 + Tokyo フォールバック
+  - WeatherLocationScreen: 設定UI (GPS切替 + 都市検索 + debounce)
+  - WeatherService: 座標変更時のキャッシュ自動無効化
+  - iOS/Android 位置情報パーミッション設定
+- お問い合わせ画面 (ContactScreen): カテゴリ選択・件名・本文のフォーム付き問い合わせ機能
+- 利用規約画面 (TermsOfServiceScreen): 9条構成の利用規約をアプリ内で閲覧可能に
+- プライバシーポリシー画面 (PrivacyPolicyScreen): 個人情報保護法準拠の8項目ポリシーをアプリ内で閲覧可能に
 - プロジェクト設計ドキュメント一式 (MVP機能スコープ、UI/UX設計、システム設計、技術選定)
 - 技術選定最終決定: Flutter + Supabase (PostgreSQL)
 - CHANGELOG.md (Keep a Changelog 形式)

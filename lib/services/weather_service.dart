@@ -13,6 +13,8 @@ class WeatherService {
 
   Map<DateTime, WeatherSummary>? _cache;
   DateTime? _cacheTime;
+  double? _cachedLat;
+  double? _cachedLon;
 
   WeatherService({http.Client? client}) : _client = client ?? http.Client();
 
@@ -21,6 +23,12 @@ class WeatherService {
     double latitude = AppConstants.defaultLatitude,
     double longitude = AppConstants.defaultLongitude,
   }) async {
+    // Invalidate cache if coordinates changed
+    if (_cachedLat != latitude || _cachedLon != longitude) {
+      _cache = null;
+      _cacheTime = null;
+    }
+
     // Return cache if still valid
     if (_cache != null &&
         _cacheTime != null &&
@@ -86,6 +94,8 @@ class WeatherService {
 
       _cache = result;
       _cacheTime = DateTime.now();
+      _cachedLat = latitude;
+      _cachedLon = longitude;
       return result;
     } on TimeoutException {
       // Network timeout: return stale cache if available

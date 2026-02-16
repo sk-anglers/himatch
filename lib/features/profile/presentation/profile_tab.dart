@@ -13,8 +13,13 @@ import 'package:himatch/features/history/presentation/history_screen.dart';
 import 'package:himatch/features/wellbeing/presentation/wellbeing_screen.dart';
 import 'package:himatch/features/booking/presentation/booking_screen.dart';
 import 'package:himatch/features/schedule/presentation/calendar_sync_settings_screen.dart';
+import 'package:himatch/features/profile/presentation/weather_location_screen.dart';
+import 'package:himatch/features/profile/presentation/providers/location_providers.dart';
 import 'package:himatch/features/schedule/presentation/template_screen.dart';
 import 'package:himatch/features/shift/presentation/shift_pattern_screen.dart';
+import 'package:himatch/features/profile/presentation/terms_of_service_screen.dart';
+import 'package:himatch/features/profile/presentation/privacy_policy_screen.dart';
+import 'package:himatch/features/profile/presentation/contact_screen.dart';
 
 class ProfileTab extends ConsumerWidget {
   const ProfileTab({super.key});
@@ -197,6 +202,8 @@ class ProfileTab extends ConsumerWidget {
                 ),
               ),
               const Divider(height: 1),
+              _WeatherLocationTile(),
+              const Divider(height: 1),
               ListTile(
                 leading: const Icon(Icons.visibility_outlined),
                 title: const Text('デフォルト公開範囲'),
@@ -239,14 +246,22 @@ class ProfileTab extends ConsumerWidget {
                 leading: const Icon(Icons.description_outlined),
                 title: const Text('利用規約'),
                 trailing: const Icon(Icons.chevron_right),
-                onTap: () {},
+                onTap: () => Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (_) => const TermsOfServiceScreen(),
+                  ),
+                ),
               ),
               const Divider(height: 1),
               ListTile(
                 leading: const Icon(Icons.privacy_tip_outlined),
                 title: const Text('プライバシーポリシー'),
                 trailing: const Icon(Icons.chevron_right),
-                onTap: () {},
+                onTap: () => Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (_) => const PrivacyPolicyScreen(),
+                  ),
+                ),
               ),
               const Divider(height: 1),
               const ListTile(
@@ -255,6 +270,17 @@ class ProfileTab extends ConsumerWidget {
                 subtitle: Text(
                   'Open-Meteo.com (CC BY 4.0)',
                   style: TextStyle(fontSize: 12),
+                ),
+              ),
+              const Divider(height: 1),
+              ListTile(
+                leading: const Icon(Icons.mail_outline),
+                title: const Text('お問い合わせ'),
+                trailing: const Icon(Icons.chevron_right),
+                onTap: () => Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (_) => const ContactScreen(),
+                  ),
                 ),
               ),
             ],
@@ -371,6 +397,24 @@ class ProfileTab extends ConsumerWidget {
                 style: TextStyle(color: AppColors.error)),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _WeatherLocationTile extends ConsumerWidget {
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final location = ref.watch(weatherLocationProvider);
+    return _NavTile(
+      icon: Icons.wb_sunny_outlined,
+      iconColor: AppColors.warning,
+      title: '天気の地域',
+      subtitle: location.name,
+      onTap: () => Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (_) => const WeatherLocationScreen(),
+        ),
       ),
     );
   }
