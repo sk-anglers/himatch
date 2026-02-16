@@ -1,40 +1,68 @@
-# Dependencies
-node_modules/
-.expo/
-vendor/
+# Flutter / Dart
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+build/
+pubspec.lock
+*.iml
+
+# iOS
+ios/Pods/
+ios/.symlinks/
+ios/Flutter/Flutter.framework
+ios/Flutter/Flutter.podspec
+ios/Flutter/Generated.xcconfig
+ios/Flutter/app.flx
+ios/Flutter/app.zip
+ios/Flutter/flutter_assets/
+ios/Flutter/App.framework
+ios/ServiceDefinitions.json
+ios/Runner/GeneratedPluginRegistrant.*
+
+# Android
+android/.gradle/
+android/captures/
+android/gradlew
+android/gradlew.bat
+android/local.properties
+android/**/GeneratedPluginRegistrant.java
+android/key.properties
+*.jks
 
 # Build
-build/
-dist/
 *.ipa
 *.apk
 *.aab
+dist/
 
 # Environment
 .env
 .env.local
 .env.production
+*.env
 
 # IDE
 .idea/
 .vscode/
 *.swp
 *.swo
+*.sublime-workspace
 
 # OS
 .DS_Store
 Thumbs.db
 
-# React Native / Expo
-*.jsbundle
-*.hbc
-
-# Flutter
-.dart_tool/
-.flutter-plugins
-.flutter-plugins-dependencies
-.packages
-pubspec.lock
-
 # Supabase
 supabase/.temp/
+supabase/.branches/
+supabase/.keys/
+
+# Coverage
+coverage/
+lcov.info
+
+# Generated
+*.g.dart
+*.freezed.dart
+*.mocks.dart
