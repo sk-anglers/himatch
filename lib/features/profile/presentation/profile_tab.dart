@@ -248,6 +248,15 @@ class ProfileTab extends ConsumerWidget {
                 trailing: const Icon(Icons.chevron_right),
                 onTap: () {},
               ),
+              const Divider(height: 1),
+              const ListTile(
+                leading: Icon(Icons.cloud_outlined),
+                title: Text('天気データ提供'),
+                subtitle: Text(
+                  'Open-Meteo.com (CC BY 4.0)',
+                  style: TextStyle(fontSize: 12),
+                ),
+              ),
             ],
           ),
           const SizedBox(height: 32),

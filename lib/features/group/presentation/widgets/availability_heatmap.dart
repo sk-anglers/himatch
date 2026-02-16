@@ -4,7 +4,7 @@ import 'package:himatch/core/theme/app_theme.dart';
 import 'package:himatch/models/schedule.dart';
 import 'package:himatch/models/group.dart';
 
-/// When2meet-style availability heatmap showing group member availability.
+/// Availability heatmap showing group member free time overlap.
 ///
 /// X axis: dates (next 14 days)
 /// Y axis: time slots (9:00-22:00, 1-hour granularity)

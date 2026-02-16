@@ -4,7 +4,7 @@ import 'package:himatch/core/theme/app_theme.dart';
 import 'package:himatch/models/activity.dart';
 import 'package:himatch/features/group/presentation/providers/activity_providers.dart';
 
-/// Activity feed screen for a group (TimeTree-style).
+/// Chronological activity feed screen for a group.
 ///
 /// Shows a chronological list of group activities with icons, reactions,
 /// and pull-to-refresh.
