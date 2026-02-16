@@ -1,4 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:himatch/core/constants/demo_data.dart';
+import 'package:himatch/features/auth/providers/auth_providers.dart';
 import 'package:himatch/models/chat_message.dart';
 import 'package:uuid/uuid.dart';
 
@@ -40,7 +42,59 @@ class ChatMessagesNotifier extends Notifier<Map<String, List<ChatMessage>>> {
   static const _uuid = Uuid();
 
   @override
-  Map<String, List<ChatMessage>> build() => {};
+  Map<String, List<ChatMessage>> build() {
+    final authState = ref.watch(authNotifierProvider);
+    if (authState.isDemo) {
+      return _demoMessages();
+    }
+    return {};
+  }
+
+  static Map<String, List<ChatMessage>> _demoMessages() {
+    final now = DateTime.now();
+    return {
+      DemoData.demoGroupId: [
+        ChatMessage(
+          id: 'demo-msg-1',
+          groupId: DemoData.demoGroupId,
+          userId: 'demo-user-a',
+          displayName: 'あかり',
+          content: '今週末ひまな人いる？🙌',
+          readBy: const ['demo-user-a'],
+          createdAt: now.subtract(const Duration(hours: 2)),
+        ),
+        ChatMessage(
+          id: 'demo-msg-2',
+          groupId: DemoData.demoGroupId,
+          userId: 'demo-user-b',
+          displayName: 'けんた',
+          content: '土曜なら空いてるよ！',
+          readBy: const ['demo-user-b'],
+          createdAt: now.subtract(const Duration(hours: 1, minutes: 45)),
+        ),
+        ChatMessage(
+          id: 'demo-msg-3',
+          groupId: DemoData.demoGroupId,
+          userId: 'demo-user-c',
+          displayName: 'みく',
+          content: '私も土曜OK！ランチ行こうよ🍔',
+          readBy: const ['demo-user-c'],
+          createdAt: now.subtract(const Duration(hours: 1, minutes: 30)),
+        ),
+      ],
+      DemoData.demoGroupId2: [
+        ChatMessage(
+          id: 'demo-msg-4',
+          groupId: DemoData.demoGroupId2,
+          userId: 'demo-user-d',
+          displayName: 'そうた',
+          content: '来週のシフト出した？',
+          readBy: const ['demo-user-d'],
+          createdAt: now.subtract(const Duration(minutes: 30)),
+        ),
+      ],
+    };
+  }
 
   /// Send a new message to a group chat.
   void sendMessage({

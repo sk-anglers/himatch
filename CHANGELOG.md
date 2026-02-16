@@ -26,6 +26,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 - 提案タブ: 手動「候補日を検索」ボタンを廃止し、タブ表示時に自動で候補日を生成するように変更
+- デモモード: チャット・投票・ToDoに初期デモデータを追加（通知バッジが起動時から表示される）
+
+### Fixed
+- お誘い送信後の完了SnackBarが表示されない問題を修正（bottom sheet の context 無効化が原因）
 - デモモード: 天気予報の地域デフォルトを福岡市に設定（設定画面から変更可能）
 
 - お問い合わせ画面 (ContactScreen): カテゴリ選択・件名・本文のフォーム付き問い合わせ機能

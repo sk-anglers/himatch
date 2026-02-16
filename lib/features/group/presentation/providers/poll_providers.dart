@@ -1,4 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:himatch/core/constants/demo_data.dart';
+import 'package:himatch/features/auth/providers/auth_providers.dart';
 import 'package:himatch/models/poll.dart';
 import 'package:uuid/uuid.dart';
 
@@ -16,7 +18,49 @@ class PollsNotifier extends Notifier<Map<String, List<Poll>>> {
   static const _uuid = Uuid();
 
   @override
-  Map<String, List<Poll>> build() => {};
+  Map<String, List<Poll>> build() {
+    final authState = ref.watch(authNotifierProvider);
+    if (authState.isDemo) {
+      return _demoPolls();
+    }
+    return {};
+  }
+
+  static Map<String, List<Poll>> _demoPolls() {
+    final now = DateTime.now();
+    return {
+      DemoData.demoGroupId: [
+        Poll(
+          id: 'demo-poll-1',
+          groupId: DemoData.demoGroupId,
+          createdBy: 'demo-user-a',
+          creatorName: 'あかり',
+          question: '今週末ランチどこ行く？',
+          options: [
+            const PollOption(
+              id: 'demo-poll-opt-1',
+              text: 'ハンバーガー',
+              voterIds: ['demo-user-a', 'demo-user-b'],
+              voterNames: ['あかり', 'けんた'],
+            ),
+            const PollOption(
+              id: 'demo-poll-opt-2',
+              text: 'パスタ',
+              voterIds: ['demo-user-c'],
+              voterNames: ['みく'],
+            ),
+            const PollOption(
+              id: 'demo-poll-opt-3',
+              text: 'ラーメン',
+              voterIds: [],
+              voterNames: [],
+            ),
+          ],
+          createdAt: now.subtract(const Duration(hours: 3)),
+        ),
+      ],
+    };
+  }
 
   /// Create a new poll in a group.
   ///

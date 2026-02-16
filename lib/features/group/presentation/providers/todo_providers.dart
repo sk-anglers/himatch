@@ -1,4 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:himatch/core/constants/demo_data.dart';
+import 'package:himatch/features/auth/providers/auth_providers.dart';
 import 'package:himatch/models/todo_item.dart';
 import 'package:uuid/uuid.dart';
 
@@ -16,7 +18,38 @@ class TodosNotifier extends Notifier<Map<String, List<TodoItem>>> {
   static const _uuid = Uuid();
 
   @override
-  Map<String, List<TodoItem>> build() => {};
+  Map<String, List<TodoItem>> build() {
+    final authState = ref.watch(authNotifierProvider);
+    if (authState.isDemo) {
+      return _demoTodos();
+    }
+    return {};
+  }
+
+  static Map<String, List<TodoItem>> _demoTodos() {
+    final now = DateTime.now();
+    return {
+      DemoData.demoGroupId: [
+        TodoItem(
+          id: 'demo-todo-1',
+          groupId: DemoData.demoGroupId,
+          title: 'お店を予約する',
+          createdBy: 'demo-user-a',
+          assignedTo: 'local-user',
+          assignedName: 'あなた',
+          dueDate: now.add(const Duration(days: 3)),
+          createdAt: now.subtract(const Duration(hours: 2)),
+        ),
+        TodoItem(
+          id: 'demo-todo-2',
+          groupId: DemoData.demoGroupId,
+          title: '集合場所を決める',
+          createdBy: 'demo-user-b',
+          createdAt: now.subtract(const Duration(hours: 1)),
+        ),
+      ],
+    };
+  }
 
   /// Add a new todo item to a group.
   ///
