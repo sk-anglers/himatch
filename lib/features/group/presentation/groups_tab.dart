@@ -6,6 +6,7 @@ import 'package:himatch/features/group/presentation/providers/group_providers.da
 import 'package:himatch/features/group/presentation/group_detail_screen.dart';
 import 'package:himatch/features/group/presentation/widgets/create_group_dialog.dart';
 import 'package:himatch/features/group/presentation/widgets/join_group_dialog.dart';
+import 'package:himatch/features/group/presentation/providers/notification_providers.dart';
 
 class GroupsTab extends ConsumerWidget {
   const GroupsTab({super.key});
@@ -207,6 +208,8 @@ class _GroupCard extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final membersMap = ref.watch(localGroupMembersProvider);
     final memberCount = (membersMap[group.id] ?? []).length;
+    final notificationCount =
+        ref.watch(groupNotificationCountProvider(group.id));
 
     return Card(
       margin: const EdgeInsets.only(bottom: 8),
@@ -276,7 +279,15 @@ class _GroupCard extends ConsumerWidget {
                   ],
                 ),
               ),
-              // Arrow
+              // Notification badge + Arrow
+              if (notificationCount > 0)
+                Padding(
+                  padding: const EdgeInsets.only(right: 4),
+                  child: Badge(
+                    label: Text('$notificationCount'),
+                    child: const SizedBox.shrink(),
+                  ),
+                ),
               const Icon(
                 Icons.chevron_right,
                 color: AppColors.textHint,
