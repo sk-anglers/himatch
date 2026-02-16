@@ -21,7 +21,7 @@ void main() {
 
     test('createGroup adds a group', () {
       final notifier = container.read(localGroupsProvider.notifier);
-      final group = notifier.createGroup(name: 'テストグループ');
+      notifier.createGroup(name: 'テストグループ');
 
       final groups = container.read(localGroupsProvider);
       expect(groups, hasLength(1));
