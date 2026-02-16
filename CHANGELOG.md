@@ -33,3 +33,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - GroupService: グループ作成/招待コード参加/メンバー管理
 - 認証ガード: go_router redirect で未認証時ログイン画面に自動遷移
 - 認証状態プロバイダー (authStateProvider, currentUserProvider)
+- Supabase CLI 初期化 (supabase init)
+- DBスキーマ: 7テーブル + GiST インデックス + CHECK制約 + updated_at トリガー
+- RLS ポリシー: 全7テーブルに Row Level Security 設定
+- 開発用 seed データ (3ユーザー、1グループ、12スケジュール)
