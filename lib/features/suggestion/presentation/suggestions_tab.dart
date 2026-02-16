@@ -1059,18 +1059,76 @@ class _SuggestionTile extends ConsumerWidget {
             '${weather.tempHigh != null ? ' ${weather.tempHigh!.round()}°/${weather.tempLow!.round()}°' : ''}'
         : null;
 
-    showModalBottomSheet(
+    final messageText = [
+      '一緒に遊ぼう！',
+      '',
+      date,
+      suggestion.activityType,
+      time,
+      ?weatherLine,
+      ?groupName,
+      '',
+      'Himatchで予定を確認してね！',
+    ].join('\n');
+
+    showModalBottomSheet<String>(
       context: context,
       backgroundColor: Colors.transparent,
       builder: (ctx) => _InviteDestinationSheet(
-        suggestion: suggestion,
-        groupName: groupName,
         date: date,
-        time: time,
-        weatherLine: weatherLine,
-        ref: ref,
+        activityType: suggestion.activityType,
       ),
-    );
+    ).then((destination) {
+      if (destination == null || !context.mounted) return;
+      switch (destination) {
+        case 'chat':
+          final authState = ref.read(authNotifierProvider);
+          ref.read(chatMessagesProvider.notifier).sendMessage(
+                groupId: suggestion.groupId,
+                content: messageText,
+                userId: authState.userId ?? 'local-user',
+                displayName: authState.displayName ?? 'You',
+                relatedSuggestionId: suggestion.id,
+              );
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Row(
+                children: [
+                  Icon(Icons.check_circle, color: Colors.white, size: 18),
+                  SizedBox(width: 8),
+                  Text('チャットにお誘いを送信しました'),
+                ],
+              ),
+              backgroundColor: AppColors.success,
+            ),
+          );
+        case 'poll':
+          final authState = ref.read(authNotifierProvider);
+          ref.read(localPollsProvider.notifier).createPoll(
+                groupId: suggestion.groupId,
+                createdBy: authState.userId ?? 'local-user',
+                creatorName: authState.displayName ?? 'You',
+                question: '$date ${suggestion.activityType}に参加できる？',
+                options: ['参加OK', '微妙…', '不参加'],
+                deadline:
+                    suggestion.suggestedDate.subtract(const Duration(days: 1)),
+              );
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Row(
+                children: [
+                  Icon(Icons.check_circle, color: Colors.white, size: 18),
+                  SizedBox(width: 8),
+                  Text('アンケートを作成しました'),
+                ],
+              ),
+              backgroundColor: AppColors.success,
+            ),
+          );
+        case 'share':
+          SharePlus.instance.share(ShareParams(text: messageText));
+      }
+    });
   }
 
   void _confirmSuggestion(BuildContext context, WidgetRef ref) {
@@ -1322,36 +1380,13 @@ class _VoteDot extends StatelessWidget {
 // ─── Invite destination picker ───
 
 class _InviteDestinationSheet extends StatelessWidget {
-  final Suggestion suggestion;
-  final String? groupName;
   final String date;
-  final String time;
-  final String? weatherLine;
-  final WidgetRef ref;
+  final String activityType;
 
   const _InviteDestinationSheet({
-    required this.suggestion,
-    required this.groupName,
     required this.date,
-    required this.time,
-    required this.weatherLine,
-    required this.ref,
+    required this.activityType,
   });
-
-  String get _messageText {
-    final lines = <String>[
-      '一緒に遊ぼう！',
-      '',
-      date,
-      suggestion.activityType,
-      time,
-      ?weatherLine,
-      ?groupName,
-      '',
-      'Himatchで予定を確認してね！',
-    ];
-    return lines.join('\n');
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -1379,7 +1414,7 @@ class _InviteDestinationSheet extends StatelessWidget {
           ),
           const SizedBox(height: 4),
           Text(
-            '$date  ${suggestion.activityType}',
+            '$date  $activityType',
             style: const TextStyle(
                 fontSize: 13, color: AppColors.textSecondary),
           ),
@@ -1391,10 +1426,7 @@ class _InviteDestinationSheet extends StatelessWidget {
             iconColor: AppColors.primary,
             title: 'チャットに送る',
             subtitle: 'グループチャットにお誘いを投稿',
-            onTap: () {
-              Navigator.pop(context);
-              _sendToChat(context);
-            },
+            onTap: () => Navigator.pop(context, 'chat'),
           ),
           const Divider(height: 1, indent: 56),
 
@@ -1404,10 +1436,7 @@ class _InviteDestinationSheet extends StatelessWidget {
             iconColor: AppColors.warning,
             title: 'アンケートを作る',
             subtitle: '「参加できる？」の投票を作成',
-            onTap: () {
-              Navigator.pop(context);
-              _createPoll(context);
-            },
+            onTap: () => Navigator.pop(context, 'poll'),
           ),
           const Divider(height: 1, indent: 56),
 
@@ -1417,45 +1446,12 @@ class _InviteDestinationSheet extends StatelessWidget {
             iconColor: AppColors.success,
             title: 'LINEなどで共有',
             subtitle: '外部アプリでお誘いメッセージを送信',
-            onTap: () {
-              Navigator.pop(context);
-              SharePlus.instance.share(ShareParams(text: _messageText));
-            },
+            onTap: () => Navigator.pop(context, 'share'),
           ),
 
           SizedBox(height: MediaQuery.of(context).padding.bottom + 16),
         ],
       ),
-    );
-  }
-
-  void _sendToChat(BuildContext context) {
-    final authState = ref.read(authNotifierProvider);
-    ref.read(chatMessagesProvider.notifier).sendMessage(
-          groupId: suggestion.groupId,
-          content: _messageText,
-          userId: authState.userId ?? 'local-user',
-          displayName: authState.displayName ?? 'You',
-          relatedSuggestionId: suggestion.id,
-        );
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('チャットにお誘いを送信しました')),
-    );
-  }
-
-  void _createPoll(BuildContext context) {
-    final authState = ref.read(authNotifierProvider);
-    ref.read(localPollsProvider.notifier).createPoll(
-          groupId: suggestion.groupId,
-          createdBy: authState.userId ?? 'local-user',
-          creatorName: authState.displayName ?? 'You',
-          question: '$date ${suggestion.activityType}に参加できる？',
-          options: ['参加OK', '微妙…', '不参加'],
-          deadline:
-              suggestion.suggestedDate.subtract(const Duration(days: 1)),
-        );
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('アンケートを作成しました')),
     );
   }
 }
