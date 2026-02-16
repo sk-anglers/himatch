@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:himatch/core/theme/app_theme.dart';
+import 'package:himatch/features/schedule/presentation/calendar_tab.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -37,7 +38,7 @@ class _HomeScreenState extends State<HomeScreen> {
       body: IndexedStack(
         index: _selectedIndex,
         children: const [
-          _CalendarTab(),
+          CalendarTab(),
           _SuggestionsTab(),
           _GroupsTab(),
           _ProfileTab(),
@@ -75,28 +76,6 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 }
 
-class _CalendarTab extends StatelessWidget {
-  const _CalendarTab();
-
-  @override
-  Widget build(BuildContext context) {
-    return const Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(Icons.calendar_month, size: 64, color: AppColors.primary),
-          SizedBox(height: 16),
-          Text('カレンダー', style: TextStyle(fontSize: 18)),
-          SizedBox(height: 8),
-          Text(
-            'ここにスケジュールが表示されます',
-            style: TextStyle(color: AppColors.textSecondary),
-          ),
-        ],
-      ),
-    );
-  }
-}
 
 class _SuggestionsTab extends StatelessWidget {
   const _SuggestionsTab();
