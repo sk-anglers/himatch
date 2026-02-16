@@ -29,11 +29,14 @@
 
 | レイヤー | 技術 |
 |---------|------|
-| フロントエンド | React Native (Expo) / Flutter (検討中) |
-| バックエンド | Supabase (PostgreSQL) |
+| フロントエンド | Flutter (Dart) |
+| バックエンド | Supabase (PostgreSQL 16) |
+| リアルタイム同期 | Supabase Realtime |
+| オフラインキャッシュ | Drift (SQLite) |
+| 状態管理 | Riverpod |
 | 天気API | Open-Meteo (JMA精度) |
 | プッシュ通知 | FCM |
-| 認証 | Apple Sign In + LINE Login + Google Sign In |
+| 認証 | Supabase Auth + Apple / Google / LINE Login |
 
 ## ドキュメント
 
@@ -41,6 +44,7 @@
 - [UI/UX設計書](docs/ui-ux-design.md)
 - [システム設計書](docs/architecture.md)
 - [技術スタック選定レポート](docs/tech-stack.md)
+- [技術選定 最終決定書](docs/TECH_DECISION.md)
 
 ## フェーズ
 
