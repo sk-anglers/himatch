@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:himatch/core/constants/app_constants.dart';
@@ -44,7 +45,10 @@ class WeatherService {
             const Duration(seconds: 10),
           );
 
-      if (response.statusCode != 200) {
+      if (response.statusCode >= 400) {
+        // 4xx: client error (bad request, rate limited)
+        // 5xx: server error (retry later)
+        // Either way, return stale cache or empty
         return _cache ?? {};
       }
 
@@ -83,8 +87,14 @@ class WeatherService {
       _cache = result;
       _cacheTime = DateTime.now();
       return result;
+    } on TimeoutException {
+      // Network timeout: return stale cache if available
+      return _cache ?? {};
+    } on FormatException {
+      // JSON parse error: API response was malformed
+      return _cache ?? {};
     } catch (_) {
-      // Graceful degradation: return stale cache or empty map
+      // Other errors (network down, etc.): graceful degradation
       return _cache ?? {};
     }
   }

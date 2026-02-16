@@ -10,11 +10,25 @@ import '../models/chat_message.dart';
 class ChatService {
   static const _uuid = Uuid();
 
+  /// Maximum allowed message length.
+  static const int maxMessageLength = 5000;
+
   /// Messages indexed by group ID.
   final Map<String, List<ChatMessage>> _messages = {};
 
   /// Last read timestamp per group per user: {groupId: {userId: DateTime}}.
   final Map<String, Map<String, DateTime>> _lastRead = {};
+
+  /// Sanitize message content: trim, limit length, strip control chars.
+  static String _sanitize(String input) {
+    // Strip control characters except newline/tab
+    final cleaned = input.replaceAll(RegExp(r'[\x00-\x08\x0B\x0C\x0E-\x1F]'), '');
+    final trimmed = cleaned.trim();
+    if (trimmed.length > maxMessageLength) {
+      return trimmed.substring(0, maxMessageLength);
+    }
+    return trimmed;
+  }
 
   /// Get all messages for a group, sorted by creation time.
   List<ChatMessage> getMessages(String groupId) {
@@ -32,6 +46,10 @@ class ChatService {
     String? imageUrl,
     String? relatedSuggestionId,
   }) {
+    final sanitized = _sanitize(content);
+    if (sanitized.isEmpty) {
+      throw ArgumentError('Message content must not be empty');
+    }
     final now = DateTime.now();
 
     final message = ChatMessage(
@@ -40,7 +58,7 @@ class ChatService {
       userId: userId,
       displayName: displayName,
       avatarUrl: avatarUrl,
-      content: content,
+      content: sanitized,
       messageType: type,
       imageUrl: imageUrl,
       relatedSuggestionId: relatedSuggestionId,

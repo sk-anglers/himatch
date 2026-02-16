@@ -58,8 +58,15 @@ class NaturalLanguageParser {
   /// Parse input string and return structured result.
   ///
   /// Returns null if no meaningful information could be extracted.
+  /// Maximum input length to prevent ReDoS attacks.
+  static const int maxInputLength = 500;
+
   static ParseResult? parse(String input, {DateTime? now}) {
     if (input.trim().isEmpty) return null;
+    // Guard against excessively long input to prevent regex backtracking
+    if (input.length > maxInputLength) {
+      input = input.substring(0, maxInputLength);
+    }
 
     now ??= DateTime.now();
     final today = DateTime(now.year, now.month, now.day);

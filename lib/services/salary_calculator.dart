@@ -84,18 +84,14 @@ class SalaryCalculator {
         // All minutes on holidays count as holiday minutes
         totalHolidayMinutes += dayTotalMinutes;
       } else {
-        totalRegularMinutes += dayRegularMinutes - dayNightMinutes;
-        if (totalRegularMinutes < 0) {
-          // Edge case: more night minutes than regular
-          totalRegularMinutes = 0;
-        }
+        // Night minutes are a subset of total; ensure regular never goes negative
+        final dayRegularNonNight =
+            (dayRegularMinutes - dayNightMinutes).clamp(0, dayRegularMinutes);
+        totalRegularMinutes += dayRegularNonNight;
         totalOvertimeMinutes += dayOvertimeMinutes;
         totalNightMinutes += dayNightMinutes;
       }
     }
-
-    // Ensure non-negative
-    if (totalRegularMinutes < 0) totalRegularMinutes = 0;
 
     // Calculate pay
     final hourlyWage = workplace.hourlyWage;
