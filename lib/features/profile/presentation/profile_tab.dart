@@ -14,6 +14,7 @@ import 'package:himatch/features/wellbeing/presentation/wellbeing_screen.dart';
 import 'package:himatch/features/booking/presentation/booking_screen.dart';
 import 'package:himatch/features/schedule/presentation/calendar_sync_settings_screen.dart';
 import 'package:himatch/features/schedule/presentation/template_screen.dart';
+import 'package:himatch/features/shift/presentation/shift_pattern_screen.dart';
 
 class ProfileTab extends ConsumerWidget {
   const ProfileTab({super.key});
@@ -88,6 +89,18 @@ class ProfileTab extends ConsumerWidget {
                 onTap: () => Navigator.of(context).push(
                   MaterialPageRoute(
                     builder: (_) => const WorkplaceSettingsScreen(),
+                  ),
+                ),
+              ),
+              const Divider(height: 1),
+              _NavTile(
+                icon: Icons.repeat,
+                iconColor: AppColors.secondary,
+                title: 'シフトパターン',
+                subtitle: 'ローテーション・パターン設定',
+                onTap: () => Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (_) => const ShiftPatternScreen(),
                   ),
                 ),
               ),

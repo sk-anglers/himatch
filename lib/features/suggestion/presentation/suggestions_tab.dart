@@ -11,6 +11,8 @@ import 'package:himatch/features/suggestion/presentation/providers/vote_provider
 import 'package:himatch/features/group/presentation/providers/group_providers.dart';
 import 'package:himatch/features/auth/providers/auth_providers.dart';
 import 'package:himatch/providers/holiday_providers.dart';
+import 'package:himatch/features/suggestion/presentation/share_card_screen.dart';
+import 'package:himatch/features/suggestion/presentation/public_vote_screen.dart';
 
 class SuggestionsTab extends ConsumerStatefulWidget {
   const SuggestionsTab({super.key});
@@ -273,6 +275,21 @@ class _SuggestionCalendarState extends ConsumerState<_SuggestionCalendar> {
                     ?.copyWith(fontWeight: FontWeight.bold),
               ),
               const Spacer(),
+              IconButton(
+                onPressed: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (_) => const PublicVoteScreen(),
+                    ),
+                  );
+                },
+                icon: const Icon(Icons.how_to_vote_outlined, size: 20),
+                tooltip: '公開投票',
+                color: AppColors.primary,
+                padding: EdgeInsets.zero,
+                constraints: const BoxConstraints(),
+              ),
+              const SizedBox(width: 8),
               if (confirmedCount > 0)
                 Container(
                   padding:
@@ -926,6 +943,34 @@ class _SuggestionTile extends ConsumerWidget {
                           fontWeight: FontWeight.bold,
                           fontSize: 14)),
                 ],
+              ),
+            ),
+            const SizedBox(height: 6),
+            Center(
+              child: TextButton.icon(
+                onPressed: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (_) => ShareCardScreen(
+                        date: AppDateUtils.formatMonthDayWeek(
+                            suggestion.suggestedDate),
+                        activity: suggestion.activityType,
+                        groupName: groupName,
+                        weatherIcon: suggestion.weatherSummary?.icon,
+                        weatherCondition: suggestion.weatherSummary?.condition,
+                      ),
+                    ),
+                  );
+                },
+                icon: const Icon(Icons.share, size: 14),
+                label: const Text('シェアカードを作成'),
+                style: TextButton.styleFrom(
+                  foregroundColor: AppColors.primary,
+                  textStyle: const TextStyle(
+                      fontSize: 12, fontWeight: FontWeight.w600),
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 12, vertical: 4),
+                ),
               ),
             ),
           ],
