@@ -23,6 +23,8 @@ enum SuggestionStatus {
   accepted,
   @JsonValue('declined')
   declined,
+  @JsonValue('confirmed')
+  confirmed,
   @JsonValue('expired')
   expired,
 }
