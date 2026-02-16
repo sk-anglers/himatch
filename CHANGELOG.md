@@ -122,3 +122,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - 12個の新Freezedモデル: Workplace, ChatMessage, Activity, TodoItem, Poll, Photo, Expense, EventTemplate, Habit, MoodEntry, BookingPage, Post
   - 14個の新Provider: 各機能のNotifier + family Provider
   - 7個の新サービス: WeatherService, SalaryCalculator, ChatService, ExportService, ShareCardGenerator, LearningEngine, RRuleParser
+
+### Fixed
+- セキュリティ: WeatherService に TimeoutException/FormatException 明示的ハンドリング追加
+- セキュリティ: ChatService に入力サニタイズ (5000字制限 + 制御文字除去)
+- セキュリティ: NaturalLanguageParser に ReDoS ガード (500字制限)
+- バグ: SalaryCalculator の深夜勤務控除で残業時間が負になりうる問題を .clamp() で修正
+- UI: 未到達画面6つをUIに接続 (WeekView/DayView/QuickInputField/ShiftPattern/ShareCard/PublicVote)
+  - カレンダータブに月/週/日表示切替 (SegmentedButton) を追加
+  - プロフィールタブにシフトパターン画面へのナビゲーション追加
+  - 候補タブに確定候補のシェアカード作成ボタン追加
+  - 候補タブに公開投票画面へのアクセスボタン追加
