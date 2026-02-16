@@ -27,3 +27,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - 文脈分類 (TimeCategory): morning/lunch/afternoon/evening/all_day
 - 天気情報モデル (WeatherSummary): 候補日の天気表示用
 - モデル単体テスト (10テスト: fromJson/toJson/copyWith/enum)
+- Supabase 初期化 (環境変数ベース: SUPABASE_URL, SUPABASE_ANON_KEY)
+- AuthService: Apple/Google OAuth サインイン/サインアウト + Riverpod Provider
+- ScheduleService: スケジュール CRUD + リアルタイムストリーム (Supabase stream)
+- GroupService: グループ作成/招待コード参加/メンバー管理
+- 認証ガード: go_router redirect で未認証時ログイン画面に自動遷移
+- 認証状態プロバイダー (authStateProvider, currentUserProvider)
