@@ -24,6 +24,32 @@ class SuggestionsTab extends ConsumerStatefulWidget {
 class _SuggestionsTabState extends ConsumerState<SuggestionsTab> {
   /// null = 全グループ表示
   String? _selectedGroupId;
+  bool _isLoading = false;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _autoRefreshIfNeeded();
+    });
+  }
+
+  Future<void> _autoRefreshIfNeeded() async {
+    final groups = ref.read(localGroupsProvider);
+    final suggestions = ref.read(localSuggestionsProvider);
+    if (groups.isNotEmpty && suggestions.isEmpty) {
+      await _refresh();
+    }
+  }
+
+  Future<void> _refresh() async {
+    if (_isLoading) return;
+    setState(() => _isLoading = true);
+    await ref.read(localSuggestionsProvider.notifier).refreshSuggestions();
+    if (mounted) {
+      setState(() => _isLoading = false);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -51,24 +77,18 @@ class _SuggestionsTabState extends ConsumerState<SuggestionsTab> {
                 ),
                 // メインコンテンツ
                 Expanded(
-                  child: suggestions.isEmpty
-                      ? _EmptySuggestionState(ref: ref)
-                      : _SuggestionCalendar(suggestions: suggestions),
+                  child: _isLoading
+                      ? const _LoadingState()
+                      : suggestions.isEmpty
+                          ? const _EmptySuggestionState()
+                          : _SuggestionCalendar(suggestions: suggestions),
                 ),
               ],
             ),
-      floatingActionButton: groups.isNotEmpty
+      floatingActionButton: groups.isNotEmpty && !_isLoading
           ? FloatingActionButton.extended(
               onPressed: () async {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('天気情報を取得中...'),
-                    duration: Duration(seconds: 1),
-                  ),
-                );
-                await ref
-                    .read(localSuggestionsProvider.notifier)
-                    .refreshSuggestions();
+                await _refresh();
                 if (context.mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(content: Text('候補日を更新しました')),
@@ -184,9 +204,38 @@ class _NoGroupState extends StatelessWidget {
   }
 }
 
+class _LoadingState extends StatelessWidget {
+  const _LoadingState();
+
+  @override
+  Widget build(BuildContext context) {
+    return const Center(
+      child: Padding(
+        padding: EdgeInsets.all(32),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            CircularProgressIndicator(),
+            SizedBox(height: 24),
+            Text('候補日を検索中...',
+                style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.textSecondary)),
+            SizedBox(height: 8),
+            Text(
+              '天気予報と空き時間を分析しています',
+              style: TextStyle(color: AppColors.textHint, fontSize: 13),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 class _EmptySuggestionState extends StatelessWidget {
-  final WidgetRef ref;
-  const _EmptySuggestionState({required this.ref});
+  const _EmptySuggestionState();
 
   @override
   Widget build(BuildContext context) {
@@ -206,19 +255,9 @@ class _EmptySuggestionState extends StatelessWidget {
                     color: AppColors.textPrimary)),
             const SizedBox(height: 8),
             const Text(
-              '右下の「更新」ボタンをタップして\n候補日を検索しましょう',
+              'メンバーの空き時間が見つかりませんでした\n右下の「更新」ボタンで再検索できます',
               textAlign: TextAlign.center,
               style: TextStyle(color: AppColors.textSecondary, fontSize: 14),
-            ),
-            const SizedBox(height: 24),
-            OutlinedButton.icon(
-              onPressed: () async {
-                await ref
-                    .read(localSuggestionsProvider.notifier)
-                    .refreshSuggestions();
-              },
-              icon: const Icon(Icons.search),
-              label: const Text('候補日を検索'),
             ),
           ],
         ),
