@@ -50,3 +50,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - グループ退出機能 (確認ダイアログ付き)
 - ローカルグループ状態管理 (LocalGroupsNotifier / LocalGroupMembersNotifier)
 - グループ機能テスト (13テスト)
+- 候補日提案エンジン (SuggestionEngine): 空き時間重複検出 + 文脈付きアクティビティ提案
+  - 30分解像度でメンバー空き時間スキャン (8:00-22:00)
+  - TimeCategory 自動分類 (朝/昼/午後/夜/終日)
+  - ActivityType 推定 (ランチ/飲み会/カフェ/日帰り旅行 etc.)
+  - スコアリング: 可用率 × 時間帯重み × 曜日重み
+- 提案タブUI (SuggestionsTab): 候補日カード一覧 + スコア表示 + 参加可能率バー
+- 提案カード操作: 承認 (Accept) / 見送り (Decline) ステータス変更
+- ローカル提案状態管理 (LocalSuggestionsNotifier)
+- 提案エンジンテスト (12テスト)

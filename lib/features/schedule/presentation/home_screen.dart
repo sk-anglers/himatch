@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:himatch/core/theme/app_theme.dart';
 import 'package:himatch/features/schedule/presentation/calendar_tab.dart';
 import 'package:himatch/features/group/presentation/groups_tab.dart';
+import 'package:himatch/features/suggestion/presentation/suggestions_tab.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -40,7 +41,7 @@ class _HomeScreenState extends State<HomeScreen> {
         index: _selectedIndex,
         children: const [
           CalendarTab(),
-          _SuggestionsTab(),
+          SuggestionsTab(),
           GroupsTab(),
           _ProfileTab(),
         ],
@@ -77,29 +78,6 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 }
 
-
-class _SuggestionsTab extends StatelessWidget {
-  const _SuggestionsTab();
-
-  @override
-  Widget build(BuildContext context) {
-    return const Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(Icons.lightbulb, size: 64, color: AppColors.primary),
-          SizedBox(height: 16),
-          Text('候補日提案', style: TextStyle(fontSize: 18)),
-          SizedBox(height: 8),
-          Text(
-            'グループに参加すると候補日が表示されます',
-            style: TextStyle(color: AppColors.textSecondary),
-          ),
-        ],
-      ),
-    );
-  }
-}
 
 
 class _ProfileTab extends StatelessWidget {
