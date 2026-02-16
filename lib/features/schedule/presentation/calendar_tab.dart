@@ -47,12 +47,16 @@ class _CalendarTabState extends ConsumerState<CalendarTab> {
     return Scaffold(
       body: Column(
         children: [
-          // クイック入力フィールド
-          QuickInputField(onFallbackToForm: _openAddForm),
           // 表示モード切替
           _buildViewModeToggle(),
-          if (_viewMode == _CalendarViewMode.calendar) ...[
-          // カレンダー（枠線+天気+大きなセル）
+          if (_viewMode == _CalendarViewMode.calendar)
+            Expanded(
+              child: SingleChildScrollView(
+                child: Column(
+                  children: [
+                    // クイック入力フィールド
+                    QuickInputField(onFallbackToForm: _openAddForm),
+                    // カレンダー（枠線+天気+大きなセル）
           TableCalendar<Schedule>(
             firstDay: DateTime.utc(2024, 1, 1),
             lastDay: DateTime.utc(2030, 12, 31),
@@ -225,7 +229,10 @@ class _CalendarTabState extends ConsumerState<CalendarTab> {
                 ),
               );
             }),
-          ], // end calendar mode
+                  ],
+                ),
+              ),
+            ),
           if (_viewMode == _CalendarViewMode.week)
             Expanded(child: _buildWeekView(schedules)),
           if (_viewMode == _CalendarViewMode.day)
