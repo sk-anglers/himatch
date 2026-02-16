@@ -12,6 +12,8 @@ import 'package:himatch/features/group/presentation/providers/group_providers.da
 import 'package:himatch/features/auth/providers/auth_providers.dart';
 import 'package:himatch/providers/holiday_providers.dart';
 import 'package:share_plus/share_plus.dart';
+import 'package:himatch/features/chat/presentation/providers/chat_providers.dart';
+import 'package:himatch/features/group/presentation/providers/poll_providers.dart';
 import 'package:himatch/features/suggestion/presentation/share_card_screen.dart';
 import 'package:himatch/features/suggestion/presentation/public_vote_screen.dart';
 
@@ -967,7 +969,7 @@ class _SuggestionTile extends ConsumerWidget {
           SizedBox(
             width: double.infinity,
             child: OutlinedButton.icon(
-              onPressed: () => _sendInvite(context),
+              onPressed: () => _sendInvite(context, ref),
               icon: const Icon(Icons.send, size: 14),
               label: const Text('お誘いを送る'),
               style: OutlinedButton.styleFrom(
@@ -1047,7 +1049,7 @@ class _SuggestionTile extends ConsumerWidget {
         );
   }
 
-  void _sendInvite(BuildContext context) {
+  void _sendInvite(BuildContext context, WidgetRef ref) {
     final date = AppDateUtils.formatMonthDayWeek(suggestion.suggestedDate);
     final time =
         '${AppDateUtils.formatTime(suggestion.startTime)}-${AppDateUtils.formatTime(suggestion.endTime)}';
@@ -1057,19 +1059,18 @@ class _SuggestionTile extends ConsumerWidget {
             '${weather.tempHigh != null ? ' ${weather.tempHigh!.round()}°/${weather.tempLow!.round()}°' : ''}'
         : null;
 
-    final lines = <String>[
-      '一緒に遊ぼう！',
-      '',
-      date,
-      suggestion.activityType,
-      time,
-      ?weatherLine,
-      ?groupName,
-      '',
-      'Himatchで予定を確認してね！',
-    ];
-
-    SharePlus.instance.share(ShareParams(text: lines.join('\n')));
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) => _InviteDestinationSheet(
+        suggestion: suggestion,
+        groupName: groupName,
+        date: date,
+        time: time,
+        weatherLine: weatherLine,
+        ref: ref,
+      ),
+    );
   }
 
   void _confirmSuggestion(BuildContext context, WidgetRef ref) {
@@ -1314,6 +1315,185 @@ class _VoteDot extends StatelessWidget {
       child: Text('$count',
           style: TextStyle(
               fontSize: 10, fontWeight: FontWeight.bold, color: color)),
+    );
+  }
+}
+
+// ─── Invite destination picker ───
+
+class _InviteDestinationSheet extends StatelessWidget {
+  final Suggestion suggestion;
+  final String? groupName;
+  final String date;
+  final String time;
+  final String? weatherLine;
+  final WidgetRef ref;
+
+  const _InviteDestinationSheet({
+    required this.suggestion,
+    required this.groupName,
+    required this.date,
+    required this.time,
+    required this.weatherLine,
+    required this.ref,
+  });
+
+  String get _messageText {
+    final lines = <String>[
+      '一緒に遊ぼう！',
+      '',
+      date,
+      suggestion.activityType,
+      time,
+      ?weatherLine,
+      ?groupName,
+      '',
+      'Himatchで予定を確認してね！',
+    ];
+    return lines.join('\n');
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: const BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const SizedBox(height: 8),
+          Container(
+            width: 40,
+            height: 4,
+            decoration: BoxDecoration(
+              color: AppColors.textHint,
+              borderRadius: BorderRadius.circular(2),
+            ),
+          ),
+          const SizedBox(height: 16),
+          const Text(
+            'お誘いを送る',
+            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            '$date  ${suggestion.activityType}',
+            style: const TextStyle(
+                fontSize: 13, color: AppColors.textSecondary),
+          ),
+          const SizedBox(height: 16),
+
+          // チャットに送る
+          _DestinationTile(
+            icon: Icons.chat_bubble_outline,
+            iconColor: AppColors.primary,
+            title: 'チャットに送る',
+            subtitle: 'グループチャットにお誘いを投稿',
+            onTap: () {
+              Navigator.pop(context);
+              _sendToChat(context);
+            },
+          ),
+          const Divider(height: 1, indent: 56),
+
+          // アンケートを作る
+          _DestinationTile(
+            icon: Icons.poll_outlined,
+            iconColor: AppColors.warning,
+            title: 'アンケートを作る',
+            subtitle: '「参加できる？」の投票を作成',
+            onTap: () {
+              Navigator.pop(context);
+              _createPoll(context);
+            },
+          ),
+          const Divider(height: 1, indent: 56),
+
+          // LINEなどで共有
+          _DestinationTile(
+            icon: Icons.share_outlined,
+            iconColor: AppColors.success,
+            title: 'LINEなどで共有',
+            subtitle: '外部アプリでお誘いメッセージを送信',
+            onTap: () {
+              Navigator.pop(context);
+              SharePlus.instance.share(ShareParams(text: _messageText));
+            },
+          ),
+
+          SizedBox(height: MediaQuery.of(context).padding.bottom + 16),
+        ],
+      ),
+    );
+  }
+
+  void _sendToChat(BuildContext context) {
+    final authState = ref.read(authNotifierProvider);
+    ref.read(chatMessagesProvider.notifier).sendMessage(
+          groupId: suggestion.groupId,
+          content: _messageText,
+          userId: authState.userId ?? 'local-user',
+          displayName: authState.displayName ?? 'You',
+          relatedSuggestionId: suggestion.id,
+        );
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('チャットにお誘いを送信しました')),
+    );
+  }
+
+  void _createPoll(BuildContext context) {
+    final authState = ref.read(authNotifierProvider);
+    ref.read(localPollsProvider.notifier).createPoll(
+          groupId: suggestion.groupId,
+          createdBy: authState.userId ?? 'local-user',
+          creatorName: authState.displayName ?? 'You',
+          question: '$date ${suggestion.activityType}に参加できる？',
+          options: ['参加OK', '微妙…', '不参加'],
+          deadline:
+              suggestion.suggestedDate.subtract(const Duration(days: 1)),
+        );
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('アンケートを作成しました')),
+    );
+  }
+}
+
+class _DestinationTile extends StatelessWidget {
+  final IconData icon;
+  final Color iconColor;
+  final String title;
+  final String subtitle;
+  final VoidCallback onTap;
+
+  const _DestinationTile({
+    required this.icon,
+    required this.iconColor,
+    required this.title,
+    required this.subtitle,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return ListTile(
+      leading: Container(
+        width: 40,
+        height: 40,
+        decoration: BoxDecoration(
+          color: iconColor.withValues(alpha: 0.1),
+          borderRadius: BorderRadius.circular(10),
+        ),
+        child: Icon(icon, color: iconColor, size: 20),
+      ),
+      title: Text(title,
+          style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15)),
+      subtitle: Text(subtitle,
+          style: const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
+      trailing:
+          const Icon(Icons.chevron_right, size: 18, color: AppColors.textHint),
+      onTap: onTap,
     );
   }
 }

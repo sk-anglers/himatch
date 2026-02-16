@@ -16,7 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - WeatherService: 座標変更時のキャッシュ自動無効化
   - iOS/Android 位置情報パーミッション設定
 
-- 提案カードに「お誘いを送る」ボタン: 候補日の詳細をLINE等で共有可能
+- 提案カードの「お誘いを送る」に送信先選択機能: チャット投稿 / アンケート作成 / 外部共有の3択
 
 ### Changed
 - 提案タブ: 手動「候補日を検索」ボタンを廃止し、タブ表示時に自動で候補日を生成するように変更
