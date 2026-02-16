@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:himatch/core/theme/app_theme.dart';
 import 'package:himatch/models/group.dart';
 import 'package:himatch/features/group/presentation/providers/group_providers.dart';
+import 'package:himatch/features/group/presentation/group_calendar_screen.dart';
 
 class GroupDetailScreen extends ConsumerWidget {
   final Group group;
@@ -46,6 +47,23 @@ class GroupDetailScreen extends ConsumerWidget {
         children: [
           // Group info card
           _GroupInfoCard(group: group),
+          const SizedBox(height: 16),
+
+          // Group calendar button
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton.icon(
+              onPressed: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (_) => GroupCalendarScreen(group: group),
+                  ),
+                );
+              },
+              icon: const Icon(Icons.calendar_month, size: 18),
+              label: const Text('メンバーのカレンダーを見る'),
+            ),
+          ),
           const SizedBox(height: 16),
 
           // Invite code card
