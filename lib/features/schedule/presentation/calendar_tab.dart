@@ -32,6 +32,10 @@ class _CalendarTabState extends ConsumerState<CalendarTab> {
   DateTime? _selectedDay;
   _CalendarViewMode _viewMode = _CalendarViewMode.calendar;
 
+  /// シフトペイントモード: 選択中のシフト種別
+  ShiftType? _activeShiftType;
+  bool get _isShiftInputMode => _activeShiftType != null;
+
   @override
   void initState() {
     super.initState();
@@ -139,6 +143,18 @@ class _CalendarTabState extends ConsumerState<CalendarTab> {
               formatButtonShowsNext: false,
             ),
             onDaySelected: (selectedDay, focusedDay) {
+              if (_isShiftInputMode) {
+                // ペイントモード: 即座にシフトを割当
+                ref.read(localSchedulesProvider.notifier).addShiftSchedule(
+                  date: selectedDay,
+                  shiftTypeId: _activeShiftType!.id,
+                  title: _activeShiftType!.name,
+                  color: _activeShiftType!.colorHex,
+                  startTime: _activeShiftType!.startTime,
+                  endTime: _activeShiftType!.endTime,
+                  isOff: _activeShiftType!.isOff,
+                );
+              }
               setState(() {
                 _selectedDay = selectedDay;
                 _focusedDay = focusedDay;
@@ -154,8 +170,21 @@ class _CalendarTabState extends ConsumerState<CalendarTab> {
 
           const SizedBox(height: 8),
 
+          // シフトペイントパネル
+          _ShiftPaintPanel(
+            activeShiftType: _activeShiftType,
+            onShiftTypeSelected: (st) {
+              setState(() {
+                _activeShiftType =
+                    _activeShiftType?.id == st.id ? null : st;
+              });
+            },
+            onDone: () => setState(() => _activeShiftType = null),
+            onEditShiftTypes: _openShiftTypeEditor,
+          ),
+
           // 選択日のヘッダー + 予定表示ボタン
-          if (_selectedDay != null)
+          if (_selectedDay != null && !_isShiftInputMode)
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: Row(
@@ -199,7 +228,7 @@ class _CalendarTabState extends ConsumerState<CalendarTab> {
             ),
 
           // 祝日名
-          if (_selectedDay != null)
+          if (_selectedDay != null && !_isShiftInputMode)
             Builder(builder: (context) {
               final holiday = ref.watch(holidayForDateProvider(
                   DateTime(_selectedDay!.year, _selectedDay!.month,
@@ -965,6 +994,148 @@ class _MenuTile extends StatelessWidget {
                 color: AppColors.textHint, size: 20),
           ],
         ),
+      ),
+    );
+  }
+}
+
+// ─── Shift paint panel (inline below calendar) ───
+
+class _ShiftPaintPanel extends ConsumerWidget {
+  final ShiftType? activeShiftType;
+  final ValueChanged<ShiftType> onShiftTypeSelected;
+  final VoidCallback onDone;
+  final VoidCallback onEditShiftTypes;
+
+  const _ShiftPaintPanel({
+    required this.activeShiftType,
+    required this.onShiftTypeSelected,
+    required this.onDone,
+    required this.onEditShiftTypes,
+  });
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final shiftTypes = ref.watch(shiftTypesProvider);
+    final isActive = activeShiftType != null;
+
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 12),
+      padding: const EdgeInsets.fromLTRB(12, 8, 12, 8),
+      decoration: BoxDecoration(
+        color: isActive
+            ? shiftTypeColor(activeShiftType!).withValues(alpha: 0.06)
+            : AppColors.surfaceVariant.withValues(alpha: 0.5),
+        borderRadius: BorderRadius.circular(12),
+        border: isActive
+            ? Border.all(
+                color: shiftTypeColor(activeShiftType!).withValues(alpha: 0.3),
+              )
+            : null,
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // ヘッダー行
+          Row(
+            children: [
+              Icon(
+                isActive ? Icons.touch_app : Icons.edit_calendar,
+                size: 16,
+                color: isActive
+                    ? shiftTypeColor(activeShiftType!)
+                    : AppColors.textSecondary,
+              ),
+              const SizedBox(width: 4),
+              Text(
+                isActive
+                    ? '「${activeShiftType!.name}」を入力中 — 日付をタップ'
+                    : 'シフト入力',
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                  color: isActive
+                      ? shiftTypeColor(activeShiftType!)
+                      : AppColors.textSecondary,
+                ),
+              ),
+              const Spacer(),
+              if (isActive)
+                GestureDetector(
+                  onTap: onDone,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 10, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: AppColors.primary,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: const Text(
+                      '完了',
+                      style: TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
+                )
+              else
+                GestureDetector(
+                  onTap: onEditShiftTypes,
+                  child: const Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.tune, size: 14, color: AppColors.textHint),
+                      SizedBox(width: 2),
+                      Text(
+                        '編集',
+                        style: TextStyle(
+                          fontSize: 11,
+                          color: AppColors.textHint,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          // シフト種別ボタン
+          Wrap(
+            spacing: 6,
+            runSpacing: 6,
+            children: shiftTypes.map((st) {
+              final isSelected = activeShiftType?.id == st.id;
+              final color = shiftTypeColor(st);
+              return GestureDetector(
+                onTap: () => onShiftTypeSelected(st),
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 150),
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 10, vertical: 6),
+                  decoration: BoxDecoration(
+                    color: isSelected ? color : color.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(
+                      color:
+                          isSelected ? color : color.withValues(alpha: 0.3),
+                      width: isSelected ? 2 : 1,
+                    ),
+                  ),
+                  child: Text(
+                    st.name,
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                      color: isSelected ? Colors.white : color,
+                    ),
+                  ),
+                ),
+              );
+            }).toList(),
+          ),
+        ],
       ),
     );
   }
