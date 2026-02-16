@@ -43,3 +43,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - スケジュール削除: 確認ダイアログ付き
 - ローカル状態管理: LocalSchedulesNotifier (オフラインファースト開発用)
 - 日本語ローカライゼーション (flutter_localizations)
+- グループ一覧画面 (GroupsTab): 参加グループ一覧 + 空状態表示
+- グループ作成ダイアログ: グループ名 + 説明入力
+- グループ詳細画面 (GroupDetailScreen): メンバー一覧 + 招待コード表示/コピー/共有
+- 招待コード参加ダイアログ: 8桁コード入力 (大文字自動変換 + バリデーション)
+- グループ退出機能 (確認ダイアログ付き)
+- ローカルグループ状態管理 (LocalGroupsNotifier / LocalGroupMembersNotifier)
+- グループ機能テスト (13テスト)
