@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:himatch/core/theme/app_theme.dart';
 import 'package:himatch/features/schedule/presentation/calendar_tab.dart';
 import 'package:himatch/features/group/presentation/groups_tab.dart';
 import 'package:himatch/features/suggestion/presentation/suggestions_tab.dart';
+import 'package:himatch/features/profile/presentation/profile_tab.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -43,7 +43,7 @@ class _HomeScreenState extends State<HomeScreen> {
           CalendarTab(),
           SuggestionsTab(),
           GroupsTab(),
-          _ProfileTab(),
+          ProfileTab(),
         ],
       ),
       bottomNavigationBar: NavigationBar(
@@ -71,31 +71,6 @@ class _HomeScreenState extends State<HomeScreen> {
             icon: Icon(Icons.person_outline),
             selectedIcon: Icon(Icons.person),
             label: 'マイページ',
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-
-
-class _ProfileTab extends StatelessWidget {
-  const _ProfileTab();
-
-  @override
-  Widget build(BuildContext context) {
-    return const Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(Icons.person, size: 64, color: AppColors.primary),
-          SizedBox(height: 16),
-          Text('マイページ', style: TextStyle(fontSize: 18)),
-          SizedBox(height: 8),
-          Text(
-            'プロフィールと設定',
-            style: TextStyle(color: AppColors.textSecondary),
           ),
         ],
       ),

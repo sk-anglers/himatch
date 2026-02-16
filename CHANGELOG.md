@@ -59,3 +59,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - 提案カード操作: 承認 (Accept) / 見送り (Decline) ステータス変更
 - ローカル提案状態管理 (LocalSuggestionsNotifier)
 - 提案エンジンテスト (12テスト)
+- マイページUI (ProfileTab): プロフィール表示 + 設定 + アカウント管理
+  - プロフィールヘッダー (アバター/表示名編集/グループ数・スケジュール数)
+  - 設定: 通知ON/OFF、デフォルト公開範囲 (全員/友達/自分)
+  - アカウント: ログアウト (確認ダイアログ付き)
+  - アプリ情報: バージョン/利用規約/プライバシーポリシー
+- 全4タブのプレースホルダー完全差替 (HomeScreen にプレースホルダーなし)
