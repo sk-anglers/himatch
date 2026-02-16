@@ -17,5 +17,6 @@ void main() {
     expect(find.text('Appleでサインイン'), findsOneWidget);
     expect(find.text('Googleでサインイン'), findsOneWidget);
     expect(find.text('LINEでサインイン'), findsOneWidget);
+    expect(find.text('デモモードで始める'), findsOneWidget);
   });
 }
