@@ -11,6 +11,7 @@ import 'package:himatch/features/suggestion/presentation/providers/vote_provider
 import 'package:himatch/features/group/presentation/providers/group_providers.dart';
 import 'package:himatch/features/auth/providers/auth_providers.dart';
 import 'package:himatch/providers/holiday_providers.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:himatch/features/suggestion/presentation/share_card_screen.dart';
 import 'package:himatch/features/suggestion/presentation/public_vote_screen.dart';
 
@@ -961,6 +962,24 @@ class _SuggestionTile extends ConsumerWidget {
             ),
           ],
 
+          // お誘いボタン
+          const SizedBox(height: 8),
+          SizedBox(
+            width: double.infinity,
+            child: OutlinedButton.icon(
+              onPressed: () => _sendInvite(context),
+              icon: const Icon(Icons.send, size: 14),
+              label: const Text('お誘いを送る'),
+              style: OutlinedButton.styleFrom(
+                foregroundColor: AppColors.primary,
+                side: const BorderSide(color: AppColors.primaryLight),
+                padding: const EdgeInsets.symmetric(vertical: 8),
+                textStyle: const TextStyle(
+                    fontSize: 13, fontWeight: FontWeight.w600),
+              ),
+            ),
+          ),
+
           // 確定表示
           if (isConfirmed) ...[
             const SizedBox(height: 8),
@@ -1026,6 +1045,31 @@ class _SuggestionTile extends ConsumerWidget {
           voteType: voteType,
           displayName: displayName,
         );
+  }
+
+  void _sendInvite(BuildContext context) {
+    final date = AppDateUtils.formatMonthDayWeek(suggestion.suggestedDate);
+    final time =
+        '${AppDateUtils.formatTime(suggestion.startTime)}-${AppDateUtils.formatTime(suggestion.endTime)}';
+    final weather = suggestion.weatherSummary;
+    final weatherLine = weather != null
+        ? '${weather.icon ?? ''} ${weather.condition}'
+            '${weather.tempHigh != null ? ' ${weather.tempHigh!.round()}°/${weather.tempLow!.round()}°' : ''}'
+        : null;
+
+    final lines = <String>[
+      '一緒に遊ぼう！',
+      '',
+      date,
+      suggestion.activityType,
+      time,
+      ?weatherLine,
+      ?groupName,
+      '',
+      'Himatchで予定を確認してね！',
+    ];
+
+    SharePlus.instance.share(ShareParams(text: lines.join('\n')));
   }
 
   void _confirmSuggestion(BuildContext context, WidgetRef ref) {
