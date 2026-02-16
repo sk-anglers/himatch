@@ -5,6 +5,14 @@ import 'package:himatch/core/theme/app_theme.dart';
 import 'package:himatch/models/group.dart';
 import 'package:himatch/features/group/presentation/providers/group_providers.dart';
 import 'package:himatch/features/group/presentation/group_calendar_screen.dart';
+import 'package:himatch/features/group/presentation/shift_list_calendar_screen.dart';
+import 'package:himatch/features/chat/presentation/chat_screen.dart';
+import 'package:himatch/features/group/presentation/activity_feed_screen.dart';
+import 'package:himatch/features/group/presentation/todo_list_screen.dart';
+import 'package:himatch/features/group/presentation/poll_screen.dart';
+import 'package:himatch/features/group/presentation/album_screen.dart';
+import 'package:himatch/features/group/presentation/board_screen.dart';
+import 'package:himatch/features/expense/presentation/expense_screen.dart';
 
 class GroupDetailScreen extends ConsumerWidget {
   final Group group;
@@ -45,11 +53,10 @@ class GroupDetailScreen extends ConsumerWidget {
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          // Group info card
           _GroupInfoCard(group: group),
           const SizedBox(height: 16),
 
-          // Group calendar button
+          // Calendar buttons
           SizedBox(
             width: double.infinity,
             child: ElevatedButton.icon(
@@ -64,7 +71,144 @@ class GroupDetailScreen extends ConsumerWidget {
               label: const Text('メンバーのカレンダーを見る'),
             ),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 8),
+          SizedBox(
+            width: double.infinity,
+            child: OutlinedButton.icon(
+              onPressed: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (_) => ShiftListCalendarScreen(group: group),
+                  ),
+                );
+              },
+              icon: const Icon(Icons.view_list, size: 18),
+              label: const Text('シフト一覧を見る'),
+            ),
+          ),
+          const SizedBox(height: 20),
+
+          // Feature grid
+          _SectionLabel(title: '機能'),
+          const SizedBox(height: 8),
+          GridView.count(
+            crossAxisCount: 4,
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            mainAxisSpacing: 8,
+            crossAxisSpacing: 8,
+            children: [
+              _FeatureButton(
+                icon: Icons.chat_bubble_outline,
+                label: 'チャット',
+                color: AppColors.primary,
+                onTap: () => Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (_) => ChatScreen(
+                      groupId: group.id,
+                      groupName: group.name,
+                      memberCount: members.length,
+                    ),
+                  ),
+                ),
+              ),
+              _FeatureButton(
+                icon: Icons.dynamic_feed,
+                label: 'フィード',
+                color: AppColors.success,
+                onTap: () => Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (_) => ActivityFeedScreen(
+                      groupId: group.id,
+                      groupName: group.name,
+                    ),
+                  ),
+                ),
+              ),
+              _FeatureButton(
+                icon: Icons.checklist,
+                label: 'ToDo',
+                color: AppColors.typeClass,
+                onTap: () => Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (_) => TodoListScreen(
+                      groupId: group.id,
+                      groupName: group.name,
+                    ),
+                  ),
+                ),
+              ),
+              _FeatureButton(
+                icon: Icons.poll_outlined,
+                label: '投票',
+                color: AppColors.warning,
+                onTap: () => Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (_) => PollScreen(
+                      groupId: group.id,
+                      groupName: group.name,
+                    ),
+                  ),
+                ),
+              ),
+              _FeatureButton(
+                icon: Icons.photo_library_outlined,
+                label: 'アルバム',
+                color: AppColors.typeParttime,
+                onTap: () => Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (_) => AlbumScreen(
+                      groupId: group.id,
+                      groupName: group.name,
+                    ),
+                  ),
+                ),
+              ),
+              _FeatureButton(
+                icon: Icons.forum_outlined,
+                label: '掲示板',
+                color: AppColors.typeClub,
+                onTap: () => Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (_) => BoardScreen(
+                      groupId: group.id,
+                      groupName: group.name,
+                    ),
+                  ),
+                ),
+              ),
+              _FeatureButton(
+                icon: Icons.receipt_long_outlined,
+                label: '割り勘',
+                color: AppColors.secondary,
+                onTap: () => Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (_) => ExpenseScreen(
+                      groupId: group.id,
+                      groupName: group.name,
+                    ),
+                  ),
+                ),
+              ),
+              _FeatureButton(
+                icon: Icons.grid_view_outlined,
+                label: 'ヒートマップ',
+                color: AppColors.heatmapFull,
+                onTap: () {
+                  // Navigate to heatmap mode in group calendar
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (_) => GroupCalendarScreen(
+                        group: group,
+                        initialMode: 'heatmap',
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ],
+          ),
+          const SizedBox(height: 20),
 
           // Invite code card
           _InviteCodeCard(inviteCode: group.inviteCode),
@@ -131,6 +275,65 @@ class GroupDetailScreen extends ConsumerWidget {
   }
 }
 
+class _SectionLabel extends StatelessWidget {
+  final String title;
+  const _SectionLabel({required this.title});
+
+  @override
+  Widget build(BuildContext context) {
+    return Text(
+      title,
+      style: Theme.of(context).textTheme.titleSmall?.copyWith(
+            fontWeight: FontWeight.bold,
+            color: AppColors.textSecondary,
+          ),
+    );
+  }
+}
+
+class _FeatureButton extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final Color color;
+  final VoidCallback onTap;
+
+  const _FeatureButton({
+    required this.icon,
+    required this.label,
+    required this.color,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(12),
+      child: Container(
+        decoration: BoxDecoration(
+          color: color.withValues(alpha: 0.08),
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(icon, color: color, size: 24),
+            const SizedBox(height: 4),
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 11,
+                fontWeight: FontWeight.w600,
+                color: color,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 class _GroupInfoCard extends StatelessWidget {
   final Group group;
 
@@ -141,51 +344,46 @@ class _GroupInfoCard extends StatelessWidget {
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+        child: Row(
           children: [
-            Row(
-              children: [
-                CircleAvatar(
-                  radius: 28,
-                  backgroundColor: AppColors.primaryLight.withValues(alpha: 0.3),
-                  child: Text(
-                    group.name.isNotEmpty ? group.name[0] : '?',
+            CircleAvatar(
+              radius: 28,
+              backgroundColor: AppColors.primaryLight.withValues(alpha: 0.3),
+              child: Text(
+                group.name.isNotEmpty ? group.name[0] : '?',
+                style: const TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.primary,
+                ),
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    group.name,
                     style: const TextStyle(
-                      fontSize: 24,
+                      fontSize: 18,
                       fontWeight: FontWeight.bold,
-                      color: AppColors.primary,
                     ),
                   ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        group.name,
+                  if (group.description != null &&
+                      group.description!.isNotEmpty)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 4),
+                      child: Text(
+                        group.description!,
                         style: const TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
+                          color: AppColors.textSecondary,
+                          fontSize: 14,
                         ),
                       ),
-                      if (group.description != null &&
-                          group.description!.isNotEmpty)
-                        Padding(
-                          padding: const EdgeInsets.only(top: 4),
-                          child: Text(
-                            group.description!,
-                            style: const TextStyle(
-                              color: AppColors.textSecondary,
-                              fontSize: 14,
-                            ),
-                          ),
-                        ),
-                    ],
-                  ),
-                ),
-              ],
+                    ),
+                ],
+              ),
             ),
           ],
         ),
@@ -213,10 +411,7 @@ class _InviteCodeCard extends StatelessWidget {
                 SizedBox(width: 8),
                 Text(
                   '招待コード',
-                  style: TextStyle(
-                    fontWeight: FontWeight.w600,
-                    fontSize: 14,
-                  ),
+                  style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
                 ),
               ],
             ),
@@ -259,7 +454,6 @@ class _InviteCodeCard extends StatelessWidget {
                 Expanded(
                   child: ElevatedButton.icon(
                     onPressed: () {
-                      // share_plus integration (requires platform setup)
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
                           content: Text(

@@ -5,6 +5,15 @@ import 'package:himatch/features/auth/providers/auth_providers.dart';
 import 'package:himatch/features/profile/presentation/providers/profile_providers.dart';
 import 'package:himatch/features/group/presentation/providers/group_providers.dart';
 import 'package:himatch/features/schedule/presentation/providers/calendar_providers.dart';
+import 'package:himatch/features/profile/presentation/theme_settings_screen.dart';
+import 'package:himatch/features/profile/presentation/notification_settings_screen.dart';
+import 'package:himatch/features/shift/presentation/salary_summary_screen.dart';
+import 'package:himatch/features/shift/presentation/workplace_settings_screen.dart';
+import 'package:himatch/features/history/presentation/history_screen.dart';
+import 'package:himatch/features/wellbeing/presentation/wellbeing_screen.dart';
+import 'package:himatch/features/booking/presentation/booking_screen.dart';
+import 'package:himatch/features/schedule/presentation/calendar_sync_settings_screen.dart';
+import 'package:himatch/features/schedule/presentation/template_screen.dart';
 
 class ProfileTab extends ConsumerWidget {
   const ProfileTab({super.key});
@@ -44,6 +53,7 @@ class ProfileTab extends ConsumerWidget {
                 ],
               ),
             ),
+
           // Profile header
           _ProfileHeader(
             displayName: authState.displayName ?? settings.displayName,
@@ -53,22 +63,125 @@ class ProfileTab extends ConsumerWidget {
           ),
           const SizedBox(height: 24),
 
+          // Quick access features
+          _SectionHeader(title: '機能'),
+          const SizedBox(height: 8),
+          _SettingsCard(
+            children: [
+              _NavTile(
+                icon: Icons.currency_yen,
+                iconColor: AppColors.typeParttime,
+                title: '給料計算',
+                subtitle: '月間・年間の給料を確認',
+                onTap: () => Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (_) => const SalarySummaryScreen(),
+                  ),
+                ),
+              ),
+              const Divider(height: 1),
+              _NavTile(
+                icon: Icons.work_outline,
+                iconColor: AppColors.typeClass,
+                title: '勤務先設定',
+                subtitle: '時給・締め日・手当の設定',
+                onTap: () => Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (_) => const WorkplaceSettingsScreen(),
+                  ),
+                ),
+              ),
+              const Divider(height: 1),
+              _NavTile(
+                icon: Icons.history,
+                iconColor: AppColors.success,
+                title: '履歴・統計',
+                subtitle: '遊んだ記録と統計',
+                onTap: () => Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (_) => const HistoryScreen(),
+                  ),
+                ),
+              ),
+              const Divider(height: 1),
+              _NavTile(
+                icon: Icons.self_improvement,
+                iconColor: AppColors.moodGood,
+                title: 'ウェルビーイング',
+                subtitle: '気分・習慣トラッカー',
+                onTap: () => Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (_) => const WellbeingScreen(),
+                  ),
+                ),
+              ),
+              const Divider(height: 1),
+              _NavTile(
+                icon: Icons.calendar_view_day,
+                iconColor: AppColors.primary,
+                title: '予約ページ',
+                subtitle: '空き時間を公開・予約受付',
+                onTap: () => Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (_) => const BookingScreen(),
+                  ),
+                ),
+              ),
+              const Divider(height: 1),
+              _NavTile(
+                icon: Icons.copy_all,
+                iconColor: AppColors.typeClub,
+                title: 'テンプレート',
+                subtitle: 'よく使う予定のテンプレート管理',
+                onTap: () => Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (_) => const TemplateScreen(),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 24),
+
           // Settings section
           _SectionHeader(title: '設定'),
           const SizedBox(height: 8),
           _SettingsCard(
             children: [
-              SwitchListTile(
-                title: const Text('通知'),
-                subtitle: const Text('候補日提案の通知を受け取る'),
-                value: settings.notificationsEnabled,
-                onChanged: (_) {
-                  ref
-                      .read(profileSettingsProvider.notifier)
-                      .toggleNotifications();
-                },
-                activeThumbColor: AppColors.primary,
-                secondary: const Icon(Icons.notifications_outlined),
+              _NavTile(
+                icon: Icons.palette_outlined,
+                iconColor: AppColors.primary,
+                title: 'テーマ・きせかえ',
+                subtitle: 'カラー・ダークモード',
+                onTap: () => Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (_) => const ThemeSettingsScreen(),
+                  ),
+                ),
+              ),
+              const Divider(height: 1),
+              _NavTile(
+                icon: Icons.notifications_outlined,
+                iconColor: AppColors.warning,
+                title: '通知設定',
+                subtitle: '通知・リマインダーの設定',
+                onTap: () => Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (_) => const NotificationSettingsScreen(),
+                  ),
+                ),
+              ),
+              const Divider(height: 1),
+              _NavTile(
+                icon: Icons.sync,
+                iconColor: AppColors.typeClass,
+                title: 'カレンダー同期',
+                subtitle: 'Apple/Googleカレンダーと同期',
+                onTap: () => Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (_) => const CalendarSyncSettingsScreen(),
+                  ),
+                ),
               ),
               const Divider(height: 1),
               ListTile(
@@ -105,7 +218,7 @@ class ProfileTab extends ConsumerWidget {
               const ListTile(
                 leading: Icon(Icons.info_outline),
                 title: Text('バージョン'),
-                trailing: Text('0.1.0',
+                trailing: Text('0.2.0',
                     style: TextStyle(color: AppColors.textSecondary)),
               ),
               const Divider(height: 1),
@@ -113,31 +226,23 @@ class ProfileTab extends ConsumerWidget {
                 leading: const Icon(Icons.description_outlined),
                 title: const Text('利用規約'),
                 trailing: const Icon(Icons.chevron_right),
-                onTap: () {
-                  // TODO: Navigate to terms
-                },
+                onTap: () {},
               ),
               const Divider(height: 1),
               ListTile(
                 leading: const Icon(Icons.privacy_tip_outlined),
                 title: const Text('プライバシーポリシー'),
                 trailing: const Icon(Icons.chevron_right),
-                onTap: () {
-                  // TODO: Navigate to privacy policy
-                },
+                onTap: () {},
               ),
             ],
           ),
           const SizedBox(height: 32),
 
-          // App name footer
           const Center(
             child: Text(
               'Himatch',
-              style: TextStyle(
-                color: AppColors.textHint,
-                fontSize: 12,
-              ),
+              style: TextStyle(color: AppColors.textHint, fontSize: 12),
             ),
           ),
           const SizedBox(height: 16),
@@ -249,6 +354,33 @@ class ProfileTab extends ConsumerWidget {
   }
 }
 
+class _NavTile extends StatelessWidget {
+  final IconData icon;
+  final Color iconColor;
+  final String title;
+  final String subtitle;
+  final VoidCallback onTap;
+
+  const _NavTile({
+    required this.icon,
+    required this.iconColor,
+    required this.title,
+    required this.subtitle,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return ListTile(
+      leading: Icon(icon, color: iconColor),
+      title: Text(title),
+      subtitle: Text(subtitle, style: const TextStyle(fontSize: 12)),
+      trailing: const Icon(Icons.chevron_right, size: 18),
+      onTap: onTap,
+    );
+  }
+}
+
 class _ProfileHeader extends StatelessWidget {
   final String displayName;
   final int groupCount;
@@ -269,7 +401,6 @@ class _ProfileHeader extends StatelessWidget {
         padding: const EdgeInsets.all(20),
         child: Column(
           children: [
-            // Avatar
             CircleAvatar(
               radius: 40,
               backgroundColor: AppColors.primaryLight.withValues(alpha: 0.3),
@@ -283,7 +414,6 @@ class _ProfileHeader extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 12),
-            // Name
             GestureDetector(
               onTap: onNameTap,
               child: Row(
@@ -302,7 +432,6 @@ class _ProfileHeader extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 16),
-            // Stats
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
@@ -311,11 +440,7 @@ class _ProfileHeader extends StatelessWidget {
                   count: groupCount,
                   label: 'グループ',
                 ),
-                Container(
-                  width: 1,
-                  height: 32,
-                  color: AppColors.surfaceVariant,
-                ),
+                Container(width: 1, height: 32, color: AppColors.surfaceVariant),
                 _StatItem(
                   icon: Icons.calendar_month,
                   count: scheduleCount,
@@ -362,10 +487,7 @@ class _StatItem extends StatelessWidget {
         const SizedBox(height: 2),
         Text(
           label,
-          style: const TextStyle(
-            fontSize: 12,
-            color: AppColors.textSecondary,
-          ),
+          style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
         ),
       ],
     );
@@ -374,7 +496,6 @@ class _StatItem extends StatelessWidget {
 
 class _SectionHeader extends StatelessWidget {
   final String title;
-
   const _SectionHeader({required this.title});
 
   @override
@@ -391,13 +512,10 @@ class _SectionHeader extends StatelessWidget {
 
 class _SettingsCard extends StatelessWidget {
   final List<Widget> children;
-
   const _SettingsCard({required this.children});
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      child: Column(children: children),
-    );
+    return Card(child: Column(children: children));
   }
 }

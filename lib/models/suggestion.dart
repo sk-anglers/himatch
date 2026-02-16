@@ -57,6 +57,8 @@ abstract class Suggestion with _$Suggestion {
     @JsonKey(name: 'total_members') required int totalMembers,
     @JsonKey(name: 'availability_ratio') required double availabilityRatio,
     @JsonKey(name: 'weather_summary') WeatherSummary? weatherSummary,
+    String? location,
+    @JsonKey(name: 'location_name') String? locationName,
     required double score,
     @Default(SuggestionStatus.proposed) SuggestionStatus status,
     @JsonKey(name: 'created_at') DateTime? createdAt,

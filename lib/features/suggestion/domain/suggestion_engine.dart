@@ -14,10 +14,12 @@ class SuggestionEngine {
   /// [memberSchedules] maps userId -> list of schedules.
   /// [searchRangeDays] how many days ahead to search.
   /// [groupId] the group to generate suggestions for.
+  /// [weatherData] optional weather forecast keyed by date.
   List<Suggestion> generateSuggestions({
     required Map<String, List<Schedule>> memberSchedules,
     required String groupId,
     int searchRangeDays = AppConstants.defaultSearchRangeDays,
+    Map<DateTime, WeatherSummary>? weatherData,
   }) {
     if (memberSchedules.length < AppConstants.minGroupMembers) {
       return [];
@@ -46,6 +48,10 @@ class SuggestionEngine {
       // Find overlapping free time slots across members
       final overlaps = _findOverlappingSlots(memberFreeSlots, memberIds);
 
+      // Look up weather for this date
+      final dateKey = DateTime(date.year, date.month, date.day);
+      final weather = weatherData?[dateKey];
+
       for (final overlap in overlaps) {
         if (overlap.availableMembers.length < AppConstants.minGroupMembers) {
           continue;
@@ -59,6 +65,7 @@ class SuggestionEngine {
           timeCategory: timeCategory,
           durationHours: durationHours,
           isWeekend: isWeekend,
+          weather: weather,
         );
         final availabilityRatio =
             overlap.availableMembers.length / totalMembers;
@@ -68,6 +75,7 @@ class SuggestionEngine {
           durationHours: durationHours,
           timeCategory: timeCategory,
           isWeekend: isWeekend,
+          weather: weather,
         );
 
         suggestions.add(Suggestion(
@@ -94,6 +102,7 @@ class SuggestionEngine {
           availableMembers: overlap.availableMembers,
           totalMembers: totalMembers,
           availabilityRatio: availabilityRatio,
+          weatherSummary: weather,
           score: score,
           status: SuggestionStatus.proposed,
           createdAt: DateTime.now(),
@@ -384,35 +393,69 @@ class SuggestionEngine {
     }
   }
 
-  /// Suggest an activity type based on context.
+  /// Suggest an activity type based on context and weather.
   String _suggestActivity({
     required TimeCategory timeCategory,
     required double durationHours,
     required bool isWeekend,
+    WeatherSummary? weather,
   }) {
+    final isRainy = weather != null && _isRainyWeather(weather.condition);
+
+    if (isRainy) {
+      // Rainy day → indoor activities
+      return switch (timeCategory) {
+        TimeCategory.morning => 'カフェ',
+        TimeCategory.lunch => 'ランチ',
+        TimeCategory.afternoon =>
+          durationHours >= 4 ? 'カラオケ' : '映画',
+        TimeCategory.evening => isWeekend ? 'ディナー' : '飲み会',
+        TimeCategory.allDay => 'カラオケ',
+      };
+    }
+
     return switch (timeCategory) {
       TimeCategory.morning => isWeekend ? 'お出かけ' : 'カフェ',
       TimeCategory.lunch => 'ランチ',
       TimeCategory.afternoon =>
         durationHours >= 4 ? (isWeekend ? '日帰り旅行' : '遊び') : 'カフェ',
       TimeCategory.evening => isWeekend ? 'ディナー' : '飲み会',
-      TimeCategory.allDay => isWeekend ? '日帰り旅行' : '遊び',
+      TimeCategory.allDay => isWeekend ? '日帰り旅行' : 'BBQ',
     };
   }
 
+  /// Check if a weather condition represents rain/snow.
+  bool _isRainyWeather(String condition) {
+    const rainyKeywords = ['雨', '雪', '雷', '霧雨'];
+    return rainyKeywords.any((k) => condition.contains(k));
+  }
+
   /// Calculate suggestion score (0.0 - 1.0).
+  ///
+  /// Weight distribution:
+  /// - Availability ratio: 40%
+  /// - Weather: 15%
+  /// - Duration: 15%
+  /// - Weekend: 10%
+  /// - Time category: 10-15%
   double _calculateScore({
     required double availabilityRatio,
     required double durationHours,
     required TimeCategory timeCategory,
     required bool isWeekend,
+    WeatherSummary? weather,
   }) {
     // Base: availability ratio (most important)
-    double score = availabilityRatio * 0.5;
+    double score = availabilityRatio * 0.4;
+
+    // Weather factor (max ±0.15)
+    if (weather != null) {
+      score += _weatherScore(weather.condition);
+    }
 
     // Duration weight (longer is generally better, up to a point)
     final durationScore = (durationHours / 8.0).clamp(0.0, 1.0);
-    score += durationScore * 0.2;
+    score += durationScore * 0.15;
 
     // Weekend bonus
     if (isWeekend) score += 0.1;
@@ -428,6 +471,17 @@ class SuggestionEngine {
     score += timeCategoryBonus;
 
     return score.clamp(0.0, 1.0);
+  }
+
+  /// Weather contribution to score.
+  double _weatherScore(String condition) {
+    if (condition.contains('快晴') || condition == '晴れ') return 0.15;
+    if (condition.contains('曇り') || condition == 'くもり') return 0.05;
+    if (condition.contains('霧')) return 0.0;
+    if (condition.contains('雷')) return -0.15;
+    if (condition.contains('雪') || condition.contains('雨')) return -0.10;
+    if (condition.contains('にわか')) return -0.05;
+    return 0.0;
   }
 }
 

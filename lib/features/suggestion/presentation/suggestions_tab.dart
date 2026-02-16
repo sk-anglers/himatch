@@ -1,47 +1,156 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:table_calendar/table_calendar.dart';
 import 'package:himatch/core/theme/app_theme.dart';
 import 'package:himatch/core/utils/date_utils.dart';
+import 'package:himatch/models/group.dart';
 import 'package:himatch/models/suggestion.dart';
 import 'package:himatch/models/vote.dart';
 import 'package:himatch/features/suggestion/presentation/providers/suggestion_providers.dart';
 import 'package:himatch/features/suggestion/presentation/providers/vote_providers.dart';
 import 'package:himatch/features/group/presentation/providers/group_providers.dart';
 import 'package:himatch/features/auth/providers/auth_providers.dart';
+import 'package:himatch/providers/holiday_providers.dart';
 
-class SuggestionsTab extends ConsumerWidget {
+class SuggestionsTab extends ConsumerStatefulWidget {
   const SuggestionsTab({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final suggestions = ref.watch(localSuggestionsProvider);
+  ConsumerState<SuggestionsTab> createState() => _SuggestionsTabState();
+}
+
+class _SuggestionsTabState extends ConsumerState<SuggestionsTab> {
+  /// null = 全グループ表示
+  String? _selectedGroupId;
+
+  @override
+  Widget build(BuildContext context) {
+    final allSuggestions = ref.watch(localSuggestionsProvider);
     final groups = ref.watch(localGroupsProvider);
+
+    // 選択グループでフィルタ
+    final suggestions = _selectedGroupId == null
+        ? allSuggestions
+        : allSuggestions
+            .where((s) => s.groupId == _selectedGroupId)
+            .toList();
 
     return Scaffold(
       body: groups.isEmpty
           ? _NoGroupState()
-          : suggestions.isEmpty
-              ? _EmptySuggestionState(ref: ref)
-              : _SuggestionList(suggestions: suggestions),
+          : Column(
+              children: [
+                // グループ切り替えチップ
+                _GroupSelector(
+                  groups: groups,
+                  selectedGroupId: _selectedGroupId,
+                  onSelected: (id) =>
+                      setState(() => _selectedGroupId = id),
+                ),
+                // メインコンテンツ
+                Expanded(
+                  child: suggestions.isEmpty
+                      ? _EmptySuggestionState(ref: ref)
+                      : _SuggestionCalendar(suggestions: suggestions),
+                ),
+              ],
+            ),
       floatingActionButton: groups.isNotEmpty
           ? FloatingActionButton.extended(
-              onPressed: () {
-                ref
+              onPressed: () async {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('天気情報を取得中...'),
+                    duration: Duration(seconds: 1),
+                  ),
+                );
+                await ref
                     .read(localSuggestionsProvider.notifier)
                     .refreshSuggestions();
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('候補日を更新しました')),
-                );
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('候補日を更新しました')),
+                  );
+                }
               },
               backgroundColor: AppColors.primary,
               icon: const Icon(Icons.refresh, color: Colors.white),
-              label: const Text('更新',
-                  style: TextStyle(color: Colors.white)),
+              label:
+                  const Text('更新', style: TextStyle(color: Colors.white)),
             )
           : null,
     );
   }
 }
+
+// ─── Group selector chips ───
+
+class _GroupSelector extends StatelessWidget {
+  final List<Group> groups;
+  final String? selectedGroupId;
+  final ValueChanged<String?> onSelected;
+
+  const _GroupSelector({
+    required this.groups,
+    required this.selectedGroupId,
+    required this.onSelected,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: 44,
+      child: ListView(
+        scrollDirection: Axis.horizontal,
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+        children: [
+          _buildChip(
+            label: 'すべて',
+            isSelected: selectedGroupId == null,
+            onTap: () => onSelected(null),
+          ),
+          ...groups.map((g) => _buildChip(
+                label: g.name,
+                isSelected: selectedGroupId == g.id,
+                onTap: () => onSelected(g.id),
+              )),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildChip({
+    required String label,
+    required bool isSelected,
+    required VoidCallback onTap,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.only(right: 8),
+      child: GestureDetector(
+        onTap: onTap,
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+          decoration: BoxDecoration(
+            color: isSelected
+                ? AppColors.primary
+                : AppColors.surfaceVariant,
+            borderRadius: BorderRadius.circular(20),
+          ),
+          child: Text(
+            label,
+            style: TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.w600,
+              color: isSelected ? Colors.white : AppColors.textSecondary,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// ─── Empty states ───
 
 class _NoGroupState extends StatelessWidget {
   @override
@@ -52,28 +161,19 @@ class _NoGroupState extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              Icons.group_add_outlined,
-              size: 80,
-              color: AppColors.primary.withValues(alpha: 0.3),
-            ),
+            Icon(Icons.group_add_outlined,
+                size: 80, color: AppColors.primary.withValues(alpha: 0.3)),
             const SizedBox(height: 24),
-            const Text(
-              'グループに参加しましょう',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                color: AppColors.textPrimary,
-              ),
-            ),
+            const Text('グループに参加しましょう',
+                style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.textPrimary)),
             const SizedBox(height: 8),
             const Text(
               'グループタブでグループを作成または\n招待コードで参加すると候補日が表示されます',
               textAlign: TextAlign.center,
-              style: TextStyle(
-                color: AppColors.textSecondary,
-                fontSize: 14,
-              ),
+              style: TextStyle(color: AppColors.textSecondary, fontSize: 14),
             ),
           ],
         ),
@@ -84,7 +184,6 @@ class _NoGroupState extends StatelessWidget {
 
 class _EmptySuggestionState extends StatelessWidget {
   final WidgetRef ref;
-
   const _EmptySuggestionState({required this.ref});
 
   @override
@@ -95,33 +194,24 @@ class _EmptySuggestionState extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              Icons.lightbulb_outline,
-              size: 80,
-              color: AppColors.warning.withValues(alpha: 0.3),
-            ),
+            Icon(Icons.lightbulb_outline,
+                size: 80, color: AppColors.warning.withValues(alpha: 0.3)),
             const SizedBox(height: 24),
-            const Text(
-              '候補日がありません',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                color: AppColors.textPrimary,
-              ),
-            ),
+            const Text('候補日がありません',
+                style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.textPrimary)),
             const SizedBox(height: 8),
             const Text(
               '右下の「更新」ボタンをタップして\n候補日を検索しましょう',
               textAlign: TextAlign.center,
-              style: TextStyle(
-                color: AppColors.textSecondary,
-                fontSize: 14,
-              ),
+              style: TextStyle(color: AppColors.textSecondary, fontSize: 14),
             ),
             const SizedBox(height: 24),
             OutlinedButton.icon(
-              onPressed: () {
-                ref
+              onPressed: () async {
+                await ref
                     .read(localSuggestionsProvider.notifier)
                     .refreshSuggestions();
               },
@@ -135,386 +225,736 @@ class _EmptySuggestionState extends StatelessWidget {
   }
 }
 
-class _SuggestionList extends ConsumerWidget {
-  final List<Suggestion> suggestions;
+// ─── Calendar-based suggestion view ───
 
-  const _SuggestionList({required this.suggestions});
+class _SuggestionCalendar extends ConsumerStatefulWidget {
+  final List<Suggestion> suggestions;
+  const _SuggestionCalendar({required this.suggestions});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final proposed =
-        suggestions.where((s) => s.status == SuggestionStatus.proposed).toList();
-    final confirmed =
-        suggestions.where((s) => s.status == SuggestionStatus.confirmed).toList();
-    final accepted =
-        suggestions.where((s) => s.status == SuggestionStatus.accepted).toList();
+  ConsumerState<_SuggestionCalendar> createState() =>
+      _SuggestionCalendarState();
+}
 
-    return ListView(
-      padding: const EdgeInsets.all(16),
+class _SuggestionCalendarState extends ConsumerState<_SuggestionCalendar> {
+  DateTime _focusedDay = DateTime.now();
+
+  /// 日付 → その日の候補リスト
+  Map<DateTime, List<Suggestion>> get _grouped {
+    final map = <DateTime, List<Suggestion>>{};
+    for (final s in widget.suggestions) {
+      final key = DateTime(s.suggestedDate.year, s.suggestedDate.month,
+          s.suggestedDate.day);
+      map.putIfAbsent(key, () => []).add(s);
+    }
+    return map;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final grouped = _grouped;
+    final confirmedCount = widget.suggestions
+        .where((s) => s.status == SuggestionStatus.confirmed)
+        .length;
+    final dateCount = grouped.keys.length;
+
+    return Column(
       children: [
-        // Stats header
-        Row(
-          children: [
-            Text(
-              '${suggestions.length}件の候補',
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
-            ),
-            const Spacer(),
-            if (confirmed.isNotEmpty)
-              Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                decoration: BoxDecoration(
-                  color: AppColors.success.withValues(alpha: 0.15),
-                  borderRadius: BorderRadius.circular(4),
-                ),
-                child: Text(
-                  '${confirmed.length}件確定',
-                  style: const TextStyle(
-                    color: AppColors.success,
-                    fontSize: 12,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
+        // ヘッダー
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+          child: Row(
+            children: [
+              Text(
+                '$dateCount日の候補',
+                style: Theme.of(context)
+                    .textTheme
+                    .titleMedium
+                    ?.copyWith(fontWeight: FontWeight.bold),
               ),
-            if (accepted.isNotEmpty && confirmed.isEmpty)
-              Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                decoration: BoxDecoration(
-                  color: AppColors.success.withValues(alpha: 0.15),
-                  borderRadius: BorderRadius.circular(4),
-                ),
-                child: Text(
-                  '${accepted.length}件承認済み',
-                  style: const TextStyle(
-                    color: AppColors.success,
-                    fontSize: 12,
-                    fontWeight: FontWeight.bold,
+              const Spacer(),
+              if (confirmedCount > 0)
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                  decoration: BoxDecoration(
+                    color: AppColors.success.withValues(alpha: 0.15),
+                    borderRadius: BorderRadius.circular(4),
                   ),
+                  child: Text('$confirmedCount件確定',
+                      style: const TextStyle(
+                          color: AppColors.success,
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold)),
                 ),
-              ),
-          ],
+            ],
+          ),
         ),
-        const SizedBox(height: 12),
 
-        // Confirmed suggestions at top
-        if (confirmed.isNotEmpty) ...[
-          const _SectionLabel(
-            icon: Icons.check_circle,
-            label: '確定済み',
-            color: AppColors.success,
+        // カレンダー
+        TableCalendar<Suggestion>(
+          firstDay: DateTime.utc(2024, 1, 1),
+          lastDay: DateTime.utc(2030, 12, 31),
+          focusedDay: _focusedDay,
+          locale: 'ja_JP',
+          startingDayOfWeek: StartingDayOfWeek.monday,
+          calendarFormat: CalendarFormat.month,
+          rowHeight: 64,
+          eventLoader: (day) {
+            final key = DateTime(day.year, day.month, day.day);
+            return grouped[key] ?? [];
+          },
+          calendarBuilders: CalendarBuilders(
+            defaultBuilder: (context, day, focusedDay) {
+              final key = DateTime(day.year, day.month, day.day);
+              final events = grouped[key] ?? [];
+              return _SuggestionCalendarCell(
+                day: day,
+                events: events,
+                isToday: false,
+                isSelected: false,
+                holidayName: ref.watch(holidayForDateProvider(key)),
+              );
+            },
+            todayBuilder: (context, day, focusedDay) {
+              final key = DateTime(day.year, day.month, day.day);
+              final events = grouped[key] ?? [];
+              return _SuggestionCalendarCell(
+                day: day,
+                events: events,
+                isToday: true,
+                isSelected: false,
+                holidayName: ref.watch(holidayForDateProvider(key)),
+              );
+            },
+            selectedBuilder: (context, day, focusedDay) {
+              final key = DateTime(day.year, day.month, day.day);
+              final events = grouped[key] ?? [];
+              return _SuggestionCalendarCell(
+                day: day,
+                events: events,
+                isToday: false,
+                isSelected: true,
+                holidayName: ref.watch(holidayForDateProvider(key)),
+              );
+            },
+            outsideBuilder: (context, day, focusedDay) {
+              return _SuggestionCalendarCell(
+                day: day,
+                events: const [],
+                isToday: false,
+                isSelected: false,
+                isOutside: true,
+              );
+            },
+            markerBuilder: (context, day, events) => const SizedBox.shrink(),
           ),
-          const SizedBox(height: 8),
-          ...confirmed.map((s) => _SuggestionCard(suggestion: s)),
-          const SizedBox(height: 16),
-        ],
+          calendarStyle: const CalendarStyle(
+            cellMargin: EdgeInsets.zero,
+            cellPadding: EdgeInsets.zero,
+            markersMaxCount: 0,
+          ),
+          headerStyle: const HeaderStyle(
+            formatButtonVisible: false,
+            titleCentered: true,
+          ),
+          onDaySelected: (selectedDay, focusedDay) {
+            setState(() => _focusedDay = focusedDay);
+            final key = DateTime(
+                selectedDay.year, selectedDay.month, selectedDay.day);
+            final daySuggestions = grouped[key];
+            if (daySuggestions != null && daySuggestions.isNotEmpty) {
+              _showDayDetail(context, selectedDay, daySuggestions);
+            }
+          },
+          onPageChanged: (focusedDay) {
+            setState(() => _focusedDay = focusedDay);
+          },
+        ),
 
-        // Proposed suggestions (votable)
-        if (proposed.isNotEmpty) ...[
-          const _SectionLabel(
-            icon: Icons.how_to_vote,
-            label: '投票受付中',
-            color: AppColors.primary,
-          ),
-          const SizedBox(height: 8),
-          ...proposed.map((s) => _SuggestionCard(suggestion: s)),
-        ],
+        const SizedBox(height: 8),
 
-        // Accepted suggestions (legacy)
-        if (accepted.isNotEmpty) ...[
-          const SizedBox(height: 16),
-          const _SectionLabel(
-            icon: Icons.thumb_up,
-            label: '承認済み',
-            color: AppColors.success,
+        // 凡例
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              _LegendItem(color: AppColors.success, label: 'おすすめ/確定'),
+              const SizedBox(width: 16),
+              _LegendItem(color: AppColors.warning, label: 'まあまあ'),
+              const SizedBox(width: 16),
+              _LegendItem(
+                  color: AppColors.textSecondary, label: '候補あり'),
+            ],
           ),
-          const SizedBox(height: 8),
-          ...accepted.map((s) => _SuggestionCard(suggestion: s)),
-        ],
+        ),
+        const SizedBox(height: 8),
+
+        // ヒントテキスト
+        const Padding(
+          padding: EdgeInsets.symmetric(horizontal: 16),
+          child: Text(
+            'マーカーのある日付をタップして詳細を確認',
+            textAlign: TextAlign.center,
+            style: TextStyle(color: AppColors.textHint, fontSize: 12),
+          ),
+        ),
+
+        const Spacer(),
       ],
+    );
+  }
+
+  void _showDayDetail(
+    BuildContext context,
+    DateTime day,
+    List<Suggestion> suggestions,
+  ) {
+    final isWeekend =
+        day.weekday == DateTime.saturday || day.weekday == DateTime.sunday;
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) => _DayDetailSheet(
+        day: day,
+        suggestions: suggestions,
+        isWeekend: isWeekend,
+      ),
     );
   }
 }
 
-class _SectionLabel extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final Color color;
+// ─── Custom calendar cell with border + weather ───
 
-  const _SectionLabel({
-    required this.icon,
-    required this.label,
-    required this.color,
+class _SuggestionCalendarCell extends StatelessWidget {
+  final DateTime day;
+  final List<Suggestion> events;
+  final bool isToday;
+  final bool isSelected;
+  final bool isOutside;
+  final String? holidayName;
+
+  const _SuggestionCalendarCell({
+    required this.day,
+    required this.events,
+    required this.isToday,
+    required this.isSelected,
+    this.isOutside = false,
+    this.holidayName,
   });
 
   @override
   Widget build(BuildContext context) {
+    final hasEvents = events.isNotEmpty;
+    final isHoliday = holidayName != null;
+    final isSunday = day.weekday == DateTime.sunday;
+    final isSaturday = day.weekday == DateTime.saturday;
+    final weatherIcon = hasEvents
+        ? events
+            .map((s) => s.weatherSummary?.icon)
+            .firstWhere((i) => i != null, orElse: () => null)
+        : null;
+    final hasConfirmed =
+        events.any((s) => s.status == SuggestionStatus.confirmed);
+    final bestScore = events.fold<double>(
+        0, (max, s) => s.score > max ? s.score : max);
+    final badgeColor = hasConfirmed
+        ? AppColors.success
+        : bestScore >= 0.7
+            ? AppColors.success
+            : bestScore >= 0.4
+                ? AppColors.warning
+                : AppColors.textSecondary;
+
+    // 日付の色: 祝日/日曜=赤, 土曜=青
+    Color dayColor;
+    if (isOutside) {
+      dayColor = AppColors.textHint;
+    } else if (isSelected) {
+      dayColor = AppColors.primary;
+    } else if (isToday) {
+      dayColor = AppColors.primaryDark;
+    } else if (isHoliday || isSunday) {
+      dayColor = AppColors.error;
+    } else if (isSaturday) {
+      dayColor = const Color(0xFF3498DB);
+    } else {
+      dayColor = AppColors.textPrimary;
+    }
+
+    return Container(
+      margin: const EdgeInsets.all(1),
+      decoration: BoxDecoration(
+        color: isSelected
+            ? AppColors.primary.withValues(alpha: 0.12)
+            : isToday
+                ? AppColors.primaryLight.withValues(alpha: 0.10)
+                : isHoliday && !isOutside
+                    ? AppColors.error.withValues(alpha: 0.04)
+                    : null,
+        border: Border.all(
+          color: isSelected
+              ? AppColors.primary
+              : isToday
+                  ? AppColors.primaryLight
+                  : AppColors.surfaceVariant,
+          width: isSelected || isToday ? 1.5 : 0.5,
+        ),
+        borderRadius: BorderRadius.circular(6),
+      ),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          // 日付（上段）
+          Text(
+            '${day.day}',
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: isToday || isSelected || isHoliday
+                  ? FontWeight.bold
+                  : FontWeight.normal,
+              color: dayColor,
+            ),
+          ),
+          // 天気アイコン（中段）
+          SizedBox(
+            height: 16,
+            child: weatherIcon != null
+                ? Text(weatherIcon,
+                    style: const TextStyle(fontSize: 12, height: 1.2))
+                : isHoliday && !isOutside
+                    ? Text(
+                        holidayName!.length > 3
+                            ? holidayName!.substring(0, 3)
+                            : holidayName!,
+                        style: const TextStyle(
+                            fontSize: 8,
+                            color: AppColors.error,
+                            fontWeight: FontWeight.bold,
+                            height: 1.8),
+                      )
+                    : null,
+          ),
+          // スコアバッジ（下段）
+          SizedBox(
+            height: 16,
+            child: hasEvents
+                ? Container(
+                    width: 16,
+                    height: 16,
+                    decoration: BoxDecoration(
+                      color: badgeColor,
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                    alignment: Alignment.center,
+                    child: hasConfirmed
+                        ? const Icon(Icons.check,
+                            size: 10, color: Colors.white)
+                        : Text(
+                            '${events.length}',
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 9,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                  )
+                : null,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _LegendItem extends StatelessWidget {
+  final Color color;
+  final String label;
+  const _LegendItem({required this.color, required this.label});
+
+  @override
+  Widget build(BuildContext context) {
     return Row(
+      mainAxisSize: MainAxisSize.min,
       children: [
-        Icon(icon, size: 16, color: color),
-        const SizedBox(width: 4),
-        Text(
-          label,
-          style: TextStyle(
-            fontWeight: FontWeight.w600,
+        Container(
+          width: 12,
+          height: 12,
+          decoration: BoxDecoration(
             color: color,
-            fontSize: 13,
+            borderRadius: BorderRadius.circular(3),
           ),
         ),
+        const SizedBox(width: 4),
+        Text(label,
+            style: const TextStyle(
+                fontSize: 11, color: AppColors.textSecondary)),
       ],
     );
   }
 }
 
-class _SuggestionCard extends ConsumerWidget {
-  final Suggestion suggestion;
+// ─── Day detail bottom sheet ───
 
-  const _SuggestionCard({required this.suggestion});
+class _DayDetailSheet extends ConsumerWidget {
+  final DateTime day;
+  final List<Suggestion> suggestions;
+  final bool isWeekend;
+
+  const _DayDetailSheet({
+    required this.day,
+    required this.suggestions,
+    required this.isWeekend,
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final isConfirmed = suggestion.status == SuggestionStatus.confirmed;
-    final isProposed = suggestion.status == SuggestionStatus.proposed;
     final groups = ref.watch(localGroupsProvider);
-    final groupName = groups
-        .where((g) => g.id == suggestion.groupId)
-        .map((g) => g.name)
-        .firstOrNull;
+    final hasConfirmed =
+        suggestions.any((s) => s.status == SuggestionStatus.confirmed);
 
-    // Check if current user is group owner
-    final members = ref.watch(localGroupMembersProvider);
-    final groupMembers = members[suggestion.groupId] ?? [];
-    final authState = ref.watch(authNotifierProvider);
-    final currentUserId = authState.userId ?? 'local-user';
-    final isOwner = groupMembers.any(
-        (m) => m.userId == currentUserId && m.role == 'owner');
-
-    // Vote state
-    final voteSummary = ref.watch(localVotesProvider.select(
-        (votes) => ref.read(localVotesProvider.notifier).getVoteSummary(suggestion.id)));
-    final myVote = ref.watch(localVotesProvider.select(
-        (votes) => ref.read(localVotesProvider.notifier).getUserVote(
-            suggestion.id, currentUserId)));
-
-    return Card(
-      margin: const EdgeInsets.only(bottom: 12),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-        side: isConfirmed
-            ? const BorderSide(color: AppColors.success, width: 2)
-            : BorderSide.none,
+    return Container(
+      decoration: const BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Top row: date & score
-            Row(
+      constraints: BoxConstraints(
+        maxHeight: MediaQuery.of(context).size.height * 0.6,
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // ドラッグハンドル
+          const SizedBox(height: 8),
+          Container(
+            width: 40,
+            height: 4,
+            decoration: BoxDecoration(
+              color: AppColors.textHint,
+              borderRadius: BorderRadius.circular(2),
+            ),
+          ),
+          const SizedBox(height: 12),
+
+          // 日付ヘッダー
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: Row(
               children: [
-                // Date badge
                 Container(
                   padding:
-                      const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                   decoration: BoxDecoration(
-                    color: isConfirmed
+                    color: hasConfirmed
                         ? AppColors.success.withValues(alpha: 0.1)
-                        : AppColors.primary.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(8),
+                        : isWeekend
+                            ? AppColors.secondary.withValues(alpha: 0.1)
+                            : AppColors.primary.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(10),
                   ),
                   child: Text(
-                    AppDateUtils.formatMonthDayWeek(suggestion.suggestedDate),
+                    AppDateUtils.formatMonthDayWeek(day),
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
-                      color: isConfirmed ? AppColors.success : AppColors.primary,
-                      fontSize: 14,
+                      fontSize: 18,
+                      color: hasConfirmed
+                          ? AppColors.success
+                          : isWeekend
+                              ? AppColors.secondary
+                              : AppColors.primary,
                     ),
                   ),
                 ),
+                // 天気情報（日付の横に大きく表示）
+                if (suggestions.first.weatherSummary != null) ...[
+                  const SizedBox(width: 10),
+                  _DayWeatherBanner(
+                      weather: suggestions.first.weatherSummary!),
+                ],
                 const Spacer(),
-                // Score indicator
-                _ScoreBadge(score: suggestion.score),
+                Text('${suggestions.length}件の候補',
+                    style: const TextStyle(
+                        color: AppColors.textSecondary, fontSize: 13)),
               ],
             ),
-            const SizedBox(height: 12),
+          ),
+          const SizedBox(height: 12),
 
-            // Activity & time
-            Row(
-              children: [
-                Icon(
-                  _getActivityIcon(suggestion.activityType),
-                  size: 20,
-                  color: AppColors.textSecondary,
+          // 候補リスト
+          Flexible(
+            child: ListView.separated(
+              shrinkWrap: true,
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+              itemCount: suggestions.length,
+              separatorBuilder: (_, _) => const SizedBox(height: 8),
+              itemBuilder: (context, index) {
+                final s = suggestions[index];
+                final groupName = groups
+                    .where((g) => g.id == s.groupId)
+                    .map((g) => g.name)
+                    .firstOrNull;
+                return _SuggestionTile(
+                    suggestion: s, groupName: groupName);
+              },
+            ),
+          ),
+
+          SizedBox(height: MediaQuery.of(context).padding.bottom),
+        ],
+      ),
+    );
+  }
+}
+
+// ─── Suggestion tile in bottom sheet ───
+
+class _SuggestionTile extends ConsumerWidget {
+  final Suggestion suggestion;
+  final String? groupName;
+
+  const _SuggestionTile({required this.suggestion, this.groupName});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final authState = ref.watch(authNotifierProvider);
+    final currentUserId = authState.userId ?? 'local-user';
+    final membersMap = ref.watch(localGroupMembersProvider);
+    final groupMembers = membersMap[suggestion.groupId] ?? [];
+    final isOwner =
+        groupMembers.any((m) => m.userId == currentUserId && m.role == 'owner');
+    final isProposed = suggestion.status == SuggestionStatus.proposed;
+    final isConfirmed = suggestion.status == SuggestionStatus.confirmed;
+
+    final allVotes = ref.watch(localVotesProvider);
+    final suggestionVotes = allVotes[suggestion.id] ?? [];
+    final voteSummary = VoteSummary(
+      okCount:
+          suggestionVotes.where((v) => v.voteType == VoteType.ok).length,
+      maybeCount:
+          suggestionVotes.where((v) => v.voteType == VoteType.maybe).length,
+      ngCount:
+          suggestionVotes.where((v) => v.voteType == VoteType.ng).length,
+      votes: suggestionVotes,
+    );
+    final myVote = suggestionVotes
+        .where((v) => v.userId == currentUserId)
+        .firstOrNull
+        ?.voteType;
+
+    final scoreColor = suggestion.score >= 0.7
+        ? AppColors.success
+        : suggestion.score >= 0.4
+            ? AppColors.warning
+            : AppColors.textSecondary;
+
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: AppColors.background,
+        borderRadius: BorderRadius.circular(14),
+        border: isConfirmed
+            ? Border.all(color: AppColors.success, width: 2)
+            : null,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // グループ + アクティビティ + 天気 + スコア
+          Row(
+            children: [
+              if (groupName != null) ...[
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                  decoration: BoxDecoration(
+                    color: AppColors.surfaceVariant,
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  child: Text(groupName!,
+                      style: const TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.textSecondary)),
                 ),
                 const SizedBox(width: 8),
-                Text(
-                  suggestion.activityType,
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                const SizedBox(width: 12),
-                _TimeCategoryBadge(category: suggestion.timeCategory),
               ],
-            ),
+              Icon(_getActivityIcon(suggestion.activityType),
+                  size: 16, color: AppColors.textSecondary),
+              const SizedBox(width: 4),
+              Text(suggestion.activityType,
+                  style: const TextStyle(
+                      fontSize: 15, fontWeight: FontWeight.w600)),
+              const Spacer(),
+              // Weather info
+              if (suggestion.weatherSummary != null) ...[
+                _WeatherChip(weather: suggestion.weatherSummary!),
+                const SizedBox(width: 6),
+              ],
+              Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+                decoration: BoxDecoration(
+                  color: scoreColor.withValues(alpha: 0.15),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.star, size: 12, color: scoreColor),
+                    const SizedBox(width: 2),
+                    Text('${(suggestion.score * 100).round()}%',
+                        style: TextStyle(
+                            color: scoreColor,
+                            fontSize: 11,
+                            fontWeight: FontWeight.bold)),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 6),
+
+          // 時間 + 参加人数
+          Row(
+            children: [
+              const Icon(Icons.access_time,
+                  size: 14, color: AppColors.textHint),
+              const SizedBox(width: 3),
+              Text(
+                '${AppDateUtils.formatTime(suggestion.startTime)}-${AppDateUtils.formatTime(suggestion.endTime)}'
+                ' (${suggestion.durationHours.toStringAsFixed(1)}h)',
+                style: const TextStyle(
+                    color: AppColors.textSecondary, fontSize: 13),
+              ),
+              const SizedBox(width: 12),
+              const Icon(Icons.people_outline,
+                  size: 14, color: AppColors.textHint),
+              const SizedBox(width: 3),
+              Text(
+                '${suggestion.availableMembers.length}/${suggestion.totalMembers}人',
+                style: const TextStyle(
+                    color: AppColors.textSecondary, fontSize: 13),
+              ),
+            ],
+          ),
+          const SizedBox(height: 6),
+
+          // 参加率バー
+          _MiniAvailabilityBar(ratio: suggestion.availabilityRatio),
+
+          // 投票サマリー
+          if (voteSummary.hasVotes) ...[
             const SizedBox(height: 8),
+            _CompactVoteSummary(summary: voteSummary),
+          ],
 
-            // Time range
+          // 投票ボタン
+          if (isProposed) ...[
+            const SizedBox(height: 8),
             Row(
               children: [
-                const Icon(Icons.access_time, size: 16, color: AppColors.textHint),
-                const SizedBox(width: 4),
-                Text(
-                  '${AppDateUtils.formatTime(suggestion.startTime)} - ${AppDateUtils.formatTime(suggestion.endTime)}'
-                  ' (${suggestion.durationHours.toStringAsFixed(1)}h)',
-                  style: const TextStyle(
-                    color: AppColors.textSecondary,
-                    fontSize: 13,
-                  ),
+                _CompactVoteButton(
+                  icon: Icons.circle_outlined,
+                  label: 'OK',
+                  color: AppColors.success,
+                  isSelected: myVote == VoteType.ok,
+                  onPressed: () => _castVote(
+                      ref, VoteType.ok, currentUserId, authState.displayName),
                 ),
-              ],
-            ),
-            const SizedBox(height: 4),
-
-            // Members & group
-            Row(
-              children: [
-                const Icon(Icons.people_outline,
-                    size: 16, color: AppColors.textHint),
-                const SizedBox(width: 4),
-                Text(
-                  '${suggestion.availableMembers.length}/${suggestion.totalMembers}人が参加可能',
-                  style: const TextStyle(
-                    color: AppColors.textSecondary,
-                    fontSize: 13,
-                  ),
+                const SizedBox(width: 6),
+                _CompactVoteButton(
+                  icon: Icons.change_history,
+                  label: '微妙',
+                  color: AppColors.warning,
+                  isSelected: myVote == VoteType.maybe,
+                  onPressed: () => _castVote(ref, VoteType.maybe,
+                      currentUserId, authState.displayName),
                 ),
-                if (groupName != null) ...[
-                  const SizedBox(width: 8),
-                  Text(
-                    groupName,
-                    style: const TextStyle(
-                      color: AppColors.textHint,
-                      fontSize: 12,
+                const SizedBox(width: 6),
+                _CompactVoteButton(
+                  icon: Icons.close,
+                  label: 'NG',
+                  color: AppColors.error,
+                  isSelected: myVote == VoteType.ng,
+                  onPressed: () => _castVote(
+                      ref, VoteType.ng, currentUserId, authState.displayName),
+                ),
+                if (isOwner && voteSummary.hasVotes) ...[
+                  const Spacer(),
+                  ElevatedButton(
+                    onPressed: () {
+                      Navigator.pop(context);
+                      _confirmSuggestion(context, ref);
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.success,
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 12, vertical: 6),
+                      minimumSize: Size.zero,
+                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                     ),
+                    child: const Text('決定',
+                        style: TextStyle(
+                            fontSize: 12, fontWeight: FontWeight.bold)),
                   ),
                 ],
               ],
             ),
-            const SizedBox(height: 12),
-
-            // Availability bar
-            _AvailabilityBar(ratio: suggestion.availabilityRatio),
-            const SizedBox(height: 12),
-
-            // Vote summary (if any votes exist)
-            if (voteSummary.hasVotes) ...[
-              _VoteSummaryBar(summary: voteSummary),
-              const SizedBox(height: 12),
-            ],
-
-            // Voting buttons (for proposed suggestions)
-            if (isProposed) ...[
-              _VotingButtons(
-                suggestionId: suggestion.id,
-                currentVote: myVote,
-                currentUserId: currentUserId,
-                displayName: authState.displayName,
-              ),
-              // Confirm button for group owner
-              if (isOwner && voteSummary.hasVotes) ...[
-                const SizedBox(height: 8),
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton.icon(
-                    onPressed: () =>
-                        _showConfirmDialog(context, ref, suggestion),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.success,
-                    ),
-                    icon: const Icon(Icons.check_circle, size: 18),
-                    label: const Text('この日に決定'),
-                  ),
-                ),
-              ],
-            ],
-
-            // Confirmed display
-            if (isConfirmed)
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.symmetric(vertical: 10),
-                decoration: BoxDecoration(
-                  color: AppColors.success.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: const Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(Icons.celebration, color: AppColors.success, size: 18),
-                    SizedBox(width: 6),
-                    Text(
-                      '予定確定！',
-                      style: TextStyle(
-                        color: AppColors.success,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 15,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
           ],
-        ),
+
+          // 確定表示
+          if (isConfirmed) ...[
+            const SizedBox(height: 8),
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(vertical: 8),
+              decoration: BoxDecoration(
+                color: AppColors.success.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: const Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.celebration, color: AppColors.success, size: 16),
+                  SizedBox(width: 4),
+                  Text('予定確定！',
+                      style: TextStyle(
+                          color: AppColors.success,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 14)),
+                ],
+              ),
+            ),
+          ],
+        ],
       ),
     );
   }
 
-  void _showConfirmDialog(
-    BuildContext context,
-    WidgetRef ref,
-    Suggestion suggestion,
-  ) {
-    showDialog(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('予定を確定'),
+  void _castVote(WidgetRef ref, VoteType voteType, String userId,
+      String? displayName) {
+    ref.read(localVotesProvider.notifier).castVote(
+          suggestionId: suggestion.id,
+          userId: userId,
+          voteType: voteType,
+          displayName: displayName,
+        );
+  }
+
+  void _confirmSuggestion(BuildContext context, WidgetRef ref) {
+    ref
+        .read(localSuggestionsProvider.notifier)
+        .confirmSuggestion(suggestion.id);
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
         content: Text(
           '${AppDateUtils.formatMonthDayWeek(suggestion.suggestedDate)}の'
-          '${suggestion.activityType}を確定しますか？\n\n'
-          '他の候補日は自動的に見送りになります。',
+          '${suggestion.activityType}を確定しました！',
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: const Text('キャンセル'),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.pop(ctx);
-              ref
-                  .read(localSuggestionsProvider.notifier)
-                  .confirmSuggestion(suggestion.id);
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(
-                    '${AppDateUtils.formatMonthDayWeek(suggestion.suggestedDate)}の'
-                    '${suggestion.activityType}を確定しました！',
-                  ),
-                  backgroundColor: AppColors.success,
-                ),
-              );
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.success,
-            ),
-            child: const Text('確定する'),
-          ),
-        ],
+        backgroundColor: AppColors.success,
       ),
     );
   }
@@ -526,80 +966,149 @@ class _SuggestionCard extends ConsumerWidget {
       'カフェ' => Icons.coffee,
       '日帰り旅行' => Icons.directions_car,
       'お出かけ' || '遊び' => Icons.celebration,
+      'カラオケ' => Icons.mic,
+      '映画' => Icons.movie,
+      'BBQ' => Icons.outdoor_grill,
       _ => Icons.event,
     };
   }
 }
 
-/// 3-choice voting buttons: 参加OK / 微妙 / NG
-class _VotingButtons extends ConsumerWidget {
-  final String suggestionId;
-  final VoteType? currentVote;
-  final String currentUserId;
-  final String? displayName;
+// ─── Weather banner for day detail header ───
 
-  const _VotingButtons({
-    required this.suggestionId,
-    required this.currentVote,
-    required this.currentUserId,
-    this.displayName,
-  });
+class _DayWeatherBanner extends StatelessWidget {
+  final WeatherSummary weather;
+  const _DayWeatherBanner({required this.weather});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    return Row(
-      children: [
-        Expanded(
-          child: _VoteButton(
-            icon: Icons.circle_outlined,
-            label: '参加OK',
-            color: AppColors.success,
-            isSelected: currentVote == VoteType.ok,
-            onPressed: () => _castVote(ref, VoteType.ok),
-          ),
-        ),
-        const SizedBox(width: 6),
-        Expanded(
-          child: _VoteButton(
-            icon: Icons.change_history,
-            label: '微妙',
-            color: AppColors.warning,
-            isSelected: currentVote == VoteType.maybe,
-            onPressed: () => _castVote(ref, VoteType.maybe),
-          ),
-        ),
-        const SizedBox(width: 6),
-        Expanded(
-          child: _VoteButton(
-            icon: Icons.close,
-            label: 'NG',
-            color: AppColors.error,
-            isSelected: currentVote == VoteType.ng,
-            onPressed: () => _castVote(ref, VoteType.ng),
-          ),
-        ),
-      ],
-    );
-  }
+  Widget build(BuildContext context) {
+    final hasTemp = weather.tempHigh != null && weather.tempLow != null;
+    final isRainy = weather.condition.contains('雨') ||
+        weather.condition.contains('雪') ||
+        weather.condition.contains('雷');
+    final bgColor = isRainy
+        ? AppColors.weatherRainy.withValues(alpha: 0.10)
+        : AppColors.weatherSunny.withValues(alpha: 0.10);
 
-  void _castVote(WidgetRef ref, VoteType voteType) {
-    ref.read(localVotesProvider.notifier).castVote(
-          suggestionId: suggestionId,
-          userId: currentUserId,
-          voteType: voteType,
-          displayName: displayName,
-        );
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      decoration: BoxDecoration(
+        color: bgColor,
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(weather.icon ?? '', style: const TextStyle(fontSize: 20)),
+          const SizedBox(width: 6),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(weather.condition,
+                  style: const TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.textPrimary)),
+              if (hasTemp)
+                Text(
+                  '${weather.tempHigh!.round()}° / ${weather.tempLow!.round()}°',
+                  style: const TextStyle(
+                      fontSize: 11, color: AppColors.textSecondary),
+                ),
+            ],
+          ),
+        ],
+      ),
+    );
   }
 }
 
-class _VoteButton extends StatelessWidget {
+// ─── Weather chip widget ───
+
+class _WeatherChip extends StatelessWidget {
+  final WeatherSummary weather;
+  const _WeatherChip({required this.weather});
+
+  @override
+  Widget build(BuildContext context) {
+    final tempText = weather.tempHigh != null && weather.tempLow != null
+        ? '${weather.tempHigh!.round()}°/${weather.tempLow!.round()}°'
+        : '';
+    final isRainy = weather.condition.contains('雨') ||
+        weather.condition.contains('雪') ||
+        weather.condition.contains('雷');
+    final bgColor = isRainy
+        ? AppColors.weatherRainy.withValues(alpha: 0.12)
+        : AppColors.weatherSunny.withValues(alpha: 0.12);
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
+      decoration: BoxDecoration(
+        color: bgColor,
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(weather.icon ?? '', style: const TextStyle(fontSize: 12)),
+          if (tempText.isNotEmpty) ...[
+            const SizedBox(width: 2),
+            Text(tempText,
+                style: const TextStyle(
+                    fontSize: 10,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.textSecondary)),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+// ─── Compact helper widgets ───
+
+class _MiniAvailabilityBar extends StatelessWidget {
+  final double ratio;
+  const _MiniAvailabilityBar({required this.ratio});
+
+  @override
+  Widget build(BuildContext context) {
+    final color = ratio >= 0.8
+        ? AppColors.success
+        : ratio >= 0.5
+            ? AppColors.warning
+            : AppColors.error;
+    return Row(
+      children: [
+        Expanded(
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(3),
+            child: LinearProgressIndicator(
+              value: ratio,
+              backgroundColor: AppColors.surfaceVariant,
+              color: color,
+              minHeight: 4,
+            ),
+          ),
+        ),
+        const SizedBox(width: 6),
+        Text('${(ratio * 100).round()}%',
+            style: TextStyle(
+                fontSize: 10, fontWeight: FontWeight.bold, color: color)),
+      ],
+    );
+  }
+}
+
+class _CompactVoteButton extends StatelessWidget {
   final IconData icon;
   final String label;
   final Color color;
   final bool isSelected;
   final VoidCallback onPressed;
 
-  const _VoteButton({
+  const _CompactVoteButton({
     required this.icon,
     required this.label,
     required this.color,
@@ -609,322 +1118,74 @@ class _VoteButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return OutlinedButton(
-      onPressed: onPressed,
-      style: OutlinedButton.styleFrom(
-        foregroundColor: isSelected ? Colors.white : color,
-        backgroundColor: isSelected ? color : Colors.transparent,
-        side: BorderSide(
-          color: isSelected ? color : color.withValues(alpha: 0.4),
-          width: isSelected ? 2 : 1,
+    return GestureDetector(
+      onTap: onPressed,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+        decoration: BoxDecoration(
+          color: isSelected ? color : Colors.transparent,
+          borderRadius: BorderRadius.circular(6),
+          border: Border.all(
+            color: isSelected ? color : color.withValues(alpha: 0.4),
+            width: isSelected ? 1.5 : 1,
+          ),
         ),
-        padding: const EdgeInsets.symmetric(vertical: 8),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(8),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon,
+                size: 13, color: isSelected ? Colors.white : color),
+            const SizedBox(width: 3),
+            Text(label,
+                style: TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w600,
+                  color: isSelected ? Colors.white : color,
+                )),
+          ],
         ),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(icon, size: 16),
-          const SizedBox(width: 4),
-          Text(label, style: const TextStyle(fontSize: 12)),
-        ],
       ),
     );
   }
 }
 
-/// Visual summary of votes: OK/Maybe/NG counts with bar
-class _VoteSummaryBar extends StatelessWidget {
+class _CompactVoteSummary extends StatelessWidget {
   final VoteSummary summary;
-
-  const _VoteSummaryBar({required this.summary});
+  const _CompactVoteSummary({required this.summary});
 
   @override
   Widget build(BuildContext context) {
-    final total = summary.totalVotes;
-    if (total == 0) return const SizedBox.shrink();
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+    return Row(
       children: [
-        // Vote count chips
-        Row(
-          children: [
-            const Icon(Icons.how_to_vote, size: 14, color: AppColors.textHint),
-            const SizedBox(width: 4),
-            Text(
-              '投票 $total件',
-              style: const TextStyle(
-                fontSize: 11,
-                color: AppColors.textHint,
-              ),
-            ),
-            const SizedBox(width: 8),
-            _VoteChip(
-              icon: Icons.circle_outlined,
-              count: summary.okCount,
-              color: AppColors.success,
-            ),
-            const SizedBox(width: 4),
-            _VoteChip(
-              icon: Icons.change_history,
-              count: summary.maybeCount,
-              color: AppColors.warning,
-            ),
-            const SizedBox(width: 4),
-            _VoteChip(
-              icon: Icons.close,
-              count: summary.ngCount,
-              color: AppColors.error,
-            ),
-          ],
-        ),
-        const SizedBox(height: 6),
-        // Stacked bar
-        ClipRRect(
-          borderRadius: BorderRadius.circular(4),
-          child: SizedBox(
-            height: 6,
-            child: Row(
-              children: [
-                if (summary.okCount > 0)
-                  Expanded(
-                    flex: summary.okCount,
-                    child: Container(color: AppColors.success),
-                  ),
-                if (summary.maybeCount > 0)
-                  Expanded(
-                    flex: summary.maybeCount,
-                    child: Container(color: AppColors.warning),
-                  ),
-                if (summary.ngCount > 0)
-                  Expanded(
-                    flex: summary.ngCount,
-                    child: Container(color: AppColors.error),
-                  ),
-              ],
-            ),
-          ),
-        ),
-        // Individual vote list
-        if (summary.votes.isNotEmpty) ...[
-          const SizedBox(height: 6),
-          Wrap(
-            spacing: 6,
-            runSpacing: 4,
-            children: summary.votes.map((v) => _VoterTag(vote: v)).toList(),
-          ),
-        ],
+        const Icon(Icons.how_to_vote, size: 12, color: AppColors.textHint),
+        const SizedBox(width: 4),
+        _VoteDot(count: summary.okCount, color: AppColors.success),
+        const SizedBox(width: 4),
+        _VoteDot(count: summary.maybeCount, color: AppColors.warning),
+        const SizedBox(width: 4),
+        _VoteDot(count: summary.ngCount, color: AppColors.error),
       ],
     );
   }
 }
 
-class _VoteChip extends StatelessWidget {
-  final IconData icon;
+class _VoteDot extends StatelessWidget {
   final int count;
   final Color color;
-
-  const _VoteChip({
-    required this.icon,
-    required this.count,
-    required this.color,
-  });
+  const _VoteDot({required this.count, required this.color});
 
   @override
   Widget build(BuildContext context) {
+    if (count == 0) return const SizedBox.shrink();
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
       decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.1),
+        color: color.withValues(alpha: 0.12),
         borderRadius: BorderRadius.circular(4),
       ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(icon, size: 10, color: color),
-          const SizedBox(width: 2),
-          Text(
-            '$count',
-            style: TextStyle(
-              fontSize: 10,
-              fontWeight: FontWeight.bold,
-              color: color,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _VoterTag extends StatelessWidget {
-  final Vote vote;
-
-  const _VoterTag({required this.vote});
-
-  @override
-  Widget build(BuildContext context) {
-    final (color, icon) = switch (vote.voteType) {
-      VoteType.ok => (AppColors.success, Icons.circle_outlined),
-      VoteType.maybe => (AppColors.warning, Icons.change_history),
-      VoteType.ng => (AppColors.error, Icons.close),
-    };
-    final name = vote.displayName ?? vote.userId;
-
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.08),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: color.withValues(alpha: 0.2)),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(icon, size: 10, color: color),
-          const SizedBox(width: 3),
-          Text(
-            name,
-            style: TextStyle(
-              fontSize: 10,
-              color: color,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _ScoreBadge extends StatelessWidget {
-  final double score;
-
-  const _ScoreBadge({required this.score});
-
-  @override
-  Widget build(BuildContext context) {
-    final percentage = (score * 100).round();
-    final color = score >= 0.7
-        ? AppColors.success
-        : score >= 0.4
-            ? AppColors.warning
-            : AppColors.textSecondary;
-
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.15),
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(Icons.star, size: 14, color: color),
-          const SizedBox(width: 2),
-          Text(
-            '$percentage%',
-            style: TextStyle(
-              color: color,
-              fontSize: 12,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _TimeCategoryBadge extends StatelessWidget {
-  final TimeCategory category;
-
-  const _TimeCategoryBadge({required this.category});
-
-  @override
-  Widget build(BuildContext context) {
-    final (label, icon) = switch (category) {
-      TimeCategory.morning => ('朝', Icons.wb_sunny),
-      TimeCategory.lunch => ('昼', Icons.restaurant),
-      TimeCategory.afternoon => ('午後', Icons.wb_cloudy),
-      TimeCategory.evening => ('夜', Icons.nightlight_round),
-      TimeCategory.allDay => ('終日', Icons.calendar_today),
-    };
-
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-      decoration: BoxDecoration(
-        color: AppColors.surfaceVariant,
-        borderRadius: BorderRadius.circular(4),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(icon, size: 12, color: AppColors.textSecondary),
-          const SizedBox(width: 2),
-          Text(
-            label,
-            style: const TextStyle(
-              fontSize: 11,
-              color: AppColors.textSecondary,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _AvailabilityBar extends StatelessWidget {
-  final double ratio;
-
-  const _AvailabilityBar({required this.ratio});
-
-  @override
-  Widget build(BuildContext context) {
-    final color = ratio >= 0.8
-        ? AppColors.success
-        : ratio >= 0.5
-            ? AppColors.warning
-            : AppColors.error;
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          children: [
-            Text(
-              '参加可能率',
-              style: TextStyle(
-                fontSize: 11,
-                color: AppColors.textHint,
-              ),
-            ),
-            const Spacer(),
-            Text(
-              '${(ratio * 100).round()}%',
-              style: TextStyle(
-                fontSize: 11,
-                fontWeight: FontWeight.bold,
-                color: color,
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 4),
-        ClipRRect(
-          borderRadius: BorderRadius.circular(4),
-          child: LinearProgressIndicator(
-            value: ratio,
-            backgroundColor: AppColors.surfaceVariant,
-            color: color,
-            minHeight: 6,
-          ),
-        ),
-      ],
+      child: Text('$count',
+          style: TextStyle(
+              fontSize: 10, fontWeight: FontWeight.bold, color: color)),
     );
   }
 }

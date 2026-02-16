@@ -4,8 +4,15 @@ import 'package:table_calendar/table_calendar.dart';
 import 'package:himatch/core/theme/app_theme.dart';
 import 'package:himatch/core/utils/date_utils.dart';
 import 'package:himatch/models/schedule.dart';
+import 'package:himatch/models/shift_type.dart';
 import 'package:himatch/features/schedule/presentation/schedule_form_screen.dart';
 import 'package:himatch/features/schedule/presentation/providers/calendar_providers.dart';
+import 'package:himatch/features/schedule/presentation/providers/shift_type_providers.dart';
+import 'package:himatch/features/schedule/presentation/widgets/shift_badge.dart';
+import 'package:himatch/features/schedule/presentation/widgets/shift_quick_input_panel.dart';
+import 'package:himatch/features/schedule/presentation/widgets/shift_type_editor_sheet.dart';
+import 'package:himatch/features/suggestion/presentation/providers/weather_providers.dart';
+import 'package:himatch/providers/holiday_providers.dart';
 
 class CalendarTab extends ConsumerStatefulWidget {
   const CalendarTab({super.key});
@@ -28,11 +35,13 @@ class _CalendarTabState extends ConsumerState<CalendarTab> {
   @override
   Widget build(BuildContext context) {
     final schedules = ref.watch(localSchedulesProvider);
+    final shiftTypeMap = ref.watch(shiftTypeMapProvider);
     final selectedDaySchedules = _getSchedulesForDay(_selectedDay, schedules);
 
     return Scaffold(
       body: Column(
         children: [
+          // カレンダー（枠線+天気+大きなセル）
           TableCalendar<Schedule>(
             firstDay: DateTime.utc(2024, 1, 1),
             lastDay: DateTime.utc(2030, 12, 31),
@@ -42,21 +51,72 @@ class _CalendarTabState extends ConsumerState<CalendarTab> {
             selectedDayPredicate: (day) => isSameDay(_selectedDay, day),
             eventLoader: (day) => _getSchedulesForDay(day, schedules),
             startingDayOfWeek: StartingDayOfWeek.monday,
-            calendarStyle: CalendarStyle(
-              todayDecoration: BoxDecoration(
-                color: AppColors.primaryLight.withValues(alpha: 0.5),
-                shape: BoxShape.circle,
-              ),
-              selectedDecoration: const BoxDecoration(
-                color: AppColors.primary,
-                shape: BoxShape.circle,
-              ),
-              markerDecoration: const BoxDecoration(
-                color: AppColors.secondary,
-                shape: BoxShape.circle,
-              ),
-              markerSize: 6,
-              markersMaxCount: 3,
+            rowHeight: 64,
+            calendarBuilders: CalendarBuilders(
+              defaultBuilder: (context, day, focusedDay) {
+                final key = DateTime(day.year, day.month, day.day);
+                final events = _getSchedulesForDay(day, schedules);
+                return _CalendarCell(
+                  day: day,
+                  isToday: false,
+                  isSelected: false,
+                  isOutside: false,
+                  scheduleCount: events.length,
+                  weather: ref.watch(weatherForDateProvider(key)),
+                  holidayName: ref.watch(holidayForDateProvider(key)),
+                  shiftTypeMap: shiftTypeMap,
+                  events: events,
+                );
+              },
+              todayBuilder: (context, day, focusedDay) {
+                final key = DateTime(day.year, day.month, day.day);
+                final events = _getSchedulesForDay(day, schedules);
+                return _CalendarCell(
+                  day: day,
+                  isToday: true,
+                  isSelected: isSameDay(_selectedDay, day),
+                  isOutside: false,
+                  scheduleCount: events.length,
+                  weather: ref.watch(weatherForDateProvider(key)),
+                  holidayName: ref.watch(holidayForDateProvider(key)),
+                  shiftTypeMap: shiftTypeMap,
+                  events: events,
+                );
+              },
+              selectedBuilder: (context, day, focusedDay) {
+                final key = DateTime(day.year, day.month, day.day);
+                final events = _getSchedulesForDay(day, schedules);
+                return _CalendarCell(
+                  day: day,
+                  isToday: isSameDay(day, DateTime.now()),
+                  isSelected: true,
+                  isOutside: false,
+                  scheduleCount: events.length,
+                  weather: ref.watch(weatherForDateProvider(key)),
+                  holidayName: ref.watch(holidayForDateProvider(key)),
+                  shiftTypeMap: shiftTypeMap,
+                  events: events,
+                );
+              },
+              outsideBuilder: (context, day, focusedDay) {
+                return _CalendarCell(
+                  day: day,
+                  isToday: false,
+                  isSelected: false,
+                  isOutside: true,
+                  scheduleCount: 0,
+                  weather: null,
+                  shiftTypeMap: shiftTypeMap,
+                  events: const [],
+                );
+              },
+              markerBuilder: (context, day, events) =>
+                  const SizedBox.shrink(),
+            ),
+            calendarStyle: const CalendarStyle(
+              cellMargin: EdgeInsets.zero,
+              cellPadding: EdgeInsets.zero,
+              markersMaxCount: 0,
             ),
             headerStyle: const HeaderStyle(
               formatButtonVisible: true,
@@ -76,8 +136,10 @@ class _CalendarTabState extends ConsumerState<CalendarTab> {
               _focusedDay = focusedDay;
             },
           ),
+
           const SizedBox(height: 8),
-          // Selected day header
+
+          // 選択日のヘッダー + 予定表示ボタン
           if (_selectedDay != null)
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -89,42 +151,73 @@ class _CalendarTabState extends ConsumerState<CalendarTab> {
                           fontWeight: FontWeight.bold,
                         ),
                   ),
+                  // 天気表示
+                  Builder(builder: (context) {
+                    final weather = ref.watch(weatherForDateProvider(
+                        DateTime(_selectedDay!.year, _selectedDay!.month,
+                            _selectedDay!.day)));
+                    if (weather == null) return const SizedBox.shrink();
+                    return Padding(
+                      padding: const EdgeInsets.only(left: 8),
+                      child: Text(
+                        '${weather.icon ?? ''} ${weather.condition}',
+                        style: const TextStyle(fontSize: 14),
+                      ),
+                    );
+                  }),
                   const Spacer(),
-                  Text(
-                    '${selectedDaySchedules.length}件',
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: AppColors.textSecondary,
-                        ),
+                  // 予定表示ボタン
+                  TextButton.icon(
+                    onPressed: () => _showScheduleSheet(
+                        context, selectedDaySchedules, shiftTypeMap),
+                    icon: const Icon(Icons.list, size: 18),
+                    label: Text('${selectedDaySchedules.length}件'),
+                    style: TextButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 10, vertical: 4),
+                      minimumSize: Size.zero,
+                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    ),
                   ),
                 ],
               ),
             ),
-          const SizedBox(height: 8),
-          // Schedule list
-          Expanded(
-            child: selectedDaySchedules.isEmpty
-                ? const Center(
-                    child: Text(
-                      '予定がありません',
-                      style: TextStyle(color: AppColors.textSecondary),
+
+          // 祝日名
+          if (_selectedDay != null)
+            Builder(builder: (context) {
+              final holiday = ref.watch(holidayForDateProvider(
+                  DateTime(_selectedDay!.year, _selectedDay!.month,
+                      _selectedDay!.day)));
+              if (holiday == null) return const SizedBox.shrink();
+              return Padding(
+                padding: const EdgeInsets.fromLTRB(16, 2, 16, 0),
+                child: Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 8, vertical: 3),
+                      decoration: BoxDecoration(
+                        color: AppColors.error.withValues(alpha: 0.08),
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      child: Text(
+                        holiday,
+                        style: const TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.error,
+                        ),
+                      ),
                     ),
-                  )
-                : ListView.builder(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    itemCount: selectedDaySchedules.length,
-                    itemBuilder: (context, index) {
-                      return _ScheduleCard(
-                        schedule: selectedDaySchedules[index],
-                        onTap: () => _openEditForm(selectedDaySchedules[index]),
-                        onDelete: () => _deleteSchedule(selectedDaySchedules[index]),
-                      );
-                    },
-                  ),
-          ),
+                  ],
+                ),
+              );
+            }),
         ],
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () => _openAddForm(),
+        onPressed: () => _showAddMenu(context),
         backgroundColor: AppColors.primary,
         child: const Icon(Icons.add, color: Colors.white),
       ),
@@ -142,6 +235,128 @@ class _CalendarTabState extends ConsumerState<CalendarTab> {
       final targetDate = DateTime(day.year, day.month, day.day);
       return scheduleDate == targetDate;
     }).toList();
+  }
+
+  void _showScheduleSheet(
+    BuildContext context,
+    List<Schedule> schedules,
+    Map<String, ShiftType> shiftTypeMap,
+  ) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) => _ScheduleListSheet(
+        day: _selectedDay!,
+        schedules: schedules,
+        shiftTypeMap: shiftTypeMap,
+        onEdit: _openEditForm,
+        onDelete: _deleteSchedule,
+      ),
+    );
+  }
+
+  void _showAddMenu(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (_) => Container(
+        decoration: const BoxDecoration(
+          color: AppColors.surface,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+        ),
+        padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 40,
+              height: 4,
+              decoration: BoxDecoration(
+                color: AppColors.textHint,
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+            const SizedBox(height: 16),
+            _MenuTile(
+              icon: Icons.edit_calendar,
+              label: 'シフト入力',
+              subtitle: 'ワンタップでシフトを登録',
+              onTap: () {
+                Navigator.pop(context);
+                _showShiftQuickInput(context);
+              },
+            ),
+            const SizedBox(height: 8),
+            _MenuTile(
+              icon: Icons.add_circle_outline,
+              label: '予定を追加',
+              subtitle: '時間を指定して予定を作成',
+              onTap: () {
+                Navigator.pop(context);
+                _openAddForm();
+              },
+            ),
+            const SizedBox(height: 8),
+            _MenuTile(
+              icon: Icons.tune,
+              label: 'シフト種類を編集',
+              subtitle: 'シフトの種類を追加・変更',
+              onTap: () {
+                Navigator.pop(context);
+                _openShiftTypeEditor();
+              },
+            ),
+            SizedBox(height: MediaQuery.of(context).padding.bottom),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showShiftQuickInput(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (_) => Container(
+        decoration: const BoxDecoration(
+          color: AppColors.surface,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+        ),
+        padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 40,
+              height: 4,
+              decoration: BoxDecoration(
+                color: AppColors.textHint,
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+            const SizedBox(height: 12),
+            Text(
+              AppDateUtils.formatMonthDayWeek(_selectedDay ?? DateTime.now()),
+              style: const TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 16,
+                color: AppColors.textPrimary,
+              ),
+            ),
+            const SizedBox(height: 12),
+            ShiftQuickInputPanel(
+              selectedDay: _selectedDay ?? DateTime.now(),
+              onEditShiftTypes: () {
+                Navigator.pop(context);
+                _openShiftTypeEditor();
+              },
+            ),
+            SizedBox(height: MediaQuery.of(context).padding.bottom),
+          ],
+        ),
+      ),
+    );
   }
 
   void _openAddForm() {
@@ -168,21 +383,300 @@ class _CalendarTabState extends ConsumerState<CalendarTab> {
   void _deleteSchedule(Schedule schedule) {
     ref.read(localSchedulesProvider.notifier).removeSchedule(schedule.id);
   }
+
+  void _openShiftTypeEditor() {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) => const ShiftTypeEditorSheet(),
+    );
+  }
 }
+
+// ─── Custom calendar cell with border + weather ───
+
+class _CalendarCell extends StatelessWidget {
+  final DateTime day;
+  final bool isToday;
+  final bool isSelected;
+  final bool isOutside;
+  final int scheduleCount;
+  final dynamic weather; // WeatherSummary?
+  final String? holidayName;
+  final Map<String, ShiftType> shiftTypeMap;
+  final List<Schedule> events;
+
+  const _CalendarCell({
+    required this.day,
+    required this.isToday,
+    required this.isSelected,
+    required this.isOutside,
+    required this.scheduleCount,
+    required this.weather,
+    this.holidayName,
+    required this.shiftTypeMap,
+    required this.events,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final isHoliday = holidayName != null;
+    final isSunday = day.weekday == DateTime.sunday;
+    final isSaturday = day.weekday == DateTime.saturday;
+
+    // シフトマーカーの色を取得
+    Color? markerColor;
+    String? markerLabel;
+    if (events.isNotEmpty) {
+      final first = events.first;
+      final shiftType = first.shiftTypeId != null
+          ? shiftTypeMap[first.shiftTypeId]
+          : null;
+      if (shiftType != null) {
+        markerColor = shiftTypeColor(shiftType);
+        markerLabel = shiftType.abbreviation;
+      }
+    }
+
+    // 日付の色: 祝日/日曜=赤, 土曜=青
+    Color dayColor;
+    if (isOutside) {
+      dayColor = AppColors.textHint;
+    } else if (isSelected) {
+      dayColor = AppColors.primary;
+    } else if (isToday) {
+      dayColor = AppColors.primaryDark;
+    } else if (isHoliday || isSunday) {
+      dayColor = AppColors.error;
+    } else if (isSaturday) {
+      dayColor = const Color(0xFF3498DB);
+    } else {
+      dayColor = AppColors.textPrimary;
+    }
+
+    return Container(
+      margin: const EdgeInsets.all(1),
+      decoration: BoxDecoration(
+        color: isSelected
+            ? AppColors.primary.withValues(alpha: 0.12)
+            : isToday
+                ? AppColors.primaryLight.withValues(alpha: 0.10)
+                : isHoliday && !isOutside
+                    ? AppColors.error.withValues(alpha: 0.04)
+                    : null,
+        border: Border.all(
+          color: isSelected
+              ? AppColors.primary
+              : isToday
+                  ? AppColors.primaryLight
+                  : AppColors.surfaceVariant,
+          width: isSelected || isToday ? 1.5 : 0.5,
+        ),
+        borderRadius: BorderRadius.circular(6),
+      ),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          // 日付（上段）
+          Text(
+            '${day.day}',
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: isToday || isSelected || isHoliday
+                  ? FontWeight.bold
+                  : FontWeight.normal,
+              color: dayColor,
+            ),
+          ),
+          // 天気アイコン（中段）
+          SizedBox(
+            height: 16,
+            child: weather != null
+                ? Text(weather.icon ?? '',
+                    style: const TextStyle(fontSize: 12, height: 1.2))
+                : isHoliday && !isOutside
+                    ? Text(
+                        holidayName!.length > 3
+                            ? holidayName!.substring(0, 3)
+                            : holidayName!,
+                        style: const TextStyle(
+                            fontSize: 8,
+                            color: AppColors.error,
+                            fontWeight: FontWeight.bold,
+                            height: 1.8),
+                      )
+                    : null,
+          ),
+          // シフトマーカー or 予定数（下段）
+          SizedBox(
+            height: 16,
+            child: isOutside
+                ? null
+                : markerLabel != null
+                    ? Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 3),
+                        decoration: BoxDecoration(
+                          color: markerColor?.withValues(alpha: 0.2) ??
+                              AppColors.surfaceVariant,
+                          borderRadius: BorderRadius.circular(3),
+                        ),
+                        child: Text(
+                          markerLabel.length > 2
+                              ? markerLabel.substring(0, 2)
+                              : markerLabel,
+                          style: TextStyle(
+                            fontSize: 9,
+                            fontWeight: FontWeight.bold,
+                            color: markerColor ?? AppColors.textSecondary,
+                          ),
+                        ),
+                      )
+                    : scheduleCount > 0
+                        ? Text(
+                            '$scheduleCount件',
+                            style: const TextStyle(
+                              fontSize: 9,
+                              color: AppColors.textSecondary,
+                            ),
+                          )
+                        : null,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ─── Schedule list bottom sheet ───
+
+class _ScheduleListSheet extends StatelessWidget {
+  final DateTime day;
+  final List<Schedule> schedules;
+  final Map<String, ShiftType> shiftTypeMap;
+  final void Function(Schedule) onEdit;
+  final void Function(Schedule) onDelete;
+
+  const _ScheduleListSheet({
+    required this.day,
+    required this.schedules,
+    required this.shiftTypeMap,
+    required this.onEdit,
+    required this.onDelete,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: const BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      constraints: BoxConstraints(
+        maxHeight: MediaQuery.of(context).size.height * 0.55,
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // ドラッグハンドル
+          const SizedBox(height: 8),
+          Container(
+            width: 40,
+            height: 4,
+            decoration: BoxDecoration(
+              color: AppColors.textHint,
+              borderRadius: BorderRadius.circular(2),
+            ),
+          ),
+          const SizedBox(height: 12),
+
+          // ヘッダー
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: Row(
+              children: [
+                Text(
+                  AppDateUtils.formatMonthDayWeek(day),
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 18,
+                    color: AppColors.textPrimary,
+                  ),
+                ),
+                const Spacer(),
+                Text(
+                  '${schedules.length}件の予定',
+                  style: const TextStyle(
+                    color: AppColors.textSecondary,
+                    fontSize: 13,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 12),
+
+          // 予定リスト
+          Flexible(
+            child: schedules.isEmpty
+                ? const Center(
+                    child: Padding(
+                      padding: EdgeInsets.all(32),
+                      child: Text(
+                        '予定がありません',
+                        style: TextStyle(color: AppColors.textSecondary),
+                      ),
+                    ),
+                  )
+                : ListView.builder(
+                    shrinkWrap: true,
+                    padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                    itemCount: schedules.length,
+                    itemBuilder: (context, index) {
+                      return _ScheduleCard(
+                        schedule: schedules[index],
+                        shiftTypeMap: shiftTypeMap,
+                        onTap: () {
+                          Navigator.pop(context);
+                          onEdit(schedules[index]);
+                        },
+                        onDelete: () {
+                          Navigator.pop(context);
+                          onDelete(schedules[index]);
+                        },
+                      );
+                    },
+                  ),
+          ),
+
+          SizedBox(height: MediaQuery.of(context).padding.bottom),
+        ],
+      ),
+    );
+  }
+}
+
+// ─── Schedule card ───
 
 class _ScheduleCard extends StatelessWidget {
   final Schedule schedule;
+  final Map<String, ShiftType> shiftTypeMap;
   final VoidCallback onTap;
   final VoidCallback onDelete;
 
   const _ScheduleCard({
     required this.schedule,
+    required this.shiftTypeMap,
     required this.onTap,
     required this.onDelete,
   });
 
   @override
   Widget build(BuildContext context) {
+    final shiftType = schedule.shiftTypeId != null
+        ? shiftTypeMap[schedule.shiftTypeId]
+        : null;
+
     return Card(
       margin: const EdgeInsets.only(bottom: 8),
       child: InkWell(
@@ -197,7 +691,9 @@ class _ScheduleCard extends StatelessWidget {
                 width: 4,
                 height: 48,
                 decoration: BoxDecoration(
-                  color: _getTypeColor(schedule.scheduleType),
+                  color: shiftType != null
+                      ? shiftTypeColor(shiftType)
+                      : _getTypeColor(schedule.scheduleType),
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
@@ -209,7 +705,10 @@ class _ScheduleCard extends StatelessWidget {
                   children: [
                     Row(
                       children: [
-                        _ScheduleTypeBadge(type: schedule.scheduleType),
+                        if (shiftType != null)
+                          ShiftBadgeInline(shiftType: shiftType)
+                        else
+                          _ScheduleTypeBadge(type: schedule.scheduleType),
                         const SizedBox(width: 8),
                         Expanded(
                           child: Text(
@@ -311,6 +810,60 @@ class _ScheduleTypeBadge extends StatelessWidget {
           color: color,
           fontSize: 11,
           fontWeight: FontWeight.bold,
+        ),
+      ),
+    );
+  }
+}
+
+// ─── FAB menu tile ───
+
+class _MenuTile extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final String subtitle;
+  final VoidCallback onTap;
+
+  const _MenuTile({
+    required this.icon,
+    required this.label,
+    required this.subtitle,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(12),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        decoration: BoxDecoration(
+          color: AppColors.background,
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Row(
+          children: [
+            Icon(icon, color: AppColors.primary, size: 24),
+            const SizedBox(width: 14),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(label,
+                      style: const TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.textPrimary)),
+                  Text(subtitle,
+                      style: const TextStyle(
+                          fontSize: 12, color: AppColors.textSecondary)),
+                ],
+              ),
+            ),
+            const Icon(Icons.chevron_right,
+                color: AppColors.textHint, size: 20),
+          ],
         ),
       ),
     );
