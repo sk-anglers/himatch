@@ -6,12 +6,23 @@ import 'package:himatch/app.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  await Supabase.initialize(
-    url: const String.fromEnvironment('SUPABASE_URL',
-        defaultValue: 'https://placeholder.supabase.co'),
-    anonKey: const String.fromEnvironment('SUPABASE_ANON_KEY',
-        defaultValue: 'placeholder-key'),
-  );
+  // Supabase initialization (safe: skip if placeholder URL)
+  const supabaseUrl = String.fromEnvironment('SUPABASE_URL');
+  const supabaseAnonKey = String.fromEnvironment('SUPABASE_ANON_KEY');
+
+  if (supabaseUrl.isNotEmpty && supabaseAnonKey.isNotEmpty) {
+    try {
+      await Supabase.initialize(
+        url: supabaseUrl,
+        anonKey: supabaseAnonKey,
+      );
+    } catch (e) {
+      debugPrint('Supabase initialization failed: $e');
+      debugPrint('Running in demo mode only.');
+    }
+  } else {
+    debugPrint('No Supabase credentials. Running in demo mode.');
+  }
 
   runApp(
     const ProviderScope(

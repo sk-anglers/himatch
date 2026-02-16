@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:himatch/core/theme/app_theme.dart';
+import 'package:himatch/features/auth/providers/auth_providers.dart';
 import 'package:himatch/features/profile/presentation/providers/profile_providers.dart';
 import 'package:himatch/features/group/presentation/providers/group_providers.dart';
 import 'package:himatch/features/schedule/presentation/providers/calendar_providers.dart';
@@ -10,6 +11,7 @@ class ProfileTab extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final authState = ref.watch(authNotifierProvider);
     final settings = ref.watch(profileSettingsProvider);
     final groups = ref.watch(localGroupsProvider);
     final schedules = ref.watch(localSchedulesProvider);
@@ -18,9 +20,33 @@ class ProfileTab extends ConsumerWidget {
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
+          // Demo mode banner
+          if (authState.isDemo)
+            Container(
+              margin: const EdgeInsets.only(bottom: 12),
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              decoration: BoxDecoration(
+                color: AppColors.warning.withValues(alpha: 0.15),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: const Row(
+                children: [
+                  Icon(Icons.science, size: 16, color: AppColors.warning),
+                  SizedBox(width: 8),
+                  Text(
+                    'デモモードで動作中',
+                    style: TextStyle(
+                      color: AppColors.warning,
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+              ),
+            ),
           // Profile header
           _ProfileHeader(
-            displayName: settings.displayName,
+            displayName: authState.displayName ?? settings.displayName,
             groupCount: groups.length,
             scheduleCount: schedules.length,
             onNameTap: () => _showEditNameDialog(context, ref, settings),
@@ -65,7 +91,7 @@ class ProfileTab extends ConsumerWidget {
                 leading: const Icon(Icons.logout, color: AppColors.error),
                 title: const Text('ログアウト',
                     style: TextStyle(color: AppColors.error)),
-                onTap: () => _showLogoutDialog(context),
+                onTap: () => _showLogoutDialog(context, ref),
               ),
             ],
           ),
@@ -198,7 +224,7 @@ class ProfileTab extends ConsumerWidget {
     );
   }
 
-  void _showLogoutDialog(BuildContext context) {
+  void _showLogoutDialog(BuildContext context, WidgetRef ref) {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
@@ -212,10 +238,7 @@ class ProfileTab extends ConsumerWidget {
           TextButton(
             onPressed: () {
               Navigator.pop(ctx);
-              // TODO: Actual logout via AuthService
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('ログアウトしました（デモ）')),
-              );
+              ref.read(authNotifierProvider.notifier).signOut();
             },
             child: const Text('ログアウト',
                 style: TextStyle(color: AppColors.error)),

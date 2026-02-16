@@ -65,3 +65,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - アカウント: ログアウト (確認ダイアログ付き)
   - アプリ情報: バージョン/利用規約/プライバシーポリシー
 - 全4タブのプレースホルダー完全差替 (HomeScreen にプレースホルダーなし)
+- デモモード認証: ログイン画面「デモモードで始める」でSupabase未接続でも全機能操作可能
+- AuthNotifier: 統合認証状態管理 (none/demo/supabase モード)
+- go_router: AuthNotifier ベースのリダイレクトに移行
+- main.dart: Supabase 初期化の安全化 (未設定時・接続失敗時もクラッシュしない)
+- ProfileTab: デモモードバナー表示 + ログアウトで AuthNotifier.signOut
+- .env.example: Supabase 環境変数テンプレート
+- 認証テスト (4テスト)
