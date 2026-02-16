@@ -9,7 +9,6 @@ import 'package:himatch/features/schedule/presentation/schedule_form_screen.dart
 import 'package:himatch/features/schedule/presentation/providers/calendar_providers.dart';
 import 'package:himatch/features/schedule/presentation/providers/shift_type_providers.dart';
 import 'package:himatch/features/schedule/presentation/widgets/shift_badge.dart';
-import 'package:himatch/features/schedule/presentation/widgets/shift_quick_input_panel.dart';
 import 'package:himatch/features/schedule/presentation/widgets/shift_type_editor_sheet.dart';
 import 'package:himatch/features/suggestion/presentation/providers/weather_providers.dart';
 import 'package:himatch/providers/holiday_providers.dart';
@@ -32,7 +31,8 @@ class _CalendarTabState extends ConsumerState<CalendarTab> {
   DateTime? _selectedDay;
   _CalendarViewMode _viewMode = _CalendarViewMode.calendar;
 
-  /// シフトペイントモード: 選択中のシフト種別
+  /// シフトペイントモード
+  bool _showShiftPanel = false;
   ShiftType? _activeShiftType;
   bool get _isShiftInputMode => _activeShiftType != null;
 
@@ -170,18 +170,22 @@ class _CalendarTabState extends ConsumerState<CalendarTab> {
 
           const SizedBox(height: 8),
 
-          // シフトペイントパネル
-          _ShiftPaintPanel(
-            activeShiftType: _activeShiftType,
-            onShiftTypeSelected: (st) {
-              setState(() {
-                _activeShiftType =
-                    _activeShiftType?.id == st.id ? null : st;
-              });
-            },
-            onDone: () => setState(() => _activeShiftType = null),
-            onEditShiftTypes: _openShiftTypeEditor,
-          ),
+          // シフトペイントパネル（FABメニューの「シフト入力」で表示）
+          if (_showShiftPanel)
+            _ShiftPaintPanel(
+              activeShiftType: _activeShiftType,
+              onShiftTypeSelected: (st) {
+                setState(() {
+                  _activeShiftType =
+                      _activeShiftType?.id == st.id ? null : st;
+                });
+              },
+              onDone: () => setState(() {
+                _activeShiftType = null;
+                _showShiftPanel = false;
+              }),
+              onEditShiftTypes: _openShiftTypeEditor,
+            ),
 
           // 選択日のヘッダー + 予定表示ボタン
           if (_selectedDay != null && !_isShiftInputMode)
@@ -367,48 +371,7 @@ class _CalendarTabState extends ConsumerState<CalendarTab> {
   }
 
   void _showShiftQuickInput(BuildContext context) {
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: Colors.transparent,
-      builder: (_) => Container(
-        decoration: const BoxDecoration(
-          color: AppColors.surface,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-        ),
-        padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              width: 40,
-              height: 4,
-              decoration: BoxDecoration(
-                color: AppColors.textHint,
-                borderRadius: BorderRadius.circular(2),
-              ),
-            ),
-            const SizedBox(height: 12),
-            Text(
-              AppDateUtils.formatMonthDayWeek(_selectedDay ?? DateTime.now()),
-              style: const TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 16,
-                color: AppColors.textPrimary,
-              ),
-            ),
-            const SizedBox(height: 12),
-            ShiftQuickInputPanel(
-              selectedDay: _selectedDay ?? DateTime.now(),
-              onEditShiftTypes: () {
-                Navigator.pop(context);
-                _openShiftTypeEditor();
-              },
-            ),
-            SizedBox(height: MediaQuery.of(context).padding.bottom),
-          ],
-        ),
-      ),
-    );
+    setState(() => _showShiftPanel = true);
   }
 
   void _openAddForm() {
