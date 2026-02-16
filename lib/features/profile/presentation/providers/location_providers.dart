@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:himatch/core/constants/app_constants.dart';
+import 'package:himatch/features/auth/providers/auth_providers.dart';
 import 'package:himatch/models/weather_location.dart';
 import 'package:himatch/services/geocoding_service.dart';
 
@@ -12,7 +13,18 @@ final weatherLocationProvider =
 
 class WeatherLocationNotifier extends Notifier<WeatherLocation> {
   @override
-  WeatherLocation build() => const WeatherLocation();
+  WeatherLocation build() {
+    final authState = ref.watch(authNotifierProvider);
+    if (authState.isDemo) {
+      return const WeatherLocation(
+        useCurrentLocation: false,
+        latitude: AppConstants.demoLatitude,
+        longitude: AppConstants.demoLongitude,
+        name: '福岡市',
+      );
+    }
+    return const WeatherLocation();
+  }
 
   /// Switch to GPS-based location.
   void useCurrentLocation() {
