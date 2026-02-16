@@ -37,3 +37,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - DBスキーマ: 7テーブル + GiST インデックス + CHECK制約 + updated_at トリガー
 - RLS ポリシー: 全7テーブルに Row Level Security 設定
 - 開発用 seed データ (3ユーザー、1グループ、12スケジュール)
+- カレンダーUI: table_calendar 統合 (月/2週/週 表示切替、日本語ロケール)
+- スケジュール一覧: 日付タップで当日の予定一覧表示 (種別バッジ + 時刻)
+- スケジュール追加/編集画面: 種別選択 (シフト/予定/空き/不可)、日時ピッカー、終日切替、メモ
+- スケジュール削除: 確認ダイアログ付き
+- ローカル状態管理: LocalSchedulesNotifier (オフラインファースト開発用)
+- 日本語ローカライゼーション (flutter_localizations)
