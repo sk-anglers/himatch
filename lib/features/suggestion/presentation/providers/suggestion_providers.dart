@@ -68,6 +68,25 @@ class LocalSuggestionsNotifier extends Notifier<List<Suggestion>> {
     ];
   }
 
+  /// Confirm a suggestion (group owner action).
+  /// Sets this suggestion to confirmed and declines other proposed suggestions
+  /// for the same group on the same date.
+  void confirmSuggestion(String id) {
+    final target = state.where((s) => s.id == id).firstOrNull;
+    if (target == null) return;
+
+    state = [
+      for (final s in state)
+        if (s.id == id)
+          s.copyWith(status: SuggestionStatus.confirmed)
+        else if (s.groupId == target.groupId &&
+            s.status == SuggestionStatus.proposed)
+          s.copyWith(status: SuggestionStatus.declined)
+        else
+          s,
+    ];
+  }
+
   void clear() {
     state = [];
   }

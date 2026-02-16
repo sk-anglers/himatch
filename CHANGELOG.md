@@ -72,3 +72,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - ProfileTab: デモモードバナー表示 + ログアウトで AuthNotifier.signOut
 - .env.example: Supabase 環境変数テンプレート
 - 認証テスト (4テスト)
+- 投票・確定フロー: 候補日に対してメンバーが「参加OK」「微妙」「NG」の3択で投票
+  - Vote モデル (Freezed): userId + suggestionId + voteType (ok/maybe/ng) + displayName
+  - LocalVotesNotifier: castVote (投票/再投票)、getUserVote、getVoteSummary、clearVotes
+  - SuggestionStatus.confirmed: グループオーナーが「この日に決定」で確定
+  - confirmSuggestion: 確定時に同グループの他候補を自動 decline
+  - 投票UI: 3色ボタン (緑=OK, 黄=微妙, 赤=NG) + 選択状態のハイライト
+  - 投票集計表示: OK/微妙/NG カウント + スタックドバー + 投票者名タグ
+  - 確定ボタン: グループオーナーかつ投票あり時のみ表示 + 確認ダイアログ
+  - 確定済み候補: 緑ボーダー + 「予定確定！」セレブレーション表示
+  - セクション分類: 確定済み / 投票受付中 / 承認済み で候補を整理表示
+- 投票テスト (14テスト): Vote モデル、VotesNotifier CRUD、VoteSummary
