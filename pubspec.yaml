@@ -43,6 +43,9 @@ dependencies:
   csv: ^6.0.0
   path_provider: ^2.1.5
 
+  # Location
+  geolocator: ^13.0.2
+
   # Media
   image_picker: ^1.1.2
 

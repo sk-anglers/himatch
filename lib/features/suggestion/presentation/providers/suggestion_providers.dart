@@ -4,6 +4,7 @@ import 'package:himatch/models/schedule.dart';
 import 'package:himatch/models/suggestion.dart';
 import 'package:himatch/features/suggestion/domain/suggestion_engine.dart';
 import 'package:himatch/features/suggestion/presentation/providers/weather_providers.dart';
+import 'package:himatch/features/profile/presentation/providers/location_providers.dart';
 import 'package:himatch/features/schedule/presentation/providers/calendar_providers.dart';
 import 'package:himatch/features/group/presentation/providers/group_providers.dart';
 
@@ -33,9 +34,13 @@ class LocalSuggestionsNotifier extends Notifier<List<Suggestion>> {
       return;
     }
 
-    // Fetch weather data (graceful: empty map on failure)
+    // Fetch weather data using resolved coordinates (graceful: empty map on failure)
     final weatherService = ref.read(weatherServiceProvider);
-    final weatherData = await weatherService.fetchForecast();
+    final coords = await ref.read(resolvedWeatherCoordsProvider.future);
+    final weatherData = await weatherService.fetchForecast(
+      latitude: coords.latitude,
+      longitude: coords.longitude,
+    );
 
     final allSuggestions = <Suggestion>[];
 

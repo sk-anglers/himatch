@@ -21,6 +21,8 @@ abstract class AppConstants {
   // Weather (Open-Meteo)
   static const String weatherApiUrl =
       'https://api.open-meteo.com/v1/forecast';
+  static const String geocodingApiUrl =
+      'https://geocoding-api.open-meteo.com/v1/search';
   static const double defaultLatitude = 35.6762; // Tokyo
   static const double defaultLongitude = 139.6503;
   static const String defaultTimezone = 'Asia/Tokyo';
