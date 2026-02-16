@@ -22,3 +22,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - ログイン画面スキャフォールド (Apple/Google/LINE ボタン配置)
 - コア定数・ユーティリティ (AppConstants, AppDateUtils)
 - 依存パッケージ: supabase_flutter, table_calendar, flutter_animate, freezed 等
+- データモデル (Freezed v3 + json_serializable): AppUser, Group, GroupMember, Schedule, Suggestion, ShiftPattern, AppNotification
+- スケジュール種別 (ScheduleType): shift/event/free/blocked
+- 文脈分類 (TimeCategory): morning/lunch/afternoon/evening/all_day
+- 天気情報モデル (WeatherSummary): 候補日の天気表示用
+- モデル単体テスト (10テスト: fromJson/toJson/copyWith/enum)
