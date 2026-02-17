@@ -144,7 +144,7 @@ class ExportService {
       ['合計', '', report.totalPay],
     ];
 
-    final csvString = const ListToCsvConverter().convert(rows);
+    final csvString = CsvCodec().encode(rows);
 
     final directory = await getApplicationDocumentsDirectory();
     final fileName =
