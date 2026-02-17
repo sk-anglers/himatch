@@ -1,5 +1,6 @@
 import 'dart:math';
 
+import 'package:himatch/core/constants/app_constants.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:himatch/core/constants/demo_data.dart';
 import 'package:himatch/models/group.dart';
@@ -34,7 +35,7 @@ class LocalGroupsNotifier extends Notifier<List<Group>> {
       name: name,
       description: description,
       inviteCode: _generateInviteCode(),
-      createdBy: 'local-user',
+      createdBy: AppConstants.localUserId,
       createdAt: DateTime.now(),
       updatedAt: DateTime.now(),
     );
@@ -69,7 +70,7 @@ class LocalGroupsNotifier extends Notifier<List<Group>> {
   void leaveGroup(String groupId) {
     ref.read(localGroupMembersProvider.notifier).removeMember(
           groupId: groupId,
-          userId: 'local-user',
+          userId: AppConstants.localUserId,
         );
     // If no members left, remove the group
     final members =
@@ -100,7 +101,7 @@ class LocalGroupMembersNotifier
 
   void addMember({
     required String groupId,
-    String userId = 'local-user',
+    String userId = AppConstants.localUserId,
     String role = 'member',
     String? nickname,
   }) {

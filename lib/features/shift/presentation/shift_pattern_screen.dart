@@ -1,3 +1,4 @@
+import 'package:himatch/core/constants/app_constants.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:himatch/core/theme/app_theme.dart';
@@ -18,7 +19,7 @@ class ShiftPatternsNotifier extends Notifier<List<ShiftPattern>> {
   List<ShiftPattern> build() => [
         ShiftPattern(
           id: 'sp-demo-1',
-          userId: 'local-user',
+          userId: AppConstants.localUserId,
           name: '早番・遅番ローテ',
           color: 'FF6C5CE7',
           shifts: const [
@@ -756,7 +757,7 @@ class _ShiftPatternEditorScreenState extends State<_ShiftPatternEditorScreen> {
 
     widget.onSave(ShiftPattern(
       id: widget.pattern?.id ?? _uuid.v4(),
-      userId: widget.pattern?.userId ?? 'local-user',
+      userId: widget.pattern?.userId ?? AppConstants.localUserId,
       name: name,
       shifts: _shifts,
       rotationDays: rotation,

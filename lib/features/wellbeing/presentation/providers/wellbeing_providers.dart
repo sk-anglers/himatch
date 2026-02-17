@@ -1,3 +1,4 @@
+import 'package:himatch/core/constants/app_constants.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:himatch/models/habit.dart';
 import 'package:himatch/models/mood_entry.dart';
@@ -32,7 +33,7 @@ class HabitsNotifier extends Notifier<List<Habit>> {
   }) {
     final habit = Habit(
       id: _uuid.v4(),
-      userId: 'local-user',
+      userId: AppConstants.localUserId,
       name: name,
       iconEmoji: iconEmoji,
       colorHex: colorHex,
@@ -174,7 +175,7 @@ class MoodEntriesNotifier extends Notifier<List<MoodEntry>> {
   }) {
     final entry = MoodEntry(
       id: _uuid.v4(),
-      userId: 'local-user',
+      userId: AppConstants.localUserId,
       date: DateTime(date.year, date.month, date.day),
       mood: mood,
       energy: energy,

@@ -1,3 +1,4 @@
+import 'package:himatch/core/constants/app_constants.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:himatch/core/theme/app_theme.dart';
@@ -45,7 +46,7 @@ class _ShiftListCalendarScreenState
     // メンバーごとのスケジュールMap
     final memberSchedules = <String, List<Schedule>>{};
     for (final member in members) {
-      if (member.userId == 'local-user') {
+      if (member.userId == AppConstants.localUserId) {
         memberSchedules[member.userId] = mySchedules;
       } else {
         memberSchedules[member.userId] =
@@ -142,7 +143,7 @@ class _ShiftListCalendarScreenState
                   final color = memberIndex < memberColors.length
                       ? memberColors[memberIndex]
                       : AppColors.textHint;
-                  final name = member.userId == 'local-user'
+                  final name = member.userId == AppConstants.localUserId
                       ? 'あなた'
                       : member.nickname ?? 'メンバー${memberIndex + 1}';
 

@@ -1,3 +1,4 @@
+import 'package:himatch/core/constants/app_constants.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:himatch/core/constants/demo_data.dart';
 import 'package:himatch/features/auth/providers/auth_providers.dart';
@@ -35,7 +36,7 @@ class TodosNotifier extends Notifier<Map<String, List<TodoItem>>> {
           groupId: DemoData.demoGroupId,
           title: 'お店を予約する',
           createdBy: 'demo-user-a',
-          assignedTo: 'local-user',
+          assignedTo: AppConstants.localUserId,
           assignedName: 'あなた',
           dueDate: now.add(const Duration(days: 3)),
           createdAt: now.subtract(const Duration(hours: 2)),

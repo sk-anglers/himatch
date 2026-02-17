@@ -1,3 +1,4 @@
+import 'package:himatch/core/constants/app_constants.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -489,7 +490,7 @@ class _WorkplaceEditDialogState extends State<_WorkplaceEditDialog> {
 
     final workplace = Workplace(
       id: widget.workplace?.id ?? _uuid.v4(),
-      userId: widget.workplace?.userId ?? 'local-user',
+      userId: widget.workplace?.userId ?? AppConstants.localUserId,
       name: name,
       hourlyWage: wage,
       closingDay: closingDay,

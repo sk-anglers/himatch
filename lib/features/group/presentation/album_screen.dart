@@ -1,3 +1,4 @@
+import 'package:himatch/core/constants/app_constants.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:himatch/core/theme/app_theme.dart';
@@ -188,7 +189,7 @@ class _AlbumScreenState extends ConsumerState<AlbumScreen> {
                             groupId: widget.groupId,
                             photoId: photo.id,
                             emoji: emoji,
-                            userId: 'local-user',
+                            userId: AppConstants.localUserId,
                           );
                       Navigator.pop(ctx);
                     },
@@ -237,7 +238,7 @@ class _AlbumScreenState extends ConsumerState<AlbumScreen> {
   void _addDemoPhoto() {
     ref.read(localPhotosProvider.notifier).addPhoto(
           groupId: widget.groupId,
-          uploadedBy: 'local-user',
+          uploadedBy: AppConstants.localUserId,
           uploaderName: 'あなた',
           imageUrl: 'asset://demo_photo_${DateTime.now().millisecondsSinceEpoch}',
           caption: 'デモ写真',
@@ -435,7 +436,7 @@ class _FullScreenPhotoView extends ConsumerWidget {
                                   groupId: groupId,
                                   photoId: photo.id,
                                   emoji: emoji,
-                                  userId: 'local-user',
+                                  userId: AppConstants.localUserId,
                                 );
                           },
                           child: Text(

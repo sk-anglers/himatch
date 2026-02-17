@@ -1,3 +1,4 @@
+import 'package:himatch/core/constants/app_constants.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:himatch/features/auth/providers/auth_providers.dart';
@@ -28,7 +29,7 @@ void main() {
       expect(state.isAuthenticated, true);
       expect(state.isDemo, true);
       expect(state.mode, AuthMode.demo);
-      expect(state.userId, 'local-user');
+      expect(state.userId, AppConstants.localUserId);
       expect(state.displayName, 'デモユーザー');
     });
 

@@ -1,3 +1,4 @@
+import 'package:himatch/core/constants/app_constants.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:himatch/core/theme/app_theme.dart';
@@ -218,7 +219,7 @@ class _TodoListScreenState extends ConsumerState<TodoListScreen> {
                         value: m.userId,
                         child: Text(
                           m.nickname ??
-                              (m.userId == 'local-user' ? 'あなた' : 'メンバー'),
+                              (m.userId == AppConstants.localUserId ? 'あなた' : 'メンバー'),
                         ),
                       ),
                     ),
@@ -231,7 +232,7 @@ class _TodoListScreenState extends ConsumerState<TodoListScreen> {
                       );
                       selectedMemberName = member.isNotEmpty
                           ? member.first.nickname ??
-                              (member.first.userId == 'local-user'
+                              (member.first.userId == AppConstants.localUserId
                                   ? 'あなた'
                                   : 'メンバー')
                           : null;
@@ -287,7 +288,7 @@ class _TodoListScreenState extends ConsumerState<TodoListScreen> {
                 ref.read(localTodosProvider.notifier).addTodo(
                       groupId: widget.groupId,
                       title: title,
-                      createdBy: 'local-user',
+                      createdBy: AppConstants.localUserId,
                       assignedTo: selectedMemberId,
                       assignedName: selectedMemberName,
                       dueDate: dueDate,

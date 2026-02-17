@@ -1,3 +1,4 @@
+import 'package:himatch/core/constants/app_constants.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -507,14 +508,14 @@ class _MemberTile extends StatelessWidget {
         ),
       ),
       title: Text(
-        member.nickname ?? (member.userId == 'local-user' ? 'あなた' : 'メンバー'),
+        member.nickname ?? (member.userId == AppConstants.localUserId ? 'あなた' : 'メンバー'),
         style: const TextStyle(fontWeight: FontWeight.w500),
       ),
       subtitle: Text(
         isOwner ? 'オーナー' : 'メンバー',
         style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
       ),
-      trailing: member.userId == 'local-user'
+      trailing: member.userId == AppConstants.localUserId
           ? Container(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
               decoration: BoxDecoration(

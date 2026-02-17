@@ -1,3 +1,4 @@
+import 'package:himatch/core/constants/app_constants.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:himatch/features/schedule/presentation/providers/calendar_providers.dart';
 import 'package:himatch/models/schedule.dart';
@@ -32,7 +33,7 @@ class WorkplacesNotifier extends Notifier<List<Workplace>> {
   }) {
     final workplace = Workplace(
       id: _uuid.v4(),
-      userId: 'local-user',
+      userId: AppConstants.localUserId,
       name: name,
       hourlyWage: hourlyWage,
       closingDay: closingDay,

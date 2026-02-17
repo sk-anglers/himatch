@@ -2,6 +2,9 @@ abstract class AppConstants {
   static const String appName = 'Himatch';
   static const String appNameJa = 'ヒマッチ';
 
+  // Local user ID for offline-first / demo mode
+  static const String localUserId = 'local-user';
+
   // Supabase (values loaded from environment)
   static const String supabaseUrlKey = 'SUPABASE_URL';
   static const String supabaseAnonKeyKey = 'SUPABASE_ANON_KEY';

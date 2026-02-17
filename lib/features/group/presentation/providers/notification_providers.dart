@@ -1,3 +1,4 @@
+import 'package:himatch/core/constants/app_constants.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:himatch/features/chat/presentation/providers/chat_providers.dart';
 import 'package:himatch/features/group/presentation/providers/group_providers.dart';
@@ -12,7 +13,7 @@ final unvotedPollCountProvider =
   return polls.where((p) {
     if (p.isClosed) return false;
     // Check if local-user has voted on any option
-    return !p.options.any((o) => o.voterIds.contains('local-user'));
+    return !p.options.any((o) => o.voterIds.contains(AppConstants.localUserId));
   }).length;
 });
 

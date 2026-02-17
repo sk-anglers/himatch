@@ -1,3 +1,4 @@
+import 'package:himatch/core/constants/app_constants.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:himatch/core/theme/app_theme.dart';
@@ -23,7 +24,7 @@ class BoardScreen extends ConsumerStatefulWidget {
 }
 
 class _BoardScreenState extends ConsumerState<BoardScreen> {
-  static const _currentUserId = 'local-user';
+  static const _currentUserId = AppConstants.localUserId;
   static const _currentUserName = 'あなた';
   static const _reactionEmojis = [
     '\u{1F44D}',
@@ -335,7 +336,7 @@ class _PostCardState extends ConsumerState<_PostCard> {
                                         groupId: widget.groupId,
                                         postId: post.id,
                                         emoji: entry.key,
-                                        userId: 'local-user',
+                                        userId: AppConstants.localUserId,
                                       );
                                 },
                                 child: Container(
@@ -486,7 +487,7 @@ class _PostCardState extends ConsumerState<_PostCard> {
                         ref.read(localPostsProvider.notifier).addComment(
                               groupId: widget.groupId,
                               postId: post.id,
-                              userId: 'local-user',
+                              userId: AppConstants.localUserId,
                               displayName: 'あなた',
                               content: text,
                             );
@@ -519,7 +520,7 @@ class _PostCardState extends ConsumerState<_PostCard> {
                             groupId: widget.groupId,
                             postId: widget.post.id,
                             emoji: emoji,
-                            userId: 'local-user',
+                            userId: AppConstants.localUserId,
                           );
                       Navigator.pop(ctx);
                     },

@@ -1,3 +1,4 @@
+import 'package:himatch/core/constants/app_constants.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:himatch/core/theme/app_theme.dart';
@@ -24,7 +25,7 @@ class PollScreen extends ConsumerStatefulWidget {
 }
 
 class _PollScreenState extends ConsumerState<PollScreen> {
-  static const _currentUserId = 'local-user';
+  static const _currentUserId = AppConstants.localUserId;
   static const _currentUserName = 'あなた';
 
   @override
@@ -267,7 +268,7 @@ class _PollCard extends ConsumerWidget {
 
   const _PollCard({required this.poll, required this.groupId});
 
-  static const _currentUserId = 'local-user';
+  static const _currentUserId = AppConstants.localUserId;
   static const _currentUserName = 'あなた';
 
   @override

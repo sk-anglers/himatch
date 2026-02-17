@@ -1,3 +1,4 @@
+import 'package:himatch/core/constants/app_constants.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:himatch/core/theme/app_theme.dart';
@@ -609,7 +610,7 @@ class _TemplateEditorScreenState extends State<_TemplateEditorScreen> {
 
     final template = EventTemplate(
       id: widget.template?.id ?? _uuid.v4(),
-      userId: widget.template?.userId ?? 'local-user',
+      userId: widget.template?.userId ?? AppConstants.localUserId,
       name: name,
       title: title,
       defaultStartTime:
