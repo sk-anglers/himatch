@@ -7,6 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed (UI Refresh)
+- テーマ基盤整備: カスタム TextTheme (28/20/17/15/13/11pt) をデザインドキュメント §4 準拠で定義
+- AppSpacing 定数クラス新規追加 (xs=4, sm=8, md=12, lg=16, xl=24, xxl=32)
+- CardTheme: elevation 2→0 + outline border に変更 (フラットデザイン)
+- OutlinedButtonTheme / FilledButtonTheme / BottomSheetThemeData / NavigationBarThemeData 追加
+- ハードコード色修正: Color(0x...) を AppColors 定数に統一 (5ファイル)
+- EmptyStateWidget: 共通空状態ウィジェット新規作成 (GroupsTab/SuggestionsTab で採用)
+- SkeletonCard/SkeletonList: flutter_animate shimmer 付きローディングプレースホルダー新規作成
+- HomeScreen AppBar: 動的タイトル (タブ名切替) + アプリロゴ + 通知バッジ + 設定ボタン→テーマ設定画面に接続
+- CalendarTab: SegmentedButton → ChoiceChip pill スタイルに変更
+- BaseCalendarCell: AppColors → AppColorsExtension 移行でダークモード完全対応 + AnimatedContainer (200ms)
+- ページ遷移アニメーション: fadeThrough (300ms) / slideUp (400ms, easeOutCubic)
+- GroupsTab: グループカードに staggered fadeIn + slideY アニメーション
+- GroupDetailScreen: 機能グリッドに fadeIn + slideY アニメーション
+- SuggestionsTab: 候補日タイルに staggered fadeIn + slideX アニメーション
+- ProfileTab: セクションヘッダーを titleMedium に統一 + デモバナーにグラデーション・補足テキスト追加
+
 ### Added
 - 天気予報の地域設定機能: GPS現在地 or 都市名検索で天気取得エリアを変更可能
   - WeatherLocation モデル + WeatherLocationNotifier (Riverpod)
