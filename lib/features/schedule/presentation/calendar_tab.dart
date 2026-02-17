@@ -13,6 +13,7 @@ import 'package:himatch/features/schedule/presentation/widgets/shift_badge.dart'
 import 'package:himatch/features/schedule/presentation/widgets/shift_type_editor_sheet.dart';
 import 'package:himatch/features/suggestion/presentation/providers/weather_providers.dart';
 import 'package:himatch/providers/holiday_providers.dart';
+import 'package:himatch/features/schedule/presentation/providers/month_data_providers.dart';
 import 'package:himatch/features/schedule/presentation/widgets/week_view.dart';
 import 'package:himatch/features/schedule/presentation/widgets/day_view.dart';
 import 'package:himatch/features/schedule/presentation/widgets/quick_input_field.dart';
@@ -49,6 +50,11 @@ class _CalendarTabState extends ConsumerState<CalendarTab> {
     final shiftTypeMap = ref.watch(shiftTypeMapProvider);
     final selectedDaySchedules = _getSchedulesForDay(_selectedDay, schedules);
 
+    // Month-level batch data for calendar cells (avoids per-cell .family providers)
+    final monthKey = DateTime(_focusedDay.year, _focusedDay.month, 1);
+    final weatherMap = ref.watch(monthWeatherProvider(monthKey));
+    final holidayMap = ref.watch(monthHolidayProvider(monthKey));
+
     return Scaffold(
       body: Column(
         children: [
@@ -82,8 +88,8 @@ class _CalendarTabState extends ConsumerState<CalendarTab> {
                   isSelected: false,
                   isOutside: false,
                   scheduleCount: events.length,
-                  weather: ref.watch(weatherForDateProvider(key)),
-                  holidayName: ref.watch(holidayForDateProvider(key)),
+                  weather: weatherMap[key],
+                  holidayName: holidayMap[key],
                   shiftTypeMap: shiftTypeMap,
                   events: events,
                 );
@@ -97,8 +103,8 @@ class _CalendarTabState extends ConsumerState<CalendarTab> {
                   isSelected: isSameDay(_selectedDay, day),
                   isOutside: false,
                   scheduleCount: events.length,
-                  weather: ref.watch(weatherForDateProvider(key)),
-                  holidayName: ref.watch(holidayForDateProvider(key)),
+                  weather: weatherMap[key],
+                  holidayName: holidayMap[key],
                   shiftTypeMap: shiftTypeMap,
                   events: events,
                 );
@@ -112,8 +118,8 @@ class _CalendarTabState extends ConsumerState<CalendarTab> {
                   isSelected: true,
                   isOutside: false,
                   scheduleCount: events.length,
-                  weather: ref.watch(weatherForDateProvider(key)),
-                  holidayName: ref.watch(holidayForDateProvider(key)),
+                  weather: weatherMap[key],
+                  holidayName: holidayMap[key],
                   shiftTypeMap: shiftTypeMap,
                   events: events,
                 );
