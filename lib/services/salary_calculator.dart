@@ -1,5 +1,5 @@
-import '../models/schedule.dart';
-import '../models/workplace.dart';
+import 'package:himatch/models/schedule.dart';
+import 'package:himatch/models/workplace.dart';
 import 'holiday_service.dart';
 
 /// Calculate salary from shift schedules.
@@ -285,7 +285,7 @@ class SalaryReport {
   static String formatMinutes(int minutes) {
     final h = minutes ~/ 60;
     final m = minutes % 60;
-    return m > 0 ? '${h}時間${m}分' : '${h}時間';
+    return m > 0 ? '$h時間$m分' : '$h時間';
   }
 
   /// Format yen amount with comma separator.
@@ -296,7 +296,7 @@ class SalaryReport {
       if (i > 0 && (str.length - i) % 3 == 0) buffer.write(',');
       buffer.write(str[i]);
     }
-    return '${buffer}円';
+    return '$buffer円';
   }
 }
 

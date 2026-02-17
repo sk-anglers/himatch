@@ -16,7 +16,7 @@ class GroupsTab extends ConsumerWidget {
     final groups = ref.watch(localGroupsProvider);
 
     return Scaffold(
-      body: groups.isEmpty ? _EmptyState(ref: ref) : _GroupList(groups: groups),
+      body: groups.isEmpty ? const _EmptyState() : _GroupList(groups: groups),
       floatingActionButton: FloatingActionButton(
         onPressed: () => _showCreateDialog(context, ref),
         backgroundColor: AppColors.primary,
@@ -42,13 +42,11 @@ class GroupsTab extends ConsumerWidget {
   }
 }
 
-class _EmptyState extends StatelessWidget {
-  final WidgetRef ref;
-
-  const _EmptyState({required this.ref});
+class _EmptyState extends ConsumerWidget {
+  const _EmptyState();
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(32),
@@ -80,7 +78,7 @@ class _EmptyState extends StatelessWidget {
             ),
             const SizedBox(height: 32),
             OutlinedButton.icon(
-              onPressed: () => _showJoinDialog(context),
+              onPressed: () => _showJoinDialog(context, ref),
               icon: const Icon(Icons.login),
               label: const Text('招待コードで参加'),
               style: OutlinedButton.styleFrom(
@@ -95,7 +93,7 @@ class _EmptyState extends StatelessWidget {
     );
   }
 
-  Future<void> _showJoinDialog(BuildContext context) async {
+  Future<void> _showJoinDialog(BuildContext context, WidgetRef ref) async {
     final code = await showDialog<String>(
       context: context,
       builder: (_) => const JoinGroupDialog(),

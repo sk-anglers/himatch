@@ -531,7 +531,7 @@ class _TemplateEditorScreenState extends State<_TemplateEditorScreen> {
               value: _isAllDay,
               onChanged: (v) => setState(() => _isAllDay = v),
               contentPadding: EdgeInsets.zero,
-              activeColor: AppColors.primary,
+              activeThumbColor: AppColors.primary,
             ),
 
             // Time fields

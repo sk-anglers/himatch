@@ -165,7 +165,7 @@ class _PollScreenState extends ConsumerState<PollScreen> {
                 SwitchListTile(
                   title: const Text('複数選択', style: TextStyle(fontSize: 14)),
                   value: isMultiSelect,
-                  activeColor: AppColors.primary,
+                  activeThumbColor: AppColors.primary,
                   contentPadding: EdgeInsets.zero,
                   onChanged: (v) => setDialogState(() => isMultiSelect = v),
                 ),
@@ -174,7 +174,7 @@ class _PollScreenState extends ConsumerState<PollScreen> {
                 SwitchListTile(
                   title: const Text('匿名投票', style: TextStyle(fontSize: 14)),
                   value: isAnonymous,
-                  activeColor: AppColors.primary,
+                  activeThumbColor: AppColors.primary,
                   contentPadding: EdgeInsets.zero,
                   onChanged: (v) => setDialogState(() => isAnonymous = v),
                 ),
@@ -412,7 +412,7 @@ class _PollCard extends ConsumerWidget {
                             tween: Tween(begin: 0, end: fraction),
                             duration: const Duration(milliseconds: 400),
                             curve: Curves.easeOut,
-                            builder: (_, value, __) =>
+                            builder: (_, value, _) =>
                                 LinearProgressIndicator(
                               value: value,
                               minHeight: 6,

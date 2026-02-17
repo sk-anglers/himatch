@@ -265,7 +265,7 @@ class _MessageBubble extends StatelessWidget {
                               width: 200,
                               height: 150,
                               fit: BoxFit.cover,
-                              errorBuilder: (_, __, ___) => Container(
+                              errorBuilder: (_, _, _) => Container(
                                 width: 200,
                                 height: 150,
                                 color: AppColors.surfaceVariant,

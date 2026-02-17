@@ -203,7 +203,7 @@ class CalendarSyncSettingsScreen extends ConsumerWidget {
                   subtitle: const Text('外部カレンダーの予定を取り込む',
                       style: TextStyle(fontSize: 12)),
                   value: syncState.importEnabled,
-                  activeColor: AppColors.primary,
+                  activeThumbColor: AppColors.primary,
                   onChanged: (v) {
                     ref.read(calendarSyncProvider.notifier).toggleImport(v);
                   },
@@ -215,7 +215,7 @@ class CalendarSyncSettingsScreen extends ConsumerWidget {
                   subtitle: const Text('ヒマッチの予定を外部カレンダーに反映',
                       style: TextStyle(fontSize: 12)),
                   value: syncState.exportEnabled,
-                  activeColor: AppColors.primary,
+                  activeThumbColor: AppColors.primary,
                   onChanged: (v) {
                     ref.read(calendarSyncProvider.notifier).toggleExport(v);
                   },
@@ -330,7 +330,7 @@ class CalendarSyncSettingsScreen extends ConsumerWidget {
           ),
         ),
         value: value,
-        activeColor: AppColors.primary,
+        activeThumbColor: AppColors.primary,
         onChanged: onChanged,
       ),
     );

@@ -35,12 +35,17 @@ class LocalSuggestionsNotifier extends Notifier<List<Suggestion>> {
     }
 
     // Fetch weather data using resolved coordinates (graceful: empty map on failure)
-    final weatherService = ref.read(weatherServiceProvider);
-    final coords = await ref.read(resolvedWeatherCoordsProvider.future);
-    final weatherData = await weatherService.fetchForecast(
-      latitude: coords.latitude,
-      longitude: coords.longitude,
-    );
+    Map<DateTime, WeatherSummary> weatherData = {};
+    try {
+      final weatherService = ref.read(weatherServiceProvider);
+      final coords = await ref.read(resolvedWeatherCoordsProvider.future);
+      weatherData = await weatherService.fetchForecast(
+        latitude: coords.latitude,
+        longitude: coords.longitude,
+      );
+    } catch (_) {
+      // Weather fetch failed — continue with empty weather data
+    }
 
     final allSuggestions = <Suggestion>[];
 

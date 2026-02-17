@@ -213,7 +213,7 @@ class RRuleParser {
       final y = until.year.toString().padLeft(4, '0');
       final m = until.month.toString().padLeft(2, '0');
       final d = until.day.toString().padLeft(2, '0');
-      parts.add('UNTIL=${y}${m}${d}T235959Z');
+      parts.add('UNTIL=$y$m${d}T235959Z');
     }
 
     return parts.join(';');
@@ -236,14 +236,14 @@ class RRuleParser {
         if (interval == 1) {
           buffer.write('毎日');
         } else {
-          buffer.write('${interval}日ごと');
+          buffer.write('$interval日ごと');
         }
 
       case 'WEEKLY':
         if (interval == 1) {
           buffer.write('毎週');
         } else {
-          buffer.write('${interval}週間ごと');
+          buffer.write('$interval週間ごと');
         }
         if (byDay.isNotEmpty) {
           final dayNames = byDay.map((d) {
@@ -261,7 +261,7 @@ class RRuleParser {
         if (interval == 1) {
           buffer.write('毎月');
         } else {
-          buffer.write('${interval}ヶ月ごと');
+          buffer.write('$intervalヶ月ごと');
         }
         if (byDay.isNotEmpty) {
           final dayNames = byDay.map((d) {
@@ -278,7 +278,7 @@ class RRuleParser {
         if (interval == 1) {
           buffer.write('毎年');
         } else {
-          buffer.write('${interval}年ごと');
+          buffer.write('$interval年ごと');
         }
     }
 

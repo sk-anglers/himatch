@@ -1,6 +1,6 @@
 import 'dart:math' as math;
 
-import '../models/suggestion.dart';
+import 'package:himatch/models/suggestion.dart';
 
 /// Learn from confirmed suggestions to improve future scoring.
 ///

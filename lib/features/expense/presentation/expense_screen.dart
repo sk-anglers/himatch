@@ -232,7 +232,7 @@ class _ExpenseScreenState extends ConsumerState<ExpenseScreen> {
 
                 // Paid by picker
                 DropdownButtonFormField<String>(
-                  value: paidBy,
+                  initialValue: paidBy,
                   decoration: const InputDecoration(labelText: '支払った人'),
                   items: members.map((m) {
                     final name = m.nickname ??
@@ -261,7 +261,7 @@ class _ExpenseScreenState extends ConsumerState<ExpenseScreen> {
 
                 // Split type
                 DropdownButtonFormField<String>(
-                  value: splitType,
+                  initialValue: splitType,
                   decoration: const InputDecoration(labelText: '割り方'),
                   items: const [
                     DropdownMenuItem(

@@ -204,7 +204,7 @@ class _TodoListScreenState extends ConsumerState<TodoListScreen> {
 
                 // Assignee picker
                 DropdownButtonFormField<String>(
-                  value: selectedMemberId,
+                  initialValue: selectedMemberId,
                   decoration: const InputDecoration(
                     labelText: '担当者',
                   ),

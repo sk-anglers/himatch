@@ -1,6 +1,6 @@
 import 'package:uuid/uuid.dart';
 
-import '../models/chat_message.dart';
+import 'package:himatch/models/chat_message.dart';
 
 /// Chat service with local state management.
 ///
