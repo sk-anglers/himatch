@@ -36,7 +36,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - お誘い送信後の完了SnackBarが表示されない問題を修正（bottom sheet の context 無効化が原因）
 - デモモード: 天気予報の地域デフォルトを福岡市に設定（設定画面から変更可能）
+- セキュリティ: WeatherService に TimeoutException/FormatException 明示的ハンドリング追加
+- セキュリティ: ChatService に入力サニタイズ (5000字制限 + 制御文字除去)
+- セキュリティ: NaturalLanguageParser に ReDoS ガード (500字制限)
+- バグ: SalaryCalculator の深夜勤務控除で残業時間が負になりうる問題を .clamp() で修正
+- UI: 未到達画面6つをUIに接続 (WeekView/DayView/QuickInputField/ShiftPattern/ShareCard/PublicVote)
+  - カレンダータブに月/週/日表示切替 (SegmentedButton) を追加
+  - プロフィールタブにシフトパターン画面へのナビゲーション追加
+  - 候補タブに確定候補のシェアカード作成ボタン追加
+  - 候補タブに公開投票画面へのアクセスボタン追加
+- 法的リスク: ソースコード doccomment から競合アプリ名参照を削除 (5ファイル)
+- 法的リスク: CHANGELOG から競合サービス名表現を中立化
+- 法的リスク: app_theme.dart のコメントから競合サービス名を削除
+- ライセンス: Open-Meteo CC-BY 4.0 帰属表示をアプリ情報セクションに追加
+- セキュリティ: album_screen.dart の外部画像サービス (picsum.photos) 参照を削除
 
+### Added (Infrastructure)
 - お問い合わせ画面 (ContactScreen): カテゴリ選択・件名・本文のフォーム付き問い合わせ機能
 - 利用規約画面 (TermsOfServiceScreen): 9条構成の利用規約をアプリ内で閲覧可能に
 - プライバシーポリシー画面 (PrivacyPolicyScreen): 個人情報保護法準拠の8項目ポリシーをアプリ内で閲覧可能に
@@ -154,19 +169,3 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - 12個の新Freezedモデル: Workplace, ChatMessage, Activity, TodoItem, Poll, Photo, Expense, EventTemplate, Habit, MoodEntry, BookingPage, Post
   - 14個の新Provider: 各機能のNotifier + family Provider
   - 7個の新サービス: WeatherService, SalaryCalculator, ChatService, ExportService, ShareCardGenerator, LearningEngine, RRuleParser
-
-### Fixed
-- セキュリティ: WeatherService に TimeoutException/FormatException 明示的ハンドリング追加
-- セキュリティ: ChatService に入力サニタイズ (5000字制限 + 制御文字除去)
-- セキュリティ: NaturalLanguageParser に ReDoS ガード (500字制限)
-- バグ: SalaryCalculator の深夜勤務控除で残業時間が負になりうる問題を .clamp() で修正
-- UI: 未到達画面6つをUIに接続 (WeekView/DayView/QuickInputField/ShiftPattern/ShareCard/PublicVote)
-  - カレンダータブに月/週/日表示切替 (SegmentedButton) を追加
-  - プロフィールタブにシフトパターン画面へのナビゲーション追加
-  - 候補タブに確定候補のシェアカード作成ボタン追加
-  - 候補タブに公開投票画面へのアクセスボタン追加
-- 法的リスク: ソースコード doccomment から競合アプリ名参照を削除 (5ファイル)
-- 法的リスク: CHANGELOG から競合サービス名表現を中立化
-- 法的リスク: app_theme.dart のコメントから競合サービス名を削除
-- ライセンス: Open-Meteo CC-BY 4.0 帰属表示をアプリ情報セクションに追加
-- セキュリティ: album_screen.dart の外部画像サービス (picsum.photos) 参照を削除

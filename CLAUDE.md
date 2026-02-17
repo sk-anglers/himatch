@@ -58,7 +58,7 @@
 - プライベートメンバー: _prefix
 - import順序: dart: → package: → relative
 
-## ディレクトリ構成（予定）
+## ディレクトリ構成
 
 ```
 lib/
@@ -66,14 +66,21 @@ lib/
 ├── app.dart
 ├── core/           # 共通ユーティリティ、定数、テーマ
 ├── features/       # 機能別モジュール
-│   ├── auth/
-│   ├── schedule/
-│   ├── group/
-│   └── suggestion/
-├── models/         # データモデル
-├── providers/      # Riverpod プロバイダー
-├── services/       # Supabase、FCM等の外部サービス
-└── widgets/        # 共通ウィジェット
+│   ├── auth/       # 認証 (デモモード / Supabase)
+│   ├── booking/    # 予約ページ
+│   ├── chat/       # グループチャット
+│   ├── expense/    # 割り勘・経費
+│   ├── group/      # グループ管理・投票・ToDo・アルバム・掲示板
+│   ├── history/    # 履歴・統計
+│   ├── profile/    # マイページ・設定
+│   ├── schedule/   # カレンダー・予定管理
+│   ├── shift/      # シフト・給料計算
+│   ├── suggestion/ # 提案エンジン・天気
+│   └── wellbeing/  # ウェルビーイング
+├── models/         # データモデル (Freezed)
+├── providers/      # グローバル Riverpod プロバイダー
+├── routing/        # go_router ルーティング
+└── services/       # 外部サービス (天気API, エクスポート等)
 ```
 
 ## 重要ファイル
