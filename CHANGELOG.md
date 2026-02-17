@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 - HomeScreen AppBar の通知ボタンが空実装（TODO）で機能していなかった問題を修正 → NotificationSettingsScreen に遷移するように接続
+- HomeScreen AppBar のナビゲーションを context.pushNamed から ref.read(appRouterProvider).push に変更（GoRouter.of(context) の解決失敗を回避）
 
 ### Changed (Docs)
 - README.md を全面刷新: 全機能一覧・デザインシステム・セットアップ手順・テスト手順を追加

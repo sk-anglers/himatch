@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 import 'package:himatch/core/theme/app_theme.dart';
-import 'package:himatch/routing/app_routes.dart';
+import 'package:himatch/routing/app_router.dart';
 import 'package:himatch/features/schedule/presentation/calendar_tab.dart';
 import 'package:himatch/features/group/presentation/groups_tab.dart';
 import 'package:himatch/features/suggestion/presentation/suggestions_tab.dart';
@@ -53,13 +52,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               child: const Icon(Icons.notifications_outlined),
             ),
             onPressed: () {
-              context.pushNamed(AppRoute.notificationSettings.name);
+              ref.read(appRouterProvider).push('/settings/notifications');
             },
           ),
           IconButton(
             icon: const Icon(Icons.settings_outlined),
             onPressed: () {
-              context.pushNamed(AppRoute.themeSettings.name);
+              ref.read(appRouterProvider).push('/settings/theme');
             },
           ),
         ],
