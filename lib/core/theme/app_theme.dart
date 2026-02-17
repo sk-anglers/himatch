@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:himatch/core/theme/app_colors_extension.dart';
+
+export 'package:himatch/core/theme/app_colors_extension.dart';
 
 abstract class AppColors {
   // Primary - Purple
@@ -124,6 +127,7 @@ abstract class AppTheme {
           vertical: 14,
         ),
       ),
+      extensions: const [AppColorsExtension.light],
     );
   }
 
@@ -175,6 +179,7 @@ abstract class AppTheme {
           vertical: 14,
         ),
       ),
+      extensions: const [AppColorsExtension.dark],
     );
   }
 }

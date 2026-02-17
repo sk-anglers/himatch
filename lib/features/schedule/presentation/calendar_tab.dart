@@ -274,7 +274,7 @@ class _CalendarTabState extends ConsumerState<CalendarTab> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () => _showAddMenu(context),
-        backgroundColor: AppColors.primary,
+        backgroundColor: Theme.of(context).extension<AppColorsExtension>()!.primary,
         child: const Icon(Icons.add, color: Colors.white),
       ),
     );
@@ -316,10 +316,12 @@ class _CalendarTabState extends ConsumerState<CalendarTab> {
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
-      builder: (_) => Container(
-        decoration: const BoxDecoration(
-          color: AppColors.surface,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      builder: (ctx) {
+        final colors = Theme.of(ctx).extension<AppColorsExtension>()!;
+        return Container(
+        decoration: BoxDecoration(
+          color: colors.surface,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
         ),
         padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
         child: Column(
@@ -329,7 +331,7 @@ class _CalendarTabState extends ConsumerState<CalendarTab> {
               width: 40,
               height: 4,
               decoration: BoxDecoration(
-                color: AppColors.textHint,
+                color: colors.textHint,
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
@@ -366,7 +368,8 @@ class _CalendarTabState extends ConsumerState<CalendarTab> {
             SizedBox(height: MediaQuery.of(context).padding.bottom),
           ],
         ),
-      ),
+      );
+      },
     );
   }
 
@@ -659,10 +662,11 @@ class _ScheduleListSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = Theme.of(context).extension<AppColorsExtension>()!;
     return Container(
-      decoration: const BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      decoration: BoxDecoration(
+        color: colors.surface,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
       ),
       constraints: BoxConstraints(
         maxHeight: MediaQuery.of(context).size.height * 0.55,
@@ -676,7 +680,7 @@ class _ScheduleListSheet extends StatelessWidget {
             width: 40,
             height: 4,
             decoration: BoxDecoration(
-              color: AppColors.textHint,
+              color: colors.textHint,
               borderRadius: BorderRadius.circular(2),
             ),
           ),
