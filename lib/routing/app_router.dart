@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:himatch/models/group.dart';
@@ -53,6 +54,46 @@ import 'package:himatch/features/profile/presentation/contact_screen.dart';
 import 'package:himatch/features/history/presentation/history_screen.dart';
 import 'package:himatch/features/wellbeing/presentation/wellbeing_screen.dart';
 
+/// Fade-through transition (Material motion, 300ms) for regular pages.
+CustomTransitionPage<T> _fadeThroughPage<T>({
+  required LocalKey key,
+  required Widget child,
+}) {
+  return CustomTransitionPage<T>(
+    key: key,
+    child: child,
+    transitionsBuilder: (context, animation, secondaryAnimation, child) {
+      return FadeTransition(opacity: animation, child: child);
+    },
+    transitionDuration: const Duration(milliseconds: 300),
+  );
+}
+
+/// Slide-up transition for modal-like pages (schedule form, chat, etc.).
+CustomTransitionPage<T> _slideUpPage<T>({
+  required LocalKey key,
+  required Widget child,
+}) {
+  return CustomTransitionPage<T>(
+    key: key,
+    child: child,
+    transitionsBuilder: (context, animation, secondaryAnimation, child) {
+      final curved = CurvedAnimation(
+        parent: animation,
+        curve: Curves.easeOutCubic,
+      );
+      return SlideTransition(
+        position: Tween<Offset>(
+          begin: const Offset(0, 0.15),
+          end: Offset.zero,
+        ).animate(curved),
+        child: FadeTransition(opacity: curved, child: child),
+      );
+    },
+    transitionDuration: const Duration(milliseconds: 400),
+  );
+}
+
 final appRouterProvider = Provider<GoRouter>((ref) {
   final authState = ref.watch(authNotifierProvider);
 
@@ -83,12 +124,15 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/schedule/new',
         name: AppRoute.scheduleForm.name,
-        builder: (context, state) {
+        pageBuilder: (context, state) {
           final extra = state.extra as Map<String, dynamic>?;
-          return ScheduleFormScreen(
-            initialDate:
-                extra?['initialDate'] as DateTime? ?? DateTime.now(),
-            schedule: extra?['schedule'] as Schedule?,
+          return _slideUpPage(
+            key: state.pageKey,
+            child: ScheduleFormScreen(
+              initialDate:
+                  extra?['initialDate'] as DateTime? ?? DateTime.now(),
+              schedule: extra?['schedule'] as Schedule?,
+            ),
           );
         },
       ),
@@ -107,9 +151,12 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/group/:groupId',
         name: AppRoute.groupDetail.name,
-        builder: (context, state) {
+        pageBuilder: (context, state) {
           final extra = state.extra as Map<String, dynamic>;
-          return GroupDetailScreen(group: extra['group'] as Group);
+          return _fadeThroughPage(
+            key: state.pageKey,
+            child: GroupDetailScreen(group: extra['group'] as Group),
+          );
         },
         routes: [
           GoRoute(

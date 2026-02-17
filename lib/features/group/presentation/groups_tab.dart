@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:himatch/core/theme/app_theme.dart';
+import 'package:himatch/core/widgets/empty_state_widget.dart';
 import 'package:himatch/models/group.dart';
 import 'package:himatch/features/group/presentation/providers/group_providers.dart';
 import 'package:go_router/go_router.dart';
@@ -48,49 +50,12 @@ class _EmptyState extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(32),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.group_outlined,
-              size: 80,
-              color: AppColors.primary.withValues(alpha: 0.3),
-            ),
-            const SizedBox(height: 24),
-            const Text(
-              'グループがありません',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                color: AppColors.textPrimary,
-              ),
-            ),
-            const SizedBox(height: 8),
-            const Text(
-              'グループを作成するか、\n招待コードで参加しましょう',
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                color: AppColors.textSecondary,
-                fontSize: 14,
-              ),
-            ),
-            const SizedBox(height: 32),
-            OutlinedButton.icon(
-              onPressed: () => _showJoinDialog(context, ref),
-              icon: const Icon(Icons.login),
-              label: const Text('招待コードで参加'),
-              style: OutlinedButton.styleFrom(
-                foregroundColor: AppColors.primary,
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-              ),
-            ),
-          ],
-        ),
-      ),
+    return EmptyStateWidget(
+      icon: Icons.group_outlined,
+      title: 'グループがありません',
+      subtitle: 'グループを作成するか、\n招待コードで参加しましょう',
+      actionLabel: '招待コードで参加',
+      onAction: () => _showJoinDialog(context, ref),
     );
   }
 
@@ -157,7 +122,18 @@ class _GroupList extends ConsumerWidget {
               return _GroupCard(
                 group: groups[index],
                 onTap: () => _openGroupDetail(context, groups[index]),
-              );
+              )
+                  .animate()
+                  .fadeIn(
+                    duration: 300.ms,
+                    delay: (50 * index).ms,
+                  )
+                  .slideY(
+                    begin: 0.1,
+                    duration: 300.ms,
+                    delay: (50 * index).ms,
+                    curve: Curves.easeOut,
+                  );
             },
           ),
         ),
