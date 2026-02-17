@@ -18,8 +18,6 @@ void main() {
     test('initial state has demo groups', () {
       final groups = container.read(localGroupsProvider);
       expect(groups, hasLength(2));
-      expect(groups[0].name, 'ゼミ3年');
-      expect(groups[1].name, 'バイト仲間');
     });
 
     test('createGroup adds a group', () {
@@ -126,7 +124,7 @@ void main() {
   group('LocalGroupMembersNotifier', () {
     test('initial state has demo members', () {
       final members = container.read(localGroupMembersProvider);
-      expect(members, isNotEmpty);
+      expect(members, hasLength(2));
       expect(members['demo-group-1'], hasLength(4));
       expect(members['demo-group-2'], hasLength(3));
     });

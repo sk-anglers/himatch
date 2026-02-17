@@ -100,7 +100,7 @@ class _SuggestionsTabState extends ConsumerState<SuggestionsTab> {
                   );
                 }
               },
-              backgroundColor: AppColors.primary,
+              backgroundColor: Theme.of(context).extension<AppColorsExtension>()!.primary,
               icon: const Icon(Icons.refresh, color: Colors.white),
               label:
                   const Text('更新', style: TextStyle(color: Colors.white)),
@@ -605,14 +605,15 @@ class _DayDetailSheet extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final colors = Theme.of(context).extension<AppColorsExtension>()!;
     final groups = ref.watch(localGroupsProvider);
     final hasConfirmed =
         suggestions.any((s) => s.status == SuggestionStatus.confirmed);
 
     return Container(
-      decoration: const BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      decoration: BoxDecoration(
+        color: colors.surface,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
       ),
       constraints: BoxConstraints(
         maxHeight: MediaQuery.of(context).size.height * 0.6,
@@ -626,7 +627,7 @@ class _DayDetailSheet extends ConsumerWidget {
             width: 40,
             height: 4,
             decoration: BoxDecoration(
-              color: AppColors.textHint,
+              color: colors.textHint,
               borderRadius: BorderRadius.circular(2),
             ),
           ),
@@ -1324,10 +1325,11 @@ class _InviteDestinationSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = Theme.of(context).extension<AppColorsExtension>()!;
     return Container(
-      decoration: const BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      decoration: BoxDecoration(
+        color: colors.surface,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -1337,7 +1339,7 @@ class _InviteDestinationSheet extends StatelessWidget {
             width: 40,
             height: 4,
             decoration: BoxDecoration(
-              color: AppColors.textHint,
+              color: colors.textHint,
               borderRadius: BorderRadius.circular(2),
             ),
           ),

@@ -329,10 +329,11 @@ class _BookingDetailSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = Theme.of(context).extension<AppColorsExtension>()!;
     return Container(
-      decoration: const BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      decoration: BoxDecoration(
+        color: colors.surface,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
       ),
       constraints: BoxConstraints(
         maxHeight: MediaQuery.of(context).size.height * 0.7,
@@ -346,7 +347,7 @@ class _BookingDetailSheet extends StatelessWidget {
             width: 40,
             height: 4,
             decoration: BoxDecoration(
-              color: AppColors.textHint,
+              color: colors.textHint,
               borderRadius: BorderRadius.circular(2),
             ),
           ),
@@ -631,10 +632,11 @@ class _CreateBookingPageSheetState extends State<_CreateBookingPageSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final colors = Theme.of(context).extension<AppColorsExtension>()!;
     return Container(
-      decoration: const BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      decoration: BoxDecoration(
+        color: colors.surface,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
       ),
       constraints: BoxConstraints(
         maxHeight: MediaQuery.of(context).size.height * 0.85,
