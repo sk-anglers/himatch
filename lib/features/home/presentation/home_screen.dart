@@ -53,7 +53,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               child: const Icon(Icons.notifications_outlined),
             ),
             onPressed: () {
-              // TODO: Navigate to notifications
+              context.pushNamed(AppRoute.notificationSettings.name);
             },
           ),
           IconButton(
