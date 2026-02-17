@@ -448,7 +448,7 @@ class _BookingTile extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: AppColors.background,
+        color: Theme.of(context).colorScheme.surfaceContainerLow,
         borderRadius: BorderRadius.circular(14),
         border: booking.isConfirmed
             ? Border.all(color: AppColors.success, width: 1.5)

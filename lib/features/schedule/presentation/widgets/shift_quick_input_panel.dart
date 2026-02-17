@@ -29,7 +29,7 @@ class ShiftQuickInputPanel extends ConsumerWidget {
     return Container(
       padding: const EdgeInsets.fromLTRB(12, 8, 12, 4),
       decoration: BoxDecoration(
-        color: AppColors.surface,
+        color: Theme.of(context).colorScheme.surface,
         border: Border(
           top: BorderSide(
             color: AppColors.surfaceVariant,

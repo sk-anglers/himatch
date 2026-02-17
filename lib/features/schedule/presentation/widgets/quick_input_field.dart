@@ -180,7 +180,7 @@ class _QuickInputFieldState extends ConsumerState<QuickInputField> {
       curve: Curves.easeInOut,
       padding: const EdgeInsets.fromLTRB(12, 8, 12, 8),
       decoration: BoxDecoration(
-        color: AppColors.surface,
+        color: Theme.of(context).colorScheme.surface,
         border: Border(
           bottom: BorderSide(
             color: AppColors.surfaceVariant,
@@ -302,7 +302,7 @@ class _ParsePreview extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: AppColors.background,
+        color: Theme.of(context).colorScheme.surfaceContainerLow,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
           color: confidenceColor.withValues(alpha: 0.3),

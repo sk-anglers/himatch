@@ -747,7 +747,7 @@ class _SuggestionTile extends ConsumerWidget {
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: AppColors.background,
+        color: Theme.of(context).colorScheme.surfaceContainerLow,
         borderRadius: BorderRadius.circular(14),
         border: isConfirmed
             ? Border.all(color: AppColors.success, width: 2)

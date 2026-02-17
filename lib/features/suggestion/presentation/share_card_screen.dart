@@ -58,7 +58,7 @@ class ShareCardScreen extends ConsumerWidget {
           Container(
             padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
             decoration: BoxDecoration(
-              color: AppColors.surface,
+              color: Theme.of(context).colorScheme.surface,
               border: Border(
                 top: BorderSide(color: AppColors.surfaceVariant),
               ),
