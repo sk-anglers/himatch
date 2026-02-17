@@ -50,7 +50,7 @@ class BaseCalendarCell extends StatelessWidget {
     } else if (isHoliday || isSunday) {
       dayColor = AppColors.error;
     } else if (isSaturday) {
-      dayColor = const Color(0xFF3498DB);
+      dayColor = AppColors.weatherRainy;
     } else {
       dayColor = AppColors.textPrimary;
     }

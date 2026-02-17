@@ -55,7 +55,7 @@ class ActivityFeedScreen extends ConsumerWidget {
     switch (type) {
       case ActivityType.scheduleAdded:
       case ActivityType.scheduleUpdated:
-        return const Color(0xFF3498DB);
+        return AppColors.typeClass;
       case ActivityType.suggestionCreated:
         return AppColors.warning;
       case ActivityType.voteCast:
@@ -67,7 +67,7 @@ class ActivityFeedScreen extends ConsumerWidget {
       case ActivityType.memberLeft:
         return AppColors.error;
       case ActivityType.photoAdded:
-        return const Color(0xFFE84393);
+        return AppColors.secondary;
       case ActivityType.todoCompleted:
         return AppColors.success;
       case ActivityType.pollCreated:
