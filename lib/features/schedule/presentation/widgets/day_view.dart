@@ -129,7 +129,7 @@ class _DayViewState extends ConsumerState<DayView> {
     final w = widget.weather!;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-      color: AppColors.surface,
+      color: Theme.of(context).colorScheme.surface,
       child: Row(
         children: [
           if (w.icon != null)

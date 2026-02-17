@@ -595,7 +595,7 @@ class _QrCodeCard extends StatelessWidget {
               width: 160,
               height: 160,
               decoration: BoxDecoration(
-                color: AppColors.surface,
+                color: Theme.of(context).colorScheme.surface,
                 border: Border.all(color: AppColors.surfaceVariant),
                 borderRadius: BorderRadius.circular(12),
               ),

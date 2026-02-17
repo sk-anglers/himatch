@@ -935,7 +935,7 @@ class _MenuTile extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
         decoration: BoxDecoration(
-          color: AppColors.background,
+          color: Theme.of(context).colorScheme.surfaceContainerLow,
           borderRadius: BorderRadius.circular(12),
         ),
         child: Row(
