@@ -16,8 +16,8 @@ import 'package:himatch/providers/holiday_providers.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:himatch/features/chat/presentation/providers/chat_providers.dart';
 import 'package:himatch/features/group/presentation/providers/poll_providers.dart';
-import 'package:himatch/features/suggestion/presentation/share_card_screen.dart';
-import 'package:himatch/features/suggestion/presentation/public_vote_screen.dart';
+import 'package:go_router/go_router.dart';
+import 'package:himatch/routing/app_routes.dart';
 
 class SuggestionsTab extends ConsumerStatefulWidget {
   const SuggestionsTab({super.key});
@@ -321,11 +321,7 @@ class _SuggestionCalendarState extends ConsumerState<_SuggestionCalendar> {
               const Spacer(),
               IconButton(
                 onPressed: () {
-                  Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder: (_) => const PublicVoteScreen(),
-                    ),
-                  );
+                  context.pushNamed(AppRoute.publicVote.name);
                 },
                 icon: const Icon(Icons.how_to_vote_outlined, size: 20),
                 tooltip: '公開投票',
@@ -944,17 +940,16 @@ class _SuggestionTile extends ConsumerWidget {
             Center(
               child: TextButton.icon(
                 onPressed: () {
-                  Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder: (_) => ShareCardScreen(
-                        date: AppDateUtils.formatMonthDayWeek(
-                            suggestion.suggestedDate),
-                        activity: suggestion.activityType,
-                        groupName: groupName,
-                        weatherIcon: suggestion.weatherSummary?.icon,
-                        weatherCondition: suggestion.weatherSummary?.condition,
-                      ),
-                    ),
+                  context.pushNamed(
+                    AppRoute.shareCard.name,
+                    extra: {
+                      'date': AppDateUtils.formatMonthDayWeek(
+                          suggestion.suggestedDate),
+                      'activity': suggestion.activityType,
+                      'groupName': groupName,
+                      'weatherIcon': suggestion.weatherSummary?.icon,
+                      'weatherCondition': suggestion.weatherSummary?.condition,
+                    },
                   );
                 },
                 icon: const Icon(Icons.share, size: 14),

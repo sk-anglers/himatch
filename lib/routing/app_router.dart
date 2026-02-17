@@ -108,24 +108,27 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         path: '/group/:groupId',
         name: AppRoute.groupDetail.name,
         builder: (context, state) {
-          final group = state.extra as Group;
-          return GroupDetailScreen(group: group);
+          final extra = state.extra as Map<String, dynamic>;
+          return GroupDetailScreen(group: extra['group'] as Group);
         },
         routes: [
           GoRoute(
             path: 'calendar',
             name: AppRoute.groupCalendar.name,
             builder: (context, state) {
-              final group = state.extra as Group;
-              return GroupCalendarScreen(group: group);
+              final extra = state.extra as Map<String, dynamic>;
+              return GroupCalendarScreen(
+                group: extra['group'] as Group,
+                initialMode: extra['initialMode'] as String?,
+              );
             },
           ),
           GoRoute(
             path: 'shift-calendar',
             name: AppRoute.shiftListCalendar.name,
             builder: (context, state) {
-              final group = state.extra as Group;
-              return ShiftListCalendarScreen(group: group);
+              final extra = state.extra as Map<String, dynamic>;
+              return ShiftListCalendarScreen(group: extra['group'] as Group);
             },
           ),
           GoRoute(

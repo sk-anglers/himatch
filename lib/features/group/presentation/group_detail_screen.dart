@@ -2,18 +2,11 @@ import 'package:himatch/core/constants/app_constants.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:himatch/core/theme/app_theme.dart';
 import 'package:himatch/models/group.dart';
+import 'package:himatch/routing/app_routes.dart';
 import 'package:himatch/features/group/presentation/providers/group_providers.dart';
-import 'package:himatch/features/group/presentation/group_calendar_screen.dart';
-import 'package:himatch/features/group/presentation/shift_list_calendar_screen.dart';
-import 'package:himatch/features/chat/presentation/chat_screen.dart';
-import 'package:himatch/features/group/presentation/activity_feed_screen.dart';
-import 'package:himatch/features/group/presentation/todo_list_screen.dart';
-import 'package:himatch/features/group/presentation/poll_screen.dart';
-import 'package:himatch/features/group/presentation/album_screen.dart';
-import 'package:himatch/features/group/presentation/board_screen.dart';
-import 'package:himatch/features/expense/presentation/expense_screen.dart';
 import 'package:himatch/features/chat/presentation/providers/chat_providers.dart';
 import 'package:himatch/features/group/presentation/providers/notification_providers.dart';
 
@@ -63,13 +56,11 @@ class GroupDetailScreen extends ConsumerWidget {
           SizedBox(
             width: double.infinity,
             child: ElevatedButton.icon(
-              onPressed: () {
-                Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (_) => GroupCalendarScreen(group: group),
-                  ),
-                );
-              },
+              onPressed: () => context.pushNamed(
+                AppRoute.groupCalendar.name,
+                pathParameters: {'groupId': group.id},
+                extra: {'group': group},
+              ),
               icon: const Icon(Icons.calendar_month, size: 18),
               label: const Text('メンバーのカレンダーを見る'),
             ),
@@ -78,13 +69,11 @@ class GroupDetailScreen extends ConsumerWidget {
           SizedBox(
             width: double.infinity,
             child: OutlinedButton.icon(
-              onPressed: () {
-                Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (_) => ShiftListCalendarScreen(group: group),
-                  ),
-                );
-              },
+              onPressed: () => context.pushNamed(
+                AppRoute.shiftListCalendar.name,
+                pathParameters: {'groupId': group.id},
+                extra: {'group': group},
+              ),
               icon: const Icon(Icons.view_list, size: 18),
               label: const Text('シフト一覧を見る'),
             ),
@@ -106,27 +95,20 @@ class GroupDetailScreen extends ConsumerWidget {
                 label: 'チャット',
                 color: AppColors.primary,
                 badgeCount: ref.watch(unreadCountProvider(group.id)),
-                onTap: () => Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (_) => ChatScreen(
-                      groupId: group.id,
-                      groupName: group.name,
-                      memberCount: members.length,
-                    ),
-                  ),
+                onTap: () => context.pushNamed(
+                  AppRoute.chat.name,
+                  pathParameters: {'groupId': group.id},
+                  extra: {'groupId': group.id, 'groupName': group.name, 'memberCount': members.length},
                 ),
               ),
               _FeatureButton(
                 icon: Icons.dynamic_feed,
                 label: 'フィード',
                 color: AppColors.success,
-                onTap: () => Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (_) => ActivityFeedScreen(
-                      groupId: group.id,
-                      groupName: group.name,
-                    ),
-                  ),
+                onTap: () => context.pushNamed(
+                  AppRoute.activityFeed.name,
+                  pathParameters: {'groupId': group.id},
+                  extra: {'groupId': group.id, 'groupName': group.name},
                 ),
               ),
               _FeatureButton(
@@ -134,13 +116,10 @@ class GroupDetailScreen extends ConsumerWidget {
                 label: 'ToDo',
                 color: AppColors.typeClass,
                 badgeCount: ref.watch(incompleteTodoCountProvider(group.id)),
-                onTap: () => Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (_) => TodoListScreen(
-                      groupId: group.id,
-                      groupName: group.name,
-                    ),
-                  ),
+                onTap: () => context.pushNamed(
+                  AppRoute.todoList.name,
+                  pathParameters: {'groupId': group.id},
+                  extra: {'groupId': group.id, 'groupName': group.name},
                 ),
               ),
               _FeatureButton(
@@ -148,69 +127,51 @@ class GroupDetailScreen extends ConsumerWidget {
                 label: '投票',
                 color: AppColors.warning,
                 badgeCount: ref.watch(unvotedPollCountProvider(group.id)),
-                onTap: () => Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (_) => PollScreen(
-                      groupId: group.id,
-                      groupName: group.name,
-                    ),
-                  ),
+                onTap: () => context.pushNamed(
+                  AppRoute.poll.name,
+                  pathParameters: {'groupId': group.id},
+                  extra: {'groupId': group.id, 'groupName': group.name},
                 ),
               ),
               _FeatureButton(
                 icon: Icons.photo_library_outlined,
                 label: 'アルバム',
                 color: AppColors.typeParttime,
-                onTap: () => Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (_) => AlbumScreen(
-                      groupId: group.id,
-                      groupName: group.name,
-                    ),
-                  ),
+                onTap: () => context.pushNamed(
+                  AppRoute.album.name,
+                  pathParameters: {'groupId': group.id},
+                  extra: {'groupId': group.id, 'groupName': group.name},
                 ),
               ),
               _FeatureButton(
                 icon: Icons.forum_outlined,
                 label: '掲示板',
                 color: AppColors.typeClub,
-                onTap: () => Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (_) => BoardScreen(
-                      groupId: group.id,
-                      groupName: group.name,
-                    ),
-                  ),
+                onTap: () => context.pushNamed(
+                  AppRoute.board.name,
+                  pathParameters: {'groupId': group.id},
+                  extra: {'groupId': group.id, 'groupName': group.name},
                 ),
               ),
               _FeatureButton(
                 icon: Icons.receipt_long_outlined,
                 label: '割り勘',
                 color: AppColors.secondary,
-                onTap: () => Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (_) => ExpenseScreen(
-                      groupId: group.id,
-                      groupName: group.name,
-                    ),
-                  ),
+                onTap: () => context.pushNamed(
+                  AppRoute.expense.name,
+                  pathParameters: {'groupId': group.id},
+                  extra: {'groupId': group.id, 'groupName': group.name},
                 ),
               ),
               _FeatureButton(
                 icon: Icons.grid_view_outlined,
                 label: 'ヒートマップ',
                 color: AppColors.heatmapFull,
-                onTap: () {
-                  // Navigate to heatmap mode in group calendar
-                  Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder: (_) => GroupCalendarScreen(
-                        group: group,
-                        initialMode: 'heatmap',
-                      ),
-                    ),
-                  );
-                },
+                onTap: () => context.pushNamed(
+                  AppRoute.groupCalendar.name,
+                  pathParameters: {'groupId': group.id},
+                  extra: {'group': group, 'initialMode': 'heatmap'},
+                ),
               ),
             ],
           ),
