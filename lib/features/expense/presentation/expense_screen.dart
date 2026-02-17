@@ -5,7 +5,8 @@ import 'package:himatch/core/theme/app_theme.dart';
 import 'package:himatch/models/expense.dart';
 import 'package:himatch/features/expense/presentation/providers/expense_providers.dart';
 import 'package:himatch/features/group/presentation/providers/group_providers.dart';
-import 'package:himatch/features/expense/presentation/settlement_screen.dart';
+import 'package:go_router/go_router.dart';
+import 'package:himatch/routing/app_routes.dart';
 
 /// Expense tracker screen for a group.
 ///
@@ -48,13 +49,13 @@ class _ExpenseScreenState extends ConsumerState<ExpenseScreen> {
           if (pendingSettlements.isNotEmpty)
             TextButton(
               onPressed: () {
-                Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (_) => SettlementScreen(
-                      groupId: widget.groupId,
-                      groupName: widget.groupName,
-                    ),
-                  ),
+                context.pushNamed(
+                  AppRoute.settlement.name,
+                  pathParameters: {'groupId': widget.groupId},
+                  extra: {
+                    'groupId': widget.groupId,
+                    'groupName': widget.groupName,
+                  },
                 );
               },
               child: const Text('精算'),
@@ -112,13 +113,13 @@ class _ExpenseScreenState extends ConsumerState<ExpenseScreen> {
                       const Spacer(),
                       TextButton(
                         onPressed: () {
-                          Navigator.of(context).push(
-                            MaterialPageRoute(
-                              builder: (_) => SettlementScreen(
-                                groupId: widget.groupId,
-                                groupName: widget.groupName,
-                              ),
-                            ),
+                          context.pushNamed(
+                            AppRoute.settlement.name,
+                            pathParameters: {'groupId': widget.groupId},
+                            extra: {
+                              'groupId': widget.groupId,
+                              'groupName': widget.groupName,
+                            },
                           );
                         },
                         child: const Text('詳細'),

@@ -1,25 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:himatch/core/theme/app_theme.dart';
+import 'package:himatch/routing/app_routes.dart';
 import 'package:himatch/features/auth/providers/auth_providers.dart';
 import 'package:himatch/features/profile/presentation/providers/profile_providers.dart';
 import 'package:himatch/features/group/presentation/providers/group_providers.dart';
 import 'package:himatch/features/schedule/presentation/providers/calendar_providers.dart';
-import 'package:himatch/features/profile/presentation/theme_settings_screen.dart';
-import 'package:himatch/features/profile/presentation/notification_settings_screen.dart';
-import 'package:himatch/features/shift/presentation/salary_summary_screen.dart';
-import 'package:himatch/features/shift/presentation/workplace_settings_screen.dart';
-import 'package:himatch/features/history/presentation/history_screen.dart';
-import 'package:himatch/features/wellbeing/presentation/wellbeing_screen.dart';
-import 'package:himatch/features/booking/presentation/booking_screen.dart';
-import 'package:himatch/features/schedule/presentation/calendar_sync_settings_screen.dart';
-import 'package:himatch/features/profile/presentation/weather_location_screen.dart';
 import 'package:himatch/features/profile/presentation/providers/location_providers.dart';
-import 'package:himatch/features/schedule/presentation/template_screen.dart';
-import 'package:himatch/features/shift/presentation/shift_pattern_screen.dart';
-import 'package:himatch/features/profile/presentation/terms_of_service_screen.dart';
-import 'package:himatch/features/profile/presentation/privacy_policy_screen.dart';
-import 'package:himatch/features/profile/presentation/contact_screen.dart';
 
 class ProfileTab extends ConsumerWidget {
   const ProfileTab({super.key});
@@ -79,11 +67,7 @@ class ProfileTab extends ConsumerWidget {
                 iconColor: AppColors.typeParttime,
                 title: '給料計算',
                 subtitle: '月間・年間の給料を確認',
-                onTap: () => Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (_) => const SalarySummaryScreen(),
-                  ),
-                ),
+                onTap: () => context.pushNamed(AppRoute.salarySummary.name),
               ),
               const Divider(height: 1),
               _NavTile(
@@ -91,11 +75,7 @@ class ProfileTab extends ConsumerWidget {
                 iconColor: AppColors.typeClass,
                 title: '勤務先設定',
                 subtitle: '時給・締め日・手当の設定',
-                onTap: () => Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (_) => const WorkplaceSettingsScreen(),
-                  ),
-                ),
+                onTap: () => context.pushNamed(AppRoute.workplaceSettings.name),
               ),
               const Divider(height: 1),
               _NavTile(
@@ -103,11 +83,7 @@ class ProfileTab extends ConsumerWidget {
                 iconColor: AppColors.secondary,
                 title: 'シフトパターン',
                 subtitle: 'ローテーション・パターン設定',
-                onTap: () => Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (_) => const ShiftPatternScreen(),
-                  ),
-                ),
+                onTap: () => context.pushNamed(AppRoute.shiftPattern.name),
               ),
               const Divider(height: 1),
               _NavTile(
@@ -115,11 +91,7 @@ class ProfileTab extends ConsumerWidget {
                 iconColor: AppColors.success,
                 title: '履歴・統計',
                 subtitle: '遊んだ記録と統計',
-                onTap: () => Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (_) => const HistoryScreen(),
-                  ),
-                ),
+                onTap: () => context.pushNamed(AppRoute.history.name),
               ),
               const Divider(height: 1),
               _NavTile(
@@ -127,11 +99,7 @@ class ProfileTab extends ConsumerWidget {
                 iconColor: AppColors.moodGood,
                 title: 'ウェルビーイング',
                 subtitle: '気分・習慣トラッカー',
-                onTap: () => Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (_) => const WellbeingScreen(),
-                  ),
-                ),
+                onTap: () => context.pushNamed(AppRoute.wellbeing.name),
               ),
               const Divider(height: 1),
               _NavTile(
@@ -139,11 +107,7 @@ class ProfileTab extends ConsumerWidget {
                 iconColor: AppColors.primary,
                 title: '予約ページ',
                 subtitle: '空き時間を公開・予約受付',
-                onTap: () => Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (_) => const BookingScreen(),
-                  ),
-                ),
+                onTap: () => context.pushNamed(AppRoute.booking.name),
               ),
               const Divider(height: 1),
               _NavTile(
@@ -151,11 +115,7 @@ class ProfileTab extends ConsumerWidget {
                 iconColor: AppColors.typeClub,
                 title: 'テンプレート',
                 subtitle: 'よく使う予定のテンプレート管理',
-                onTap: () => Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (_) => const TemplateScreen(),
-                  ),
-                ),
+                onTap: () => context.pushNamed(AppRoute.templateEditor.name),
               ),
             ],
           ),
@@ -171,11 +131,7 @@ class ProfileTab extends ConsumerWidget {
                 iconColor: AppColors.primary,
                 title: 'テーマ・きせかえ',
                 subtitle: 'カラー・ダークモード',
-                onTap: () => Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (_) => const ThemeSettingsScreen(),
-                  ),
-                ),
+                onTap: () => context.pushNamed(AppRoute.themeSettings.name),
               ),
               const Divider(height: 1),
               _NavTile(
@@ -183,11 +139,7 @@ class ProfileTab extends ConsumerWidget {
                 iconColor: AppColors.warning,
                 title: '通知設定',
                 subtitle: '通知・リマインダーの設定',
-                onTap: () => Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (_) => const NotificationSettingsScreen(),
-                  ),
-                ),
+                onTap: () => context.pushNamed(AppRoute.notificationSettings.name),
               ),
               const Divider(height: 1),
               _NavTile(
@@ -195,11 +147,7 @@ class ProfileTab extends ConsumerWidget {
                 iconColor: AppColors.typeClass,
                 title: 'カレンダー同期',
                 subtitle: 'Apple/Googleカレンダーと同期',
-                onTap: () => Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (_) => const CalendarSyncSettingsScreen(),
-                  ),
-                ),
+                onTap: () => context.pushNamed(AppRoute.calendarSyncSettings.name),
               ),
               const Divider(height: 1),
               _WeatherLocationTile(),
@@ -246,22 +194,14 @@ class ProfileTab extends ConsumerWidget {
                 leading: const Icon(Icons.description_outlined),
                 title: const Text('利用規約'),
                 trailing: const Icon(Icons.chevron_right),
-                onTap: () => Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (_) => const TermsOfServiceScreen(),
-                  ),
-                ),
+                onTap: () => context.pushNamed(AppRoute.termsOfService.name),
               ),
               const Divider(height: 1),
               ListTile(
                 leading: const Icon(Icons.privacy_tip_outlined),
                 title: const Text('プライバシーポリシー'),
                 trailing: const Icon(Icons.chevron_right),
-                onTap: () => Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (_) => const PrivacyPolicyScreen(),
-                  ),
-                ),
+                onTap: () => context.pushNamed(AppRoute.privacyPolicy.name),
               ),
               const Divider(height: 1),
               const ListTile(
@@ -277,11 +217,7 @@ class ProfileTab extends ConsumerWidget {
                 leading: const Icon(Icons.mail_outline),
                 title: const Text('お問い合わせ'),
                 trailing: const Icon(Icons.chevron_right),
-                onTap: () => Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (_) => const ContactScreen(),
-                  ),
-                ),
+                onTap: () => context.pushNamed(AppRoute.contact.name),
               ),
             ],
           ),
@@ -411,11 +347,7 @@ class _WeatherLocationTile extends ConsumerWidget {
       iconColor: AppColors.warning,
       title: '天気の地域',
       subtitle: location.name,
-      onTap: () => Navigator.of(context).push(
-        MaterialPageRoute(
-          builder: (_) => const WeatherLocationScreen(),
-        ),
-      ),
+      onTap: () => context.pushNamed(AppRoute.weatherLocation.name),
     );
   }
 }

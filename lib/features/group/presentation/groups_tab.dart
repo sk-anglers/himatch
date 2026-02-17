@@ -3,7 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:himatch/core/theme/app_theme.dart';
 import 'package:himatch/models/group.dart';
 import 'package:himatch/features/group/presentation/providers/group_providers.dart';
-import 'package:himatch/features/group/presentation/group_detail_screen.dart';
+import 'package:go_router/go_router.dart';
+import 'package:himatch/routing/app_routes.dart';
 import 'package:himatch/features/group/presentation/widgets/create_group_dialog.dart';
 import 'package:himatch/features/group/presentation/widgets/join_group_dialog.dart';
 import 'package:himatch/features/group/presentation/providers/notification_providers.dart';
@@ -165,10 +166,10 @@ class _GroupList extends ConsumerWidget {
   }
 
   void _openGroupDetail(BuildContext context, Group group) {
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (_) => GroupDetailScreen(group: group),
-      ),
+    context.pushNamed(
+      AppRoute.groupDetail.name,
+      pathParameters: {'groupId': group.id},
+      extra: {'group': group},
     );
   }
 

@@ -5,7 +5,8 @@ import 'package:himatch/core/theme/app_theme.dart';
 import 'package:himatch/core/utils/date_utils.dart';
 import 'package:himatch/models/schedule.dart';
 import 'package:himatch/models/shift_type.dart';
-import 'package:himatch/features/schedule/presentation/schedule_form_screen.dart';
+import 'package:go_router/go_router.dart';
+import 'package:himatch/routing/app_routes.dart';
 import 'package:himatch/features/schedule/presentation/providers/calendar_providers.dart';
 import 'package:himatch/features/schedule/presentation/providers/shift_type_providers.dart';
 import 'package:himatch/features/schedule/presentation/widgets/base_calendar_cell.dart';
@@ -385,23 +386,16 @@ class _CalendarTabState extends ConsumerState<CalendarTab> {
   }
 
   void _openAddForm() {
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (_) => ScheduleFormScreen(
-          initialDate: _selectedDay ?? DateTime.now(),
-        ),
-      ),
+    context.pushNamed(
+      AppRoute.scheduleForm.name,
+      extra: {'initialDate': _selectedDay ?? DateTime.now()},
     );
   }
 
   void _openEditForm(Schedule schedule) {
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (_) => ScheduleFormScreen(
-          initialDate: schedule.startTime,
-          schedule: schedule,
-        ),
-      ),
+    context.pushNamed(
+      AppRoute.scheduleForm.name,
+      extra: {'initialDate': schedule.startTime, 'schedule': schedule},
     );
   }
 
@@ -461,10 +455,9 @@ class _CalendarTabState extends ConsumerState<CalendarTab> {
         });
       },
       onTimeSlotTapped: (time) {
-        Navigator.of(context).push(
-          MaterialPageRoute(
-            builder: (_) => ScheduleFormScreen(initialDate: time),
-          ),
+        context.pushNamed(
+          AppRoute.scheduleForm.name,
+          extra: {'initialDate': time},
         );
       },
       weatherData: weatherData,
@@ -485,10 +478,9 @@ class _CalendarTabState extends ConsumerState<CalendarTab> {
       selectedDay: day,
       schedules: daySchedules,
       onTimeSlotTapped: (time) {
-        Navigator.of(context).push(
-          MaterialPageRoute(
-            builder: (_) => ScheduleFormScreen(initialDate: time),
-          ),
+        context.pushNamed(
+          AppRoute.scheduleForm.name,
+          extra: {'initialDate': time},
         );
       },
       weather: weather,
