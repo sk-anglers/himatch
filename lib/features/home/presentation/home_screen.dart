@@ -5,6 +5,7 @@ import 'package:himatch/features/group/presentation/groups_tab.dart';
 import 'package:himatch/features/suggestion/presentation/suggestions_tab.dart';
 import 'package:himatch/features/profile/presentation/profile_tab.dart';
 import 'package:himatch/features/group/presentation/providers/notification_providers.dart';
+import 'package:himatch/widgets/lazy_indexed_stack.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
@@ -41,7 +42,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           ),
         ],
       ),
-      body: IndexedStack(
+      body: LazyIndexedStack(
         index: _selectedIndex,
         children: const [
           CalendarTab(),
