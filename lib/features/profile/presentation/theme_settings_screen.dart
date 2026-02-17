@@ -195,7 +195,7 @@ class _DarkModeToggle extends StatelessWidget {
         ),
         value: isDarkMode,
         onChanged: onChanged,
-        activeColor: AppColors.primary,
+        activeThumbColor: AppColors.primary,
         secondary: Icon(
           isDarkMode ? Icons.dark_mode : Icons.light_mode,
           color: isDarkMode ? AppColors.primary : AppColors.warning,

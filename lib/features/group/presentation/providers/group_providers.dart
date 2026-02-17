@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:himatch/core/constants/demo_data.dart';
 import 'package:himatch/models/group.dart';
@@ -78,10 +80,10 @@ class LocalGroupsNotifier extends Notifier<List<Group>> {
   }
 
   String _generateInviteCode() {
-    final random = DateTime.now().microsecondsSinceEpoch;
+    final random = Random.secure();
     return List.generate(
       8,
-      (i) => _inviteChars[(random + i * 37) % _inviteChars.length],
+      (_) => _inviteChars[random.nextInt(_inviteChars.length)],
     ).join();
   }
 }

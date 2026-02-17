@@ -172,7 +172,7 @@ class NotificationSettingsScreen extends ConsumerWidget {
                             return s.copyWith(mutedGroupIds: updated);
                           });
                         },
-                        activeColor: AppColors.primary,
+                        activeThumbColor: AppColors.primary,
                         secondary: CircleAvatar(
                           radius: 18,
                           backgroundColor:
@@ -283,7 +283,7 @@ class _NotificationToggle extends StatelessWidget {
       ),
       value: value,
       onChanged: onChanged,
-      activeColor: AppColors.primary,
+      activeThumbColor: AppColors.primary,
       secondary: Icon(icon, color: AppColors.textSecondary),
     );
   }

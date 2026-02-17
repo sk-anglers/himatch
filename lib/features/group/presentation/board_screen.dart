@@ -293,7 +293,7 @@ class _PostCardState extends ConsumerState<_PostCard> {
                     child: ListView.separated(
                       scrollDirection: Axis.horizontal,
                       itemCount: post.imageUrls.length,
-                      separatorBuilder: (_, __) => const SizedBox(width: 8),
+                      separatorBuilder: (_, _) => const SizedBox(width: 8),
                       itemBuilder: (_, i) => ClipRRect(
                         borderRadius: BorderRadius.circular(8),
                         child: Image.network(
@@ -301,7 +301,7 @@ class _PostCardState extends ConsumerState<_PostCard> {
                           height: 160,
                           width: 160,
                           fit: BoxFit.cover,
-                          errorBuilder: (_, __, ___) => Container(
+                          errorBuilder: (_, _, _) => Container(
                             height: 160,
                             width: 160,
                             color: AppColors.surfaceVariant,

@@ -14,9 +14,11 @@ void main() {
   });
 
   group('LocalGroupsNotifier', () {
-    test('initial state is empty', () {
+    test('initial state has demo groups', () {
       final groups = container.read(localGroupsProvider);
-      expect(groups, isEmpty);
+      expect(groups, hasLength(2));
+      expect(groups[0].name, 'ゼミ3年');
+      expect(groups[1].name, 'バイト仲間');
     });
 
     test('createGroup adds a group', () {
@@ -24,10 +26,10 @@ void main() {
       notifier.createGroup(name: 'テストグループ');
 
       final groups = container.read(localGroupsProvider);
-      expect(groups, hasLength(1));
-      expect(groups.first.name, 'テストグループ');
-      expect(groups.first.inviteCode, hasLength(8));
-      expect(groups.first.createdBy, 'local-user');
+      expect(groups, hasLength(3));
+      expect(groups.last.name, 'テストグループ');
+      expect(groups.last.inviteCode, hasLength(8));
+      expect(groups.last.createdBy, 'local-user');
     });
 
     test('createGroup with description', () {
@@ -38,7 +40,7 @@ void main() {
       );
 
       final groups = container.read(localGroupsProvider);
-      expect(groups.first.description, '毎月の飲み会メンバー');
+      expect(groups.last.description, '毎月の飲み会メンバー');
     });
 
     test('createGroup auto-adds creator as owner', () {
@@ -56,12 +58,12 @@ void main() {
       final notifier = container.read(localGroupsProvider.notifier);
       final group = notifier.createGroup(name: 'グループ');
 
-      expect(container.read(localGroupsProvider), hasLength(1));
+      expect(container.read(localGroupsProvider), hasLength(3));
       expect(container.read(localGroupMembersProvider)[group.id], hasLength(1));
 
       notifier.removeGroup(group.id);
 
-      expect(container.read(localGroupsProvider), isEmpty);
+      expect(container.read(localGroupsProvider), hasLength(2));
       expect(container.read(localGroupMembersProvider)[group.id], isNull);
     });
 
@@ -116,14 +118,16 @@ void main() {
       notifier.createGroup(name: 'グループ2');
       notifier.createGroup(name: 'グループ3');
 
-      expect(container.read(localGroupsProvider), hasLength(3));
+      expect(container.read(localGroupsProvider), hasLength(5));
     });
   });
 
   group('LocalGroupMembersNotifier', () {
-    test('initial state is empty map', () {
+    test('initial state has demo members', () {
       final members = container.read(localGroupMembersProvider);
-      expect(members, isEmpty);
+      expect(members, isNotEmpty);
+      expect(members['demo-group-1'], hasLength(4));
+      expect(members['demo-group-2'], hasLength(3));
     });
 
     test('addMember creates entry for group', () {

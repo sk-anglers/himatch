@@ -4,7 +4,7 @@ import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
-import '../models/suggestion.dart';
+import 'package:himatch/models/suggestion.dart';
 
 /// Generate shareable image cards for confirmed plans.
 ///

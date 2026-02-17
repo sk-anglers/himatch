@@ -224,7 +224,7 @@ class ShiftPatternScreen extends ConsumerWidget {
                 Navigator.pop(ctx);
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
-                    content: Text('${pattern.name}を${days}日間適用しました'),
+                    content: Text('${pattern.name}を$days日間適用しました'),
                   ),
                 );
               },

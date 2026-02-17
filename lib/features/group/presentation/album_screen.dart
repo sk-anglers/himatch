@@ -276,7 +276,7 @@ class _PhotoGridItem extends StatelessWidget {
             child: Image.network(
               photo.thumbnailUrl ?? photo.imageUrl,
               fit: BoxFit.cover,
-              errorBuilder: (_, __, ___) => Container(
+              errorBuilder: (_, _, _) => Container(
                 color: AppColors.surfaceVariant,
                 child: const Icon(Icons.broken_image, color: AppColors.textHint),
               ),
@@ -357,7 +357,7 @@ class _FullScreenPhotoView extends ConsumerWidget {
                 child: Image.network(
                   photo.imageUrl,
                   fit: BoxFit.contain,
-                  errorBuilder: (_, __, ___) => const Icon(
+                  errorBuilder: (_, _, _) => const Icon(
                     Icons.broken_image,
                     color: Colors.white54,
                     size: 64,

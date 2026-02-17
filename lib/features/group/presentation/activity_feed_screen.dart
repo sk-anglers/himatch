@@ -122,7 +122,7 @@ class ActivityFeedScreen extends ConsumerWidget {
               child: ListView.separated(
                 padding: const EdgeInsets.all(16),
                 itemCount: activities.length,
-                separatorBuilder: (_, __) => const Divider(height: 1),
+                separatorBuilder: (_, _) => const Divider(height: 1),
                 itemBuilder: (context, index) {
                   final activity = activities[index];
                   return _ActivityTile(

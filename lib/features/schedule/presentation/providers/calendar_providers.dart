@@ -65,11 +65,11 @@ class LocalSchedulesNotifier extends Notifier<List<Schedule>> {
       final endParts = endTime.split(':');
       scheduleStart = DateTime(
         date.year, date.month, date.day,
-        int.parse(startParts[0]), int.parse(startParts[1]),
+        int.tryParse(startParts[0]) ?? 0, int.tryParse(startParts.length > 1 ? startParts[1] : '0') ?? 0,
       );
       scheduleEnd = DateTime(
         date.year, date.month, date.day,
-        int.parse(endParts[0]), int.parse(endParts[1]),
+        int.tryParse(endParts[0]) ?? 0, int.tryParse(endParts.length > 1 ? endParts[1] : '0') ?? 0,
       );
       // 夜勤等: 終了 < 開始の場合は翌日扱い
       if (scheduleEnd.isBefore(scheduleStart)) {
