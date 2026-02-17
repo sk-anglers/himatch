@@ -103,7 +103,7 @@ class ExportService {
   ///
   /// Returns the file path of the generated CSV.
   static Future<String> salaryToCsv(
-    SalaryReport report,
+    DetailedSalaryReport report,
     String workplaceName,
     int year,
     int month,
@@ -117,22 +117,22 @@ class ExportService {
       ['項目', '時間', '金額（円）'],
       [
         '通常勤務',
-        SalaryReport.formatMinutes(report.regularMinutes),
+        DetailedSalaryReport.formatMinutes(report.regularMinutes),
         report.regularPay,
       ],
       [
         '残業',
-        SalaryReport.formatMinutes(report.overtimeMinutes),
+        DetailedSalaryReport.formatMinutes(report.overtimeMinutes),
         report.overtimePay,
       ],
       [
         '深夜手当',
-        SalaryReport.formatMinutes(report.nightMinutes),
+        DetailedSalaryReport.formatMinutes(report.nightMinutes),
         report.nightPay,
       ],
       [
         '休日手当',
-        SalaryReport.formatMinutes(report.holidayMinutes),
+        DetailedSalaryReport.formatMinutes(report.holidayMinutes),
         report.holidayPay,
       ],
       [
@@ -164,7 +164,7 @@ class ExportService {
   /// Returns the file path of the generated PDF.
   static Future<String> workReportToPdf(
     List<Schedule> shifts,
-    SalaryReport report,
+    DetailedSalaryReport report,
     String workplaceName,
     int year,
     int month,
@@ -303,7 +303,7 @@ class ExportService {
     );
   }
 
-  static pw.Widget _buildSalarySummary(SalaryReport report) {
+  static pw.Widget _buildSalarySummary(DetailedSalaryReport report) {
     return pw.Container(
       padding: const pw.EdgeInsets.all(12),
       decoration: pw.BoxDecoration(
@@ -329,19 +329,19 @@ class ExportService {
           ),
           _summaryRow(
             'Regular',
-            '${SalaryReport.formatMinutes(report.regularMinutes)}  /  ${report.regularPay} yen',
+            '${DetailedSalaryReport.formatMinutes(report.regularMinutes)}  /  ${report.regularPay} yen',
           ),
           _summaryRow(
             'Overtime',
-            '${SalaryReport.formatMinutes(report.overtimeMinutes)}  /  ${report.overtimePay} yen',
+            '${DetailedSalaryReport.formatMinutes(report.overtimeMinutes)}  /  ${report.overtimePay} yen',
           ),
           _summaryRow(
             'Night',
-            '${SalaryReport.formatMinutes(report.nightMinutes)}  /  ${report.nightPay} yen',
+            '${DetailedSalaryReport.formatMinutes(report.nightMinutes)}  /  ${report.nightPay} yen',
           ),
           _summaryRow(
             'Holiday',
-            '${SalaryReport.formatMinutes(report.holidayMinutes)}  /  ${report.holidayPay} yen',
+            '${DetailedSalaryReport.formatMinutes(report.holidayMinutes)}  /  ${report.holidayPay} yen',
           ),
           _summaryRow(
             'Transport',
