@@ -386,7 +386,7 @@ class _SalarySummaryScreenState extends ConsumerState<SalarySummaryScreen> {
         '深夜手当',
         salary.nightPay,
         '${salary.nightHours.toStringAsFixed(1)}時間',
-        const Color(0xFF6C5CE7),
+        AppColors.primary,
       ),
       _BreakdownItem(
         '休日手当',

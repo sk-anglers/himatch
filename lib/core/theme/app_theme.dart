@@ -80,18 +80,51 @@ enum ThemePreset {
 }
 
 abstract class AppTheme {
+  /// Custom TextTheme based on design doc §4 type scale.
+  static const _textThemeLight = TextTheme(
+    displayLarge: TextStyle(
+        fontSize: 28, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
+    titleLarge: TextStyle(
+        fontSize: 20, fontWeight: FontWeight.w600, color: AppColors.textPrimary),
+    titleMedium: TextStyle(
+        fontSize: 17, fontWeight: FontWeight.w600, color: AppColors.textPrimary),
+    bodyLarge: TextStyle(
+        fontSize: 15, fontWeight: FontWeight.normal, color: AppColors.textPrimary),
+    bodySmall: TextStyle(
+        fontSize: 13, fontWeight: FontWeight.normal, color: AppColors.textSecondary),
+    labelSmall: TextStyle(
+        fontSize: 11, fontWeight: FontWeight.w500, color: AppColors.textSecondary),
+  );
+
+  static const _textThemeDark = TextTheme(
+    displayLarge: TextStyle(
+        fontSize: 28, fontWeight: FontWeight.bold, color: Color(0xFFE8E8E8)),
+    titleLarge: TextStyle(
+        fontSize: 20, fontWeight: FontWeight.w600, color: Color(0xFFE8E8E8)),
+    titleMedium: TextStyle(
+        fontSize: 17, fontWeight: FontWeight.w600, color: Color(0xFFE8E8E8)),
+    bodyLarge: TextStyle(
+        fontSize: 15, fontWeight: FontWeight.normal, color: Color(0xFFE8E8E8)),
+    bodySmall: TextStyle(
+        fontSize: 13, fontWeight: FontWeight.normal, color: Color(0xFFB0B0B0)),
+    labelSmall: TextStyle(
+        fontSize: 11, fontWeight: FontWeight.w500, color: Color(0xFFB0B0B0)),
+  );
+
   static ThemeData light({Color? seedColor}) {
     final seed = seedColor ?? AppColors.primary;
+    final colorScheme = ColorScheme.fromSeed(
+      seedColor: seed,
+      brightness: Brightness.light,
+      primary: seed,
+      secondary: AppColors.secondary,
+      surface: AppColors.surface,
+      error: AppColors.error,
+    );
     return ThemeData(
       useMaterial3: true,
-      colorScheme: ColorScheme.fromSeed(
-        seedColor: seed,
-        brightness: Brightness.light,
-        primary: seed,
-        secondary: AppColors.secondary,
-        surface: AppColors.surface,
-        error: AppColors.error,
-      ),
+      colorScheme: colorScheme,
+      textTheme: _textThemeLight,
       scaffoldBackgroundColor: AppColors.background,
       appBarTheme: const AppBarTheme(
         backgroundColor: Colors.white,
@@ -100,9 +133,10 @@ abstract class AppTheme {
         centerTitle: true,
       ),
       cardTheme: CardThemeData(
-        elevation: 2,
+        elevation: 0,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
+          side: BorderSide(color: colorScheme.outlineVariant),
         ),
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
@@ -114,6 +148,47 @@ abstract class AppTheme {
           ),
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
         ),
+      ),
+      outlinedButtonTheme: OutlinedButtonThemeData(
+        style: OutlinedButton.styleFrom(
+          foregroundColor: seed,
+          side: BorderSide(color: seed),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+        ),
+      ),
+      filledButtonTheme: FilledButtonThemeData(
+        style: FilledButton.styleFrom(
+          backgroundColor: seed,
+          foregroundColor: Colors.white,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+        ),
+      ),
+      bottomSheetTheme: const BottomSheetThemeData(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+        ),
+        backgroundColor: AppColors.surface,
+        showDragHandle: true,
+      ),
+      navigationBarTheme: NavigationBarThemeData(
+        indicatorShape: const StadiumBorder(),
+        indicatorColor: seed.withValues(alpha: 0.12),
+        labelTextStyle: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) {
+            return TextStyle(
+                fontSize: 11, fontWeight: FontWeight.w600, color: seed);
+          }
+          return const TextStyle(
+              fontSize: 11,
+              fontWeight: FontWeight.w500,
+              color: AppColors.textSecondary);
+        }),
       ),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
@@ -133,16 +208,18 @@ abstract class AppTheme {
 
   static ThemeData dark({Color? seedColor}) {
     final seed = seedColor ?? AppColors.primary;
+    final colorScheme = ColorScheme.fromSeed(
+      seedColor: seed,
+      brightness: Brightness.dark,
+      primary: seed,
+      secondary: AppColors.secondaryLight,
+      error: AppColors.error,
+    );
     return ThemeData(
       useMaterial3: true,
       brightness: Brightness.dark,
-      colorScheme: ColorScheme.fromSeed(
-        seedColor: seed,
-        brightness: Brightness.dark,
-        primary: seed,
-        secondary: AppColors.secondaryLight,
-        error: AppColors.error,
-      ),
+      colorScheme: colorScheme,
+      textTheme: _textThemeDark,
       scaffoldBackgroundColor: const Color(0xFF1A1A2E),
       appBarTheme: const AppBarTheme(
         backgroundColor: Color(0xFF16213E),
@@ -151,10 +228,11 @@ abstract class AppTheme {
         centerTitle: true,
       ),
       cardTheme: CardThemeData(
-        elevation: 2,
+        elevation: 0,
         color: const Color(0xFF16213E),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
+          side: BorderSide(color: colorScheme.outlineVariant),
         ),
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
@@ -166,6 +244,47 @@ abstract class AppTheme {
           ),
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
         ),
+      ),
+      outlinedButtonTheme: OutlinedButtonThemeData(
+        style: OutlinedButton.styleFrom(
+          foregroundColor: seed,
+          side: BorderSide(color: seed),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+        ),
+      ),
+      filledButtonTheme: FilledButtonThemeData(
+        style: FilledButton.styleFrom(
+          backgroundColor: seed,
+          foregroundColor: Colors.white,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+        ),
+      ),
+      bottomSheetTheme: const BottomSheetThemeData(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+        ),
+        backgroundColor: Color(0xFF16213E),
+        showDragHandle: true,
+      ),
+      navigationBarTheme: NavigationBarThemeData(
+        indicatorShape: const StadiumBorder(),
+        indicatorColor: seed.withValues(alpha: 0.18),
+        labelTextStyle: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) {
+            return TextStyle(
+                fontSize: 11, fontWeight: FontWeight.w600, color: seed);
+          }
+          return const TextStyle(
+              fontSize: 11,
+              fontWeight: FontWeight.w500,
+              color: Color(0xFFB0B0B0));
+        }),
       ),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,

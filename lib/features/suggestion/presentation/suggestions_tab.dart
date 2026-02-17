@@ -1,9 +1,11 @@
 import 'package:himatch/core/constants/app_constants.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:himatch/core/theme/app_theme.dart';
 import 'package:himatch/core/utils/date_utils.dart';
+import 'package:himatch/core/widgets/empty_state_widget.dart';
 import 'package:himatch/models/group.dart';
 import 'package:himatch/models/suggestion.dart';
 import 'package:himatch/models/vote.dart';
@@ -182,29 +184,10 @@ class _GroupSelector extends StatelessWidget {
 class _NoGroupState extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(32),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.group_add_outlined,
-                size: 80, color: AppColors.primary.withValues(alpha: 0.3)),
-            const SizedBox(height: 24),
-            const Text('グループに参加しましょう',
-                style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.textPrimary)),
-            const SizedBox(height: 8),
-            const Text(
-              'グループタブでグループを作成または\n招待コードで参加すると候補日が表示されます',
-              textAlign: TextAlign.center,
-              style: TextStyle(color: AppColors.textSecondary, fontSize: 14),
-            ),
-          ],
-        ),
-      ),
+    return const EmptyStateWidget(
+      icon: Icons.group_add_outlined,
+      title: 'グループに参加しましょう',
+      subtitle: 'グループタブでグループを作成または\n招待コードで参加すると候補日が表示されます',
     );
   }
 }
@@ -244,29 +227,10 @@ class _EmptySuggestionState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(32),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.lightbulb_outline,
-                size: 80, color: AppColors.warning.withValues(alpha: 0.3)),
-            const SizedBox(height: 24),
-            const Text('候補日がありません',
-                style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.textPrimary)),
-            const SizedBox(height: 8),
-            const Text(
-              'メンバーの空き時間が見つかりませんでした\n右下の「更新」ボタンで再検索できます',
-              textAlign: TextAlign.center,
-              style: TextStyle(color: AppColors.textSecondary, fontSize: 14),
-            ),
-          ],
-        ),
-      ),
+    return const EmptyStateWidget(
+      icon: Icons.lightbulb_outline,
+      title: '候補日がありません',
+      subtitle: 'メンバーの空き時間が見つかりませんでした\n右下の「更新」ボタンで再検索できます',
     );
   }
 }
@@ -687,7 +651,10 @@ class _DayDetailSheet extends ConsumerWidget {
                     .map((g) => g.name)
                     .firstOrNull;
                 return _SuggestionTile(
-                    suggestion: s, groupName: groupName);
+                    suggestion: s, groupName: groupName)
+                    .animate()
+                    .fadeIn(duration: 300.ms, delay: (60 * index).ms)
+                    .slideX(begin: 0.05, duration: 300.ms, delay: (60 * index).ms);
               },
             ),
           ),

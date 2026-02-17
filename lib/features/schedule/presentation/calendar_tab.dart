@@ -413,30 +413,38 @@ class _CalendarTabState extends ConsumerState<CalendarTab> {
   }
 
   Widget _buildViewModeToggle() {
+    final colors = Theme.of(context).extension<AppColorsExtension>()!;
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-      child: SegmentedButton<_CalendarViewMode>(
-        segments: const [
-          ButtonSegment(
-            value: _CalendarViewMode.calendar,
-            icon: Icon(Icons.calendar_month, size: 16),
-            label: Text('月'),
-          ),
-          ButtonSegment(
-            value: _CalendarViewMode.week,
-            icon: Icon(Icons.view_week, size: 16),
-            label: Text('週'),
-          ),
-          ButtonSegment(
-            value: _CalendarViewMode.day,
-            icon: Icon(Icons.view_day, size: 16),
-            label: Text('日'),
-          ),
-        ],
-        selected: {_viewMode},
-        onSelectionChanged: (Set<_CalendarViewMode> newSelection) {
-          setState(() => _viewMode = newSelection.first);
-        },
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: _CalendarViewMode.values.map((mode) {
+          final isSelected = _viewMode == mode;
+          final (icon, label) = switch (mode) {
+            _CalendarViewMode.calendar => (Icons.calendar_month, '月'),
+            _CalendarViewMode.week => (Icons.view_week, '週'),
+            _CalendarViewMode.day => (Icons.view_day, '日'),
+          };
+          return Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 4),
+            child: ChoiceChip(
+              avatar: Icon(icon, size: 16,
+                  color: isSelected ? Colors.white : colors.textSecondary),
+              label: Text(label),
+              selected: isSelected,
+              selectedColor: colors.primary,
+              labelStyle: TextStyle(
+                color: isSelected ? Colors.white : colors.textSecondary,
+                fontWeight: FontWeight.w600,
+                fontSize: 13,
+              ),
+              shape: const StadiumBorder(),
+              side: BorderSide.none,
+              showCheckmark: false,
+              onSelected: (_) => setState(() => _viewMode = mode),
+            ),
+          );
+        }).toList(),
       ),
     );
   }

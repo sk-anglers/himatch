@@ -27,21 +27,41 @@ class ProfileTab extends ConsumerWidget {
           if (authState.isDemo)
             Container(
               margin: const EdgeInsets.only(bottom: 12),
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
               decoration: BoxDecoration(
-                color: AppColors.warning.withValues(alpha: 0.15),
-                borderRadius: BorderRadius.circular(8),
+                gradient: LinearGradient(
+                  colors: [
+                    AppColors.warning.withValues(alpha: 0.18),
+                    AppColors.warning.withValues(alpha: 0.08),
+                  ],
+                ),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                  color: AppColors.warning.withValues(alpha: 0.3),
+                ),
               ),
-              child: const Row(
+              child: Row(
                 children: [
-                  Icon(Icons.science, size: 16, color: AppColors.warning),
-                  SizedBox(width: 8),
-                  Text(
-                    'デモモードで動作中',
-                    style: TextStyle(
-                      color: AppColors.warning,
-                      fontSize: 13,
-                      fontWeight: FontWeight.w600,
+                  const Icon(Icons.science, size: 18, color: AppColors.warning),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'デモモードで動作中',
+                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                fontWeight: FontWeight.w600,
+                                color: AppColors.warning,
+                              ),
+                        ),
+                        Text(
+                          'データはローカルに保存されます',
+                          style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                                color: AppColors.warning.withValues(alpha: 0.7),
+                              ),
+                        ),
+                      ],
                     ),
                   ),
                 ],
@@ -500,9 +520,9 @@ class _SectionHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     return Text(
       title,
-      style: Theme.of(context).textTheme.titleSmall?.copyWith(
+      style: Theme.of(context).textTheme.titleMedium?.copyWith(
             fontWeight: FontWeight.bold,
-            color: AppColors.textSecondary,
+            color: Theme.of(context).extension<AppColorsExtension>()!.textSecondary,
           ),
     );
   }

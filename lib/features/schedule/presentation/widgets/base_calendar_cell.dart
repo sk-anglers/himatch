@@ -35,42 +35,45 @@ class BaseCalendarCell extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = Theme.of(context).extension<AppColorsExtension>()!;
     final isHoliday = holidayName != null;
     final isSunday = day.weekday == DateTime.sunday;
     final isSaturday = day.weekday == DateTime.saturday;
 
-    // Day number color
+    // Day number color (theme-aware)
     Color dayColor;
     if (isOutside) {
-      dayColor = AppColors.textHint;
+      dayColor = colors.textHint;
     } else if (isSelected) {
-      dayColor = AppColors.primary;
+      dayColor = colors.primary;
     } else if (isToday) {
-      dayColor = AppColors.primaryDark;
+      dayColor = colors.primaryDark;
     } else if (isHoliday || isSunday) {
-      dayColor = AppColors.error;
+      dayColor = colors.error;
     } else if (isSaturday) {
-      dayColor = const Color(0xFF3498DB);
+      dayColor = AppColors.weatherRainy;
     } else {
-      dayColor = AppColors.textPrimary;
+      dayColor = colors.textPrimary;
     }
 
-    return Container(
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 200),
+      curve: Curves.easeInOut,
       margin: const EdgeInsets.all(1),
       decoration: BoxDecoration(
         color: isSelected
-            ? AppColors.primary.withValues(alpha: 0.12)
+            ? colors.primary.withValues(alpha: 0.12)
             : isToday
-                ? AppColors.primaryLight.withValues(alpha: 0.10)
+                ? colors.primaryLight.withValues(alpha: 0.10)
                 : isHoliday && !isOutside
-                    ? AppColors.error.withValues(alpha: 0.04)
+                    ? colors.error.withValues(alpha: 0.04)
                     : null,
         border: Border.all(
           color: isSelected
-              ? AppColors.primary
+              ? colors.primary
               : isToday
-                  ? AppColors.primaryLight
-                  : AppColors.surfaceVariant,
+                  ? colors.primaryLight
+                  : colors.surfaceVariant,
           width: isSelected || isToday ? 1.5 : 0.5,
         ),
         borderRadius: BorderRadius.circular(6),
@@ -98,9 +101,9 @@ class BaseCalendarCell extends StatelessWidget {
                         holidayName!.length > 3
                             ? holidayName!.substring(0, 3)
                             : holidayName!,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 8,
-                          color: AppColors.error,
+                          color: colors.error,
                           fontWeight: FontWeight.bold,
                           height: 1.8,
                         ),

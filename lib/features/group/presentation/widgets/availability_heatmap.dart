@@ -213,7 +213,7 @@ class _AvailabilityHeatmapState extends ConsumerState<AvailabilityHeatmap> {
                                     color: isSunday
                                         ? AppColors.error
                                         : isSaturday
-                                            ? const Color(0xFF3498DB)
+                                            ? AppColors.weatherRainy
                                             : AppColors.textHint,
                                   ),
                                 ),
