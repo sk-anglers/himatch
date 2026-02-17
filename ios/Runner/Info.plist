@@ -51,6 +51,17 @@
 	<string>グループアルバムに写真を撮影して投稿するために使用します</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>グループアルバムに写真を選択して投稿するために使用します</string>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>com.skanglers.himatch</string>
+			</array>
+		</dict>
+	</array>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>現在地の天気予報を表示するために位置情報を使用します。</string>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
