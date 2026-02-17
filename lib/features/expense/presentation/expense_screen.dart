@@ -1,3 +1,4 @@
+import 'package:himatch/core/constants/app_constants.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:himatch/core/theme/app_theme.dart';
@@ -25,7 +26,7 @@ class ExpenseScreen extends ConsumerStatefulWidget {
 }
 
 class _ExpenseScreenState extends ConsumerState<ExpenseScreen> {
-  static const _currentUserId = 'local-user';
+  static const _currentUserId = AppConstants.localUserId;
   static const _currentUserName = 'あなた';
 
   @override
@@ -236,7 +237,7 @@ class _ExpenseScreenState extends ConsumerState<ExpenseScreen> {
                   decoration: const InputDecoration(labelText: '支払った人'),
                   items: members.map((m) {
                     final name = m.nickname ??
-                        (m.userId == 'local-user' ? 'あなた' : 'メンバー');
+                        (m.userId == AppConstants.localUserId ? 'あなた' : 'メンバー');
                     return DropdownMenuItem(
                       value: m.userId,
                       child: Text(name),
@@ -250,7 +251,7 @@ class _ExpenseScreenState extends ConsumerState<ExpenseScreen> {
                           members.where((m) => m.userId == value);
                       paidByName = member.isNotEmpty
                           ? member.first.nickname ??
-                              (member.first.userId == 'local-user'
+                              (member.first.userId == AppConstants.localUserId
                                   ? 'あなた'
                                   : 'メンバー')
                           : 'メンバー';
@@ -316,7 +317,7 @@ class _ExpenseScreenState extends ConsumerState<ExpenseScreen> {
                         id: '${m.userId}-${DateTime.now().millisecondsSinceEpoch}',
                         userId: m.userId,
                         displayName: m.nickname ??
-                            (m.userId == 'local-user' ? 'あなた' : 'メンバー'),
+                            (m.userId == AppConstants.localUserId ? 'あなた' : 'メンバー'),
                         amount: splitAmount,
                         isPaid: false,
                       ),

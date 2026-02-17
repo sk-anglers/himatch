@@ -1,3 +1,4 @@
+import 'package:himatch/core/constants/app_constants.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:himatch/core/constants/demo_data.dart';
 import 'package:himatch/models/schedule.dart';
@@ -28,7 +29,7 @@ class LocalSchedulesNotifier extends Notifier<List<Schedule>> {
   }) {
     final schedule = Schedule(
       id: _uuid.v4(),
-      userId: 'local-user',
+      userId: AppConstants.localUserId,
       title: title,
       scheduleType: scheduleType,
       startTime: startTime,
@@ -83,7 +84,7 @@ class LocalSchedulesNotifier extends Notifier<List<Schedule>> {
 
     final schedule = Schedule(
       id: _uuid.v4(),
-      userId: 'local-user',
+      userId: AppConstants.localUserId,
       title: title,
       scheduleType: isOff ? ScheduleType.free : ScheduleType.shift,
       startTime: scheduleStart,

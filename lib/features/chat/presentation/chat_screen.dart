@@ -1,3 +1,4 @@
+import 'package:himatch/core/constants/app_constants.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:himatch/core/theme/app_theme.dart';
@@ -27,7 +28,7 @@ class ChatScreen extends ConsumerStatefulWidget {
 class _ChatScreenState extends ConsumerState<ChatScreen> {
   final _textController = TextEditingController();
   final _scrollController = ScrollController();
-  static const _currentUserId = 'local-user';
+  static const _currentUserId = AppConstants.localUserId;
   static const _reactionEmojis = [
     '\u{1F44D}', // thumbs up
     '\u{2764}\u{FE0F}', // heart

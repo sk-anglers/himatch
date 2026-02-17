@@ -1,3 +1,4 @@
+import 'package:himatch/core/constants/app_constants.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:himatch/features/group/presentation/providers/group_providers.dart';
@@ -29,7 +30,7 @@ void main() {
       expect(groups, hasLength(3));
       expect(groups.last.name, 'テストグループ');
       expect(groups.last.inviteCode, hasLength(8));
-      expect(groups.last.createdBy, 'local-user');
+      expect(groups.last.createdBy, AppConstants.localUserId);
     });
 
     test('createGroup with description', () {
@@ -51,7 +52,7 @@ void main() {
       expect(members[group.id], isNotNull);
       expect(members[group.id], hasLength(1));
       expect(members[group.id]!.first.role, 'owner');
-      expect(members[group.id]!.first.userId, 'local-user');
+      expect(members[group.id]!.first.userId, AppConstants.localUserId);
     });
 
     test('removeGroup removes group and members', () {

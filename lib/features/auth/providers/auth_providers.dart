@@ -1,3 +1,4 @@
+import 'package:himatch/core/constants/app_constants.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 /// Unified auth state that works in both demo and Supabase modes.
@@ -28,7 +29,7 @@ class AuthNotifier extends Notifier<AuthState> {
   void signInDemo() {
     state = const AuthState(
       mode: AuthMode.demo,
-      userId: 'local-user',
+      userId: AppConstants.localUserId,
       displayName: 'デモユーザー',
     );
   }

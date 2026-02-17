@@ -1,3 +1,4 @@
+import 'package:himatch/core/constants/app_constants.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:table_calendar/table_calendar.dart';
@@ -779,7 +780,7 @@ class _SuggestionTile extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final authState = ref.watch(authNotifierProvider);
-    final currentUserId = authState.userId ?? 'local-user';
+    final currentUserId = authState.userId ?? AppConstants.localUserId;
     final membersMap = ref.watch(localGroupMembersProvider);
     final groupMembers = membersMap[suggestion.groupId] ?? [];
     final isOwner =
@@ -1086,7 +1087,7 @@ class _SuggestionTile extends ConsumerWidget {
           ref.read(chatMessagesProvider.notifier).sendMessage(
                 groupId: suggestion.groupId,
                 content: messageText,
-                userId: authState.userId ?? 'local-user',
+                userId: authState.userId ?? AppConstants.localUserId,
                 displayName: authState.displayName ?? 'You',
                 relatedSuggestionId: suggestion.id,
               );
@@ -1106,7 +1107,7 @@ class _SuggestionTile extends ConsumerWidget {
           final authState = ref.read(authNotifierProvider);
           ref.read(localPollsProvider.notifier).createPoll(
                 groupId: suggestion.groupId,
-                createdBy: authState.userId ?? 'local-user',
+                createdBy: authState.userId ?? AppConstants.localUserId,
                 creatorName: authState.displayName ?? 'You',
                 question: '$date ${suggestion.activityType}に参加できる？',
                 options: ['参加OK', '微妙…', '不参加'],

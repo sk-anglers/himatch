@@ -1,3 +1,4 @@
+import 'package:himatch/core/constants/app_constants.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:table_calendar/table_calendar.dart';
@@ -61,7 +62,7 @@ class _GroupCalendarScreenState extends ConsumerState<GroupCalendarScreen> {
     // In demo mode, only local-user has real schedules, others are "fully free"
     final memberSchedules = <String, List<Schedule>>{};
     for (final member in members) {
-      if (member.userId == 'local-user') {
+      if (member.userId == AppConstants.localUserId) {
         memberSchedules[member.userId] = mySchedules;
       } else {
         // Demo: generate simulated schedules for other members
@@ -111,7 +112,7 @@ class _GroupCalendarScreenState extends ConsumerState<GroupCalendarScreen> {
                   children: [
                     // シフトバッジ（local-userのみ、最大1つ）
                     ...shiftEvents
-                        .where((e) => e.userId == 'local-user')
+                        .where((e) => e.userId == AppConstants.localUserId)
                         .take(1)
                         .map((e) {
                       final st = shiftTypeMap[e.shiftTypeId];
@@ -124,8 +125,8 @@ class _GroupCalendarScreenState extends ConsumerState<GroupCalendarScreen> {
                     // 他メンバーはドット
                     ...userIds
                         .where((uid) =>
-                            uid != 'local-user' ||
-                            shiftEvents.every((e) => e.userId != 'local-user'))
+                            uid != AppConstants.localUserId ||
+                            shiftEvents.every((e) => e.userId != AppConstants.localUserId))
                         .take(3)
                         .map((userId) {
                       final idx = memberList
@@ -399,7 +400,7 @@ class _MemberLegend extends StatelessWidget {
                 ),
                 const SizedBox(width: 4),
                 Text(
-                  members[i].userId == 'local-user'
+                  members[i].userId == AppConstants.localUserId
                       ? 'あなた'
                       : members[i].nickname ?? 'メンバー${i + 1}',
                   style: const TextStyle(fontSize: 12),
@@ -471,7 +472,7 @@ class _MemberDaySchedules extends StatelessWidget {
           return d == targetDate;
         }).toList();
 
-        final name = member.userId == 'local-user'
+        final name = member.userId == AppConstants.localUserId
             ? 'あなた'
             : member.nickname ?? 'メンバー${index + 1}';
 

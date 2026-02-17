@@ -1,3 +1,4 @@
+import 'package:himatch/core/constants/app_constants.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:himatch/core/theme/app_theme.dart';
@@ -158,7 +159,7 @@ class ActivityFeedScreen extends ConsumerWidget {
                             groupId: groupId,
                             activityId: activity.id,
                             emoji: emoji,
-                            userId: 'local-user',
+                            userId: AppConstants.localUserId,
                           );
                       Navigator.pop(ctx);
                     },

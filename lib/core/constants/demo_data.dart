@@ -1,3 +1,4 @@
+import 'package:himatch/core/constants/app_constants.dart';
 import 'package:himatch/models/group.dart';
 import 'package:himatch/models/schedule.dart';
 
@@ -14,7 +15,7 @@ abstract class DemoData {
       name: 'ゼミ3年',
       description: '田中ゼミ 3年メンバー',
       inviteCode: 'ZEMI2026',
-      createdBy: 'local-user',
+      createdBy: AppConstants.localUserId,
       createdAt: DateTime(2026, 1, 15),
     ),
     Group(
@@ -33,7 +34,7 @@ abstract class DemoData {
       GroupMember(
         id: 'gm-1',
         groupId: demoGroupId,
-        userId: 'local-user',
+        userId: AppConstants.localUserId,
         role: 'owner',
         joinedAt: DateTime(2026, 1, 15),
       ),
@@ -74,7 +75,7 @@ abstract class DemoData {
       GroupMember(
         id: 'gm-6',
         groupId: demoGroupId2,
-        userId: 'local-user',
+        userId: AppConstants.localUserId,
         role: 'member',
         joinedAt: DateTime(2026, 2, 2),
       ),
@@ -97,7 +98,7 @@ abstract class DemoData {
     final today = DateTime(now.year, now.month, now.day);
 
     return {
-      'local-user': my,
+      AppConstants.localUserId: my,
 
       // あかり: 大学生。月水金は授業、火木はバイト
       'demo-user-a': [
@@ -350,7 +351,7 @@ abstract class DemoData {
       // 今日: バイト
       Schedule(
         id: 'demo-my-0',
-        userId: 'local-user',
+        userId: AppConstants.localUserId,
         title: 'バイト',
         scheduleType: ScheduleType.shift,
         startTime: today,
@@ -363,7 +364,7 @@ abstract class DemoData {
       // 明日: 授業
       Schedule(
         id: 'demo-my-1',
-        userId: 'local-user',
+        userId: AppConstants.localUserId,
         title: '授業',
         scheduleType: ScheduleType.shift,
         startTime: today.add(const Duration(days: 1)),
@@ -376,7 +377,7 @@ abstract class DemoData {
       // 明後日: 終日空き
       Schedule(
         id: 'demo-my-2',
-        userId: 'local-user',
+        userId: AppConstants.localUserId,
         title: '終日空き',
         scheduleType: ScheduleType.free,
         startTime: today.add(const Duration(days: 2)),
@@ -389,7 +390,7 @@ abstract class DemoData {
       // 3日後: サークル
       Schedule(
         id: 'demo-my-3',
-        userId: 'local-user',
+        userId: AppConstants.localUserId,
         title: 'サークル',
         scheduleType: ScheduleType.shift,
         startTime: today.add(const Duration(days: 3, hours: 15)),
@@ -401,7 +402,7 @@ abstract class DemoData {
       // 5日後: 午後空き
       Schedule(
         id: 'demo-my-5',
-        userId: 'local-user',
+        userId: AppConstants.localUserId,
         title: '午後空き',
         scheduleType: ScheduleType.free,
         startTime: today.add(const Duration(days: 5, hours: 13)),
@@ -413,7 +414,7 @@ abstract class DemoData {
       // 6日後: 休み
       Schedule(
         id: 'demo-my-6',
-        userId: 'local-user',
+        userId: AppConstants.localUserId,
         title: '休み',
         scheduleType: ScheduleType.free,
         startTime: today.add(const Duration(days: 6)),
@@ -426,7 +427,7 @@ abstract class DemoData {
       // 7日後: 一般予定（シフトなし）
       Schedule(
         id: 'demo-my-7',
-        userId: 'local-user',
+        userId: AppConstants.localUserId,
         title: '歯医者',
         scheduleType: ScheduleType.event,
         startTime: today.add(const Duration(days: 7, hours: 10)),
@@ -436,7 +437,7 @@ abstract class DemoData {
       // 8日後: バイト
       Schedule(
         id: 'demo-my-8',
-        userId: 'local-user',
+        userId: AppConstants.localUserId,
         title: 'バイト',
         scheduleType: ScheduleType.shift,
         startTime: today.add(const Duration(days: 8)),
@@ -449,7 +450,7 @@ abstract class DemoData {
       // 10日後: 午前空き
       Schedule(
         id: 'demo-my-10',
-        userId: 'local-user',
+        userId: AppConstants.localUserId,
         title: '午前空き',
         scheduleType: ScheduleType.free,
         startTime: today.add(const Duration(days: 10, hours: 9)),

@@ -1,3 +1,4 @@
+import 'package:himatch/core/constants/app_constants.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:himatch/models/event_template.dart';
 import 'package:uuid/uuid.dart';
@@ -34,7 +35,7 @@ class EventTemplatesNotifier extends Notifier<List<EventTemplate>> {
   }) {
     final template = EventTemplate(
       id: _uuid.v4(),
-      userId: 'local-user',
+      userId: AppConstants.localUserId,
       name: name,
       title: title,
       defaultStartTime: defaultStartTime,

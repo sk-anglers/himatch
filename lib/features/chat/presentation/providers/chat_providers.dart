@@ -1,3 +1,4 @@
+import 'package:himatch/core/constants/app_constants.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:himatch/core/constants/demo_data.dart';
 import 'package:himatch/features/auth/providers/auth_providers.dart';
@@ -100,7 +101,7 @@ class ChatMessagesNotifier extends Notifier<Map<String, List<ChatMessage>>> {
   void sendMessage({
     required String groupId,
     required String content,
-    String userId = 'local-user',
+    String userId = AppConstants.localUserId,
     String displayName = 'You',
     MessageType messageType = MessageType.text,
     String? imageUrl,
@@ -133,7 +134,7 @@ class ChatMessagesNotifier extends Notifier<Map<String, List<ChatMessage>>> {
     required String groupId,
     required String messageId,
     required String emoji,
-    String userId = 'local-user',
+    String userId = AppConstants.localUserId,
   }) {
     final messages = List<ChatMessage>.from(state[groupId] ?? []);
     state = {
@@ -161,7 +162,7 @@ class ChatMessagesNotifier extends Notifier<Map<String, List<ChatMessage>>> {
     required String groupId,
     required String messageId,
     required String emoji,
-    String userId = 'local-user',
+    String userId = AppConstants.localUserId,
   }) {
     final messages = List<ChatMessage>.from(state[groupId] ?? []);
     state = {
@@ -184,7 +185,7 @@ class ChatMessagesNotifier extends Notifier<Map<String, List<ChatMessage>>> {
   }
 
   /// Mark all messages in a group as read by the current user.
-  void markAsRead(String groupId, {String userId = 'local-user'}) {
+  void markAsRead(String groupId, {String userId = AppConstants.localUserId}) {
     final messages = List<ChatMessage>.from(state[groupId] ?? []);
     state = {
       ...state,
@@ -206,5 +207,5 @@ class ChatMessagesNotifier extends Notifier<Map<String, List<ChatMessage>>> {
 final unreadCountProvider = Provider.family<int, String>((ref, groupId) {
   final allMessages = ref.watch(chatMessagesProvider);
   final messages = allMessages[groupId] ?? [];
-  return messages.where((m) => !m.readBy.contains('local-user')).length;
+  return messages.where((m) => !m.readBy.contains(AppConstants.localUserId)).length;
 });

@@ -1,3 +1,4 @@
+import 'package:himatch/core/constants/app_constants.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:himatch/models/booking_page.dart';
 import 'package:uuid/uuid.dart';
@@ -36,7 +37,7 @@ class BookingPagesNotifier extends Notifier<List<BookingPage>> {
 
     final page = BookingPage(
       id: _uuid.v4(),
-      userId: 'local-user',
+      userId: AppConstants.localUserId,
       title: title,
       description: description,
       slug: slug,

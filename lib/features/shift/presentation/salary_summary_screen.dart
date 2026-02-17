@@ -1,3 +1,4 @@
+import 'package:himatch/core/constants/app_constants.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:himatch/core/theme/app_theme.dart';
@@ -48,7 +49,7 @@ class WorkplacesNotifier extends Notifier<List<Workplace>> {
   List<Workplace> build() => [
         const Workplace(
           id: 'wp-1',
-          userId: 'local-user',
+          userId: AppConstants.localUserId,
           name: 'カフェバイト',
           hourlyWage: 1200,
           closingDay: 25,

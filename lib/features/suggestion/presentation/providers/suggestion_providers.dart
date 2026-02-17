@@ -1,3 +1,4 @@
+import 'package:himatch/core/constants/app_constants.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:himatch/core/constants/demo_data.dart';
 import 'package:himatch/models/schedule.dart';
@@ -58,7 +59,7 @@ class LocalSuggestionsNotifier extends Notifier<List<Suggestion>> {
       final allDemoSchedules = DemoData.generateAllMemberSchedules();
       final memberSchedules = <String, List<Schedule>>{};
       for (final member in members) {
-        if (member.userId == 'local-user') {
+        if (member.userId == AppConstants.localUserId) {
           memberSchedules[member.userId] = schedules;
         } else {
           memberSchedules[member.userId] =
