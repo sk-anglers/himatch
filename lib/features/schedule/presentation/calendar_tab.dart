@@ -8,6 +8,7 @@ import 'package:himatch/models/shift_type.dart';
 import 'package:himatch/features/schedule/presentation/schedule_form_screen.dart';
 import 'package:himatch/features/schedule/presentation/providers/calendar_providers.dart';
 import 'package:himatch/features/schedule/presentation/providers/shift_type_providers.dart';
+import 'package:himatch/features/schedule/presentation/widgets/base_calendar_cell.dart';
 import 'package:himatch/features/schedule/presentation/widgets/shift_badge.dart';
 import 'package:himatch/features/schedule/presentation/widgets/shift_type_editor_sheet.dart';
 import 'package:himatch/features/suggestion/presentation/providers/weather_providers.dart';
@@ -513,10 +514,6 @@ class _CalendarCell extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isHoliday = holidayName != null;
-    final isSunday = day.weekday == DateTime.sunday;
-    final isSaturday = day.weekday == DateTime.saturday;
-
     // シフトマーカーの色を取得
     Color? markerColor;
     String? markerLabel;
@@ -531,111 +528,46 @@ class _CalendarCell extends StatelessWidget {
       }
     }
 
-    // 日付の色: 祝日/日曜=赤, 土曜=青
-    Color dayColor;
-    if (isOutside) {
-      dayColor = AppColors.textHint;
-    } else if (isSelected) {
-      dayColor = AppColors.primary;
-    } else if (isToday) {
-      dayColor = AppColors.primaryDark;
-    } else if (isHoliday || isSunday) {
-      dayColor = AppColors.error;
-    } else if (isSaturday) {
-      dayColor = const Color(0xFF3498DB);
-    } else {
-      dayColor = AppColors.textPrimary;
-    }
-
-    return Container(
-      margin: const EdgeInsets.all(1),
-      decoration: BoxDecoration(
-        color: isSelected
-            ? AppColors.primary.withValues(alpha: 0.12)
-            : isToday
-                ? AppColors.primaryLight.withValues(alpha: 0.10)
-                : isHoliday && !isOutside
-                    ? AppColors.error.withValues(alpha: 0.04)
-                    : null,
-        border: Border.all(
-          color: isSelected
-              ? AppColors.primary
-              : isToday
-                  ? AppColors.primaryLight
-                  : AppColors.surfaceVariant,
-          width: isSelected || isToday ? 1.5 : 0.5,
-        ),
-        borderRadius: BorderRadius.circular(6),
-      ),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          // 日付（上段）
-          Text(
-            '${day.day}',
-            style: TextStyle(
-              fontSize: 14,
-              fontWeight: isToday || isSelected || isHoliday
-                  ? FontWeight.bold
-                  : FontWeight.normal,
-              color: dayColor,
-            ),
-          ),
-          // 天気アイコン（中段）
-          SizedBox(
-            height: 16,
-            child: weather != null
-                ? Text(weather.icon ?? '',
-                    style: const TextStyle(fontSize: 12, height: 1.2))
-                : isHoliday && !isOutside
-                    ? Text(
-                        holidayName!.length > 3
-                            ? holidayName!.substring(0, 3)
-                            : holidayName!,
-                        style: const TextStyle(
-                            fontSize: 8,
-                            color: AppColors.error,
-                            fontWeight: FontWeight.bold,
-                            height: 1.8),
-                      )
-                    : null,
-          ),
-          // シフトマーカー or 予定数（下段）
-          SizedBox(
-            height: 16,
-            child: isOutside
-                ? null
-                : markerLabel != null
-                    ? Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 3),
-                        decoration: BoxDecoration(
-                          color: markerColor?.withValues(alpha: 0.2) ??
-                              AppColors.surfaceVariant,
-                          borderRadius: BorderRadius.circular(3),
-                        ),
-                        child: Text(
-                          markerLabel.length > 2
-                              ? markerLabel.substring(0, 2)
-                              : markerLabel,
-                          style: TextStyle(
-                            fontSize: 9,
-                            fontWeight: FontWeight.bold,
-                            color: markerColor ?? AppColors.textSecondary,
-                          ),
-                        ),
-                      )
-                    : scheduleCount > 0
-                        ? Text(
-                            '$scheduleCount件',
-                            style: const TextStyle(
-                              fontSize: 9,
-                              color: AppColors.textSecondary,
-                            ),
-                          )
-                        : null,
-          ),
-        ],
-      ),
+    return BaseCalendarCell(
+      day: day,
+      isToday: isToday,
+      isSelected: isSelected,
+      isOutside: isOutside,
+      holidayName: holidayName,
+      middleContent: weather != null
+          ? Text(weather.icon ?? '',
+              style: const TextStyle(fontSize: 12, height: 1.2))
+          : null,
+      bottomContent: isOutside
+          ? null
+          : markerLabel != null
+              ? Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 3),
+                  decoration: BoxDecoration(
+                    color: markerColor?.withValues(alpha: 0.2) ??
+                        AppColors.surfaceVariant,
+                    borderRadius: BorderRadius.circular(3),
+                  ),
+                  child: Text(
+                    markerLabel.length > 2
+                        ? markerLabel.substring(0, 2)
+                        : markerLabel,
+                    style: TextStyle(
+                      fontSize: 9,
+                      fontWeight: FontWeight.bold,
+                      color: markerColor ?? AppColors.textSecondary,
+                    ),
+                  ),
+                )
+              : scheduleCount > 0
+                  ? Text(
+                      '$scheduleCount件',
+                      style: const TextStyle(
+                        fontSize: 9,
+                        color: AppColors.textSecondary,
+                      ),
+                    )
+                  : null,
     );
   }
 }
