@@ -7,7 +7,7 @@ final holidayServiceProvider = Provider<JapaneseHolidayService>((ref) {
 
 /// Look up holiday name for a specific date. Returns null if not a holiday.
 final holidayForDateProvider =
-    Provider.family<String?, DateTime>((ref, date) {
+    Provider.autoDispose.family<String?, DateTime>((ref, date) {
   final service = ref.read(holidayServiceProvider);
   return service.getHoliday(date);
 });

@@ -20,7 +20,7 @@ final weatherForecastProvider =
 
 /// Look up weather for a specific date.
 final weatherForDateProvider =
-    Provider.family<WeatherSummary?, DateTime>((ref, date) {
+    Provider.autoDispose.family<WeatherSummary?, DateTime>((ref, date) {
   final forecastAsync = ref.watch(weatherForecastProvider);
   return forecastAsync.whenOrNull(
     data: (forecast) {

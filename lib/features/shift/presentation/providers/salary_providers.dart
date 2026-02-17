@@ -90,7 +90,7 @@ class SalaryReport {
 /// Uses the workplace's closing day to determine the pay period.
 /// For example, closingDay=25 means the period is the 26th of the previous
 /// month through the 25th of the current month.
-final monthlySalaryProvider = Provider.family<SalaryReport?,
+final monthlySalaryProvider = Provider.autoDispose.family<SalaryReport?,
     ({String workplaceId, int year, int month})>((ref, params) {
   final workplaces = ref.watch(workplacesProvider);
   final schedules = ref.watch(localSchedulesProvider);
@@ -146,7 +146,7 @@ final monthlySalaryProvider = Provider.family<SalaryReport?,
 ///
 /// Sums monthly salary reports for all 12 months of the given year.
 final yearlySalaryProvider =
-    Provider.family<int, ({String workplaceId, int year})>((ref, params) {
+    Provider.autoDispose.family<int, ({String workplaceId, int year})>((ref, params) {
   int total = 0;
   for (int month = 1; month <= 12; month++) {
     final report = ref.watch(monthlySalaryProvider((
@@ -186,7 +186,7 @@ class TaxWallWarning {
 ///
 /// Returns warnings for each tax threshold, indicating how close
 /// the user is to exceeding the limit.
-final taxWallWarningsProvider = Provider.family<List<TaxWallWarning>,
+final taxWallWarningsProvider = Provider.autoDispose.family<List<TaxWallWarning>,
     ({String workplaceId, int year})>((ref, params) {
   final yearlyTotal = ref.watch(yearlySalaryProvider((
     workplaceId: params.workplaceId,
