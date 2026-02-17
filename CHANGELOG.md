@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed (Docs)
+- README.md を全面刷新: 全機能一覧・デザインシステム・セットアップ手順・テスト手順を追加
+
 ### Changed (UI Refresh)
 - テーマ基盤整備: カスタム TextTheme (28/20/17/15/13/11pt) をデザインドキュメント §4 準拠で定義
 - AppSpacing 定数クラス新規追加 (xs=4, sm=8, md=12, lg=16, xl=24, xxl=32)
