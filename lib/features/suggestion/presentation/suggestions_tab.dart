@@ -6,6 +6,7 @@ import 'package:himatch/core/utils/date_utils.dart';
 import 'package:himatch/models/group.dart';
 import 'package:himatch/models/suggestion.dart';
 import 'package:himatch/models/vote.dart';
+import 'package:himatch/features/schedule/presentation/widgets/base_calendar_cell.dart';
 import 'package:himatch/features/suggestion/presentation/providers/suggestion_providers.dart';
 import 'package:himatch/features/suggestion/presentation/providers/vote_providers.dart';
 import 'package:himatch/features/group/presentation/providers/group_providers.dart';
@@ -508,9 +509,6 @@ class _SuggestionCalendarCell extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final hasEvents = events.isNotEmpty;
-    final isHoliday = holidayName != null;
-    final isSunday = day.weekday == DateTime.sunday;
-    final isSaturday = day.weekday == DateTime.saturday;
     final weatherIcon = hasEvents
         ? events
             .map((s) => s.weatherSummary?.icon)
@@ -528,103 +526,38 @@ class _SuggestionCalendarCell extends StatelessWidget {
                 ? AppColors.warning
                 : AppColors.textSecondary;
 
-    // 日付の色: 祝日/日曜=赤, 土曜=青
-    Color dayColor;
-    if (isOutside) {
-      dayColor = AppColors.textHint;
-    } else if (isSelected) {
-      dayColor = AppColors.primary;
-    } else if (isToday) {
-      dayColor = AppColors.primaryDark;
-    } else if (isHoliday || isSunday) {
-      dayColor = AppColors.error;
-    } else if (isSaturday) {
-      dayColor = const Color(0xFF3498DB);
-    } else {
-      dayColor = AppColors.textPrimary;
-    }
-
-    return Container(
-      margin: const EdgeInsets.all(1),
-      decoration: BoxDecoration(
-        color: isSelected
-            ? AppColors.primary.withValues(alpha: 0.12)
-            : isToday
-                ? AppColors.primaryLight.withValues(alpha: 0.10)
-                : isHoliday && !isOutside
-                    ? AppColors.error.withValues(alpha: 0.04)
-                    : null,
-        border: Border.all(
-          color: isSelected
-              ? AppColors.primary
-              : isToday
-                  ? AppColors.primaryLight
-                  : AppColors.surfaceVariant,
-          width: isSelected || isToday ? 1.5 : 0.5,
-        ),
-        borderRadius: BorderRadius.circular(6),
-      ),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          // 日付（上段）
-          Text(
-            '${day.day}',
-            style: TextStyle(
-              fontSize: 14,
-              fontWeight: isToday || isSelected || isHoliday
-                  ? FontWeight.bold
-                  : FontWeight.normal,
-              color: dayColor,
-            ),
-          ),
-          // 天気アイコン（中段）
-          SizedBox(
-            height: 16,
-            child: weatherIcon != null
-                ? Text(weatherIcon,
-                    style: const TextStyle(fontSize: 12, height: 1.2))
-                : isHoliday && !isOutside
-                    ? Text(
-                        holidayName!.length > 3
-                            ? holidayName!.substring(0, 3)
-                            : holidayName!,
-                        style: const TextStyle(
-                            fontSize: 8,
-                            color: AppColors.error,
-                            fontWeight: FontWeight.bold,
-                            height: 1.8),
-                      )
-                    : null,
-          ),
-          // スコアバッジ（下段）
-          SizedBox(
-            height: 16,
-            child: hasEvents
-                ? Container(
-                    width: 16,
-                    height: 16,
-                    decoration: BoxDecoration(
-                      color: badgeColor,
-                      borderRadius: BorderRadius.circular(4),
+    return BaseCalendarCell(
+      day: day,
+      isToday: isToday,
+      isSelected: isSelected,
+      isOutside: isOutside,
+      holidayName: holidayName,
+      middleContent: weatherIcon != null
+          ? Text(weatherIcon,
+              style: const TextStyle(fontSize: 12, height: 1.2))
+          : null,
+      bottomContent: hasEvents
+          ? Container(
+              width: 16,
+              height: 16,
+              decoration: BoxDecoration(
+                color: badgeColor,
+                borderRadius: BorderRadius.circular(4),
+              ),
+              alignment: Alignment.center,
+              child: hasConfirmed
+                  ? const Icon(Icons.check,
+                      size: 10, color: Colors.white)
+                  : Text(
+                      '${events.length}',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 9,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
-                    alignment: Alignment.center,
-                    child: hasConfirmed
-                        ? const Icon(Icons.check,
-                            size: 10, color: Colors.white)
-                        : Text(
-                            '${events.length}',
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 9,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                  )
-                : null,
-          ),
-        ],
-      ),
+            )
+          : null,
     );
   }
 }
