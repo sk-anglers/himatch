@@ -17,7 +17,7 @@ class SalaryCalculator {
   /// [year] - Target year
   /// [month] - Target month
   /// [holidays] - Optional override for holiday dates; if null, computed
-  static SalaryReport calculateMonthly({
+  static DetailedSalaryReport calculateMonthly({
     required List<Schedule> shifts,
     required Workplace workplace,
     required int year,
@@ -108,7 +108,7 @@ class SalaryCalculator {
             .round();
     final transportCost = workplace.transportCost * workDays;
 
-    return SalaryReport(
+    return DetailedSalaryReport(
       regularMinutes: totalRegularMinutes,
       overtimeMinutes: totalOvertimeMinutes,
       nightMinutes: totalNightMinutes,
@@ -124,13 +124,13 @@ class SalaryCalculator {
   }
 
   /// Calculate yearly total salary across all months.
-  static YearlySalaryReport calculateYearly({
+  static YearlyDetailedSalaryReport calculateYearly({
     required List<Schedule> shifts,
     required Workplace workplace,
     required int year,
     Map<DateTime, String>? holidays,
   }) {
-    final monthlyReports = <int, SalaryReport>{};
+    final monthlyReports = <int, DetailedSalaryReport>{};
     int yearlyTotal = 0;
 
     for (int month = 1; month <= 12; month++) {
@@ -145,7 +145,7 @@ class SalaryCalculator {
       yearlyTotal += report.totalPay;
     }
 
-    return YearlySalaryReport(
+    return YearlyDetailedSalaryReport(
       year: year,
       monthlyReports: monthlyReports,
       yearlyTotal: yearlyTotal,
@@ -250,7 +250,7 @@ class SalaryCalculator {
 }
 
 /// Monthly salary report.
-class SalaryReport {
+class DetailedSalaryReport {
   final int regularMinutes;
   final int overtimeMinutes;
   final int nightMinutes;
@@ -263,7 +263,7 @@ class SalaryReport {
   final int totalPay;
   final int workDays;
 
-  const SalaryReport({
+  const DetailedSalaryReport({
     required this.regularMinutes,
     required this.overtimeMinutes,
     required this.nightMinutes,
@@ -301,13 +301,13 @@ class SalaryReport {
 }
 
 /// Yearly salary summary with monthly breakdown.
-class YearlySalaryReport {
+class YearlyDetailedSalaryReport {
   final int year;
-  final Map<int, SalaryReport> monthlyReports;
+  final Map<int, DetailedSalaryReport> monthlyReports;
   final int yearlyTotal;
   final List<TaxWallWarning> taxWallWarnings;
 
-  const YearlySalaryReport({
+  const YearlyDetailedSalaryReport({
     required this.year,
     required this.monthlyReports,
     required this.yearlyTotal,
