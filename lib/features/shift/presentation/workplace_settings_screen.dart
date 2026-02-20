@@ -249,9 +249,6 @@ class _WorkplaceEditDialogState extends State<_WorkplaceEditDialog> {
   late final TextEditingController _nameController;
   late final TextEditingController _wageController;
   late final TextEditingController _closingDayController;
-  late final TextEditingController _overtimeController;
-  late final TextEditingController _nightController;
-  late final TextEditingController _holidayController;
   late final TextEditingController _transportController;
   int _selectedColorIndex = 0;
 
@@ -276,12 +273,6 @@ class _WorkplaceEditDialogState extends State<_WorkplaceEditDialog> {
         TextEditingController(text: wp?.hourlyWage.toString() ?? '');
     _closingDayController =
         TextEditingController(text: (wp?.closingDay ?? 25).toString());
-    _overtimeController = TextEditingController(
-        text: (wp?.overtimeMultiplier ?? 1.25).toString());
-    _nightController =
-        TextEditingController(text: (wp?.nightMultiplier ?? 1.25).toString());
-    _holidayController = TextEditingController(
-        text: (wp?.holidayMultiplier ?? 1.35).toString());
     _transportController =
         TextEditingController(text: (wp?.transportCost ?? 0).toString());
 
@@ -296,9 +287,6 @@ class _WorkplaceEditDialogState extends State<_WorkplaceEditDialog> {
     _nameController.dispose();
     _wageController.dispose();
     _closingDayController.dispose();
-    _overtimeController.dispose();
-    _nightController.dispose();
-    _holidayController.dispose();
     _transportController.dispose();
     super.dispose();
   }
@@ -343,57 +331,6 @@ class _WorkplaceEditDialogState extends State<_WorkplaceEditDialog> {
               ),
               keyboardType: TextInputType.number,
               inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-            ),
-            const SizedBox(height: 16),
-
-            // Multipliers section
-            const Text(
-              '割増率',
-              style: TextStyle(
-                fontWeight: FontWeight.w600,
-                fontSize: 13,
-                color: AppColors.textSecondary,
-              ),
-            ),
-            const SizedBox(height: 8),
-            Row(
-              children: [
-                Expanded(
-                  child: TextField(
-                    controller: _overtimeController,
-                    decoration: const InputDecoration(
-                      labelText: '残業',
-                      hintText: '1.25',
-                    ),
-                    keyboardType:
-                        const TextInputType.numberWithOptions(decimal: true),
-                  ),
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: TextField(
-                    controller: _nightController,
-                    decoration: const InputDecoration(
-                      labelText: '深夜',
-                      hintText: '1.25',
-                    ),
-                    keyboardType:
-                        const TextInputType.numberWithOptions(decimal: true),
-                  ),
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: TextField(
-                    controller: _holidayController,
-                    decoration: const InputDecoration(
-                      labelText: '休日',
-                      hintText: '1.35',
-                    ),
-                    keyboardType:
-                        const TextInputType.numberWithOptions(decimal: true),
-                  ),
-                ),
-              ],
             ),
             const SizedBox(height: 12),
 
@@ -480,11 +417,6 @@ class _WorkplaceEditDialogState extends State<_WorkplaceEditDialog> {
 
     final closingDay =
         int.tryParse(_closingDayController.text.trim())?.clamp(1, 28) ?? 25;
-    final overtime =
-        double.tryParse(_overtimeController.text.trim()) ?? 1.25;
-    final night = double.tryParse(_nightController.text.trim()) ?? 1.25;
-    final holiday =
-        double.tryParse(_holidayController.text.trim()) ?? 1.35;
     final transport =
         int.tryParse(_transportController.text.trim()) ?? 0;
 
@@ -494,9 +426,6 @@ class _WorkplaceEditDialogState extends State<_WorkplaceEditDialog> {
       name: name,
       hourlyWage: wage,
       closingDay: closingDay,
-      overtimeMultiplier: overtime,
-      nightMultiplier: night,
-      holidayMultiplier: holiday,
       transportCost: transport,
       colorHex: _colorOptions[_selectedColorIndex],
       createdAt: widget.workplace?.createdAt ?? DateTime.now(),

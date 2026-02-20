@@ -10,26 +10,14 @@ import 'package:himatch/features/schedule/presentation/providers/calendar_provid
 
 class SalaryBreakdown {
   final int basePay;
-  final double baseHours;
-  final int overtimePay;
-  final double overtimeHours;
-  final int nightPay;
-  final double nightHours;
-  final int holidayPay;
-  final double holidayHours;
+  final double totalHours;
   final int transportCost;
   final int workingDays;
   final int totalPay;
 
   const SalaryBreakdown({
     required this.basePay,
-    required this.baseHours,
-    required this.overtimePay,
-    required this.overtimeHours,
-    required this.nightPay,
-    required this.nightHours,
-    required this.holidayPay,
-    required this.holidayHours,
+    required this.totalHours,
     required this.transportCost,
     required this.workingDays,
     required this.totalPay,
@@ -106,65 +94,22 @@ final salaryBreakdownProvider =
       !s.startTime.isBefore(monthStart) &&
       !s.startTime.isAfter(monthEnd));
 
-  double baseHours = 0;
-  double overtimeHours = 0;
-  double nightHours = 0;
-  double holidayHours = 0;
+  double totalHours = 0;
   final workDays = <DateTime>{};
 
   for (final s in monthSchedules) {
     final hours = s.endTime.difference(s.startTime).inMinutes / 60.0;
+    totalHours += hours;
     workDays.add(DateTime(s.startTime.year, s.startTime.month, s.startTime.day));
-
-    // Simple heuristic: >8h = overtime portion
-    final regularHours = hours.clamp(0, 8).toDouble();
-    final ot = (hours - 8).clamp(0, double.infinity).toDouble();
-
-    // Night hours: 22:00-05:00 portion (handles cross-midnight shifts)
-    double nightH = 0;
-    var cursor = s.startTime;
-    while (cursor.isBefore(s.endTime)) {
-      final h = cursor.hour;
-      if (h >= 22 || h < 5) nightH += 1;
-      cursor = cursor.add(const Duration(hours: 1));
-    }
-
-    // Holiday: Saturday/Sunday
-    final isHoliday =
-        s.startTime.weekday == DateTime.saturday ||
-        s.startTime.weekday == DateTime.sunday;
-
-    if (isHoliday) {
-      holidayHours += hours;
-    } else {
-      baseHours += regularHours;
-      overtimeHours += ot;
-    }
-    nightHours += nightH;
   }
 
-  final basePay = (baseHours * workplace.hourlyWage).round();
-  final overtimePay =
-      (overtimeHours * workplace.hourlyWage * workplace.overtimeMultiplier)
-          .round();
-  final nightPay =
-      (nightHours * workplace.hourlyWage * (workplace.nightMultiplier - 1))
-          .round();
-  final holidayPay =
-      (holidayHours * workplace.hourlyWage * workplace.holidayMultiplier)
-          .round();
+  final basePay = (totalHours * workplace.hourlyWage).round();
   final transport = workplace.transportCost * workDays.length;
-  final total = basePay + overtimePay + nightPay + holidayPay + transport;
+  final total = basePay + transport;
 
   return SalaryBreakdown(
     basePay: basePay,
-    baseHours: baseHours,
-    overtimePay: overtimePay,
-    overtimeHours: overtimeHours,
-    nightPay: nightPay,
-    nightHours: nightHours,
-    holidayPay: holidayPay,
-    holidayHours: holidayHours,
+    totalHours: totalHours,
     transportCost: transport,
     workingDays: workDays.length,
     totalPay: total,
@@ -384,42 +329,6 @@ class _SalarySummaryScreenState extends ConsumerState<SalarySummaryScreen> {
   }
 
   Widget _buildBreakdownSection(SalaryBreakdown salary) {
-    final items = [
-      _BreakdownItem(
-        '基本給',
-        salary.basePay,
-        '${salary.baseHours.toStringAsFixed(1)}時間',
-        AppColors.primary,
-      ),
-      _BreakdownItem(
-        '残業手当',
-        salary.overtimePay,
-        '${salary.overtimeHours.toStringAsFixed(1)}時間',
-        AppColors.warning,
-      ),
-      _BreakdownItem(
-        '深夜手当',
-        salary.nightPay,
-        '${salary.nightHours.toStringAsFixed(1)}時間',
-        AppColors.primary,
-      ),
-      _BreakdownItem(
-        '休日手当',
-        salary.holidayPay,
-        '${salary.holidayHours.toStringAsFixed(1)}時間',
-        AppColors.error,
-      ),
-      _BreakdownItem(
-        '交通費',
-        salary.transportCost,
-        null,
-        AppColors.success,
-      ),
-    ];
-
-    final maxAmount =
-        items.map((e) => e.amount).reduce((a, b) => a > b ? a : b);
-
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -435,63 +344,68 @@ class _SalarySummaryScreenState extends ConsumerState<SalarySummaryScreen> {
               ),
             ),
             const SizedBox(height: 12),
-            ...items.map((item) => _buildBreakdownBar(item, maxAmount)),
+            _buildBreakdownRow(
+              '基本給',
+              '${salary.totalHours.toStringAsFixed(1)}h',
+              salary.basePay,
+              AppColors.primary,
+            ),
+            const Divider(height: 20),
+            _buildBreakdownRow(
+              '交通費',
+              '${salary.workingDays}日分',
+              salary.transportCost,
+              AppColors.success,
+            ),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildBreakdownBar(_BreakdownItem item, int maxAmount) {
-    final ratio = maxAmount > 0 ? item.amount / maxAmount : 0.0;
-
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Text(
-                item.label,
-                style: const TextStyle(
-                  fontSize: 13,
-                  color: AppColors.textSecondary,
-                ),
-              ),
-              if (item.detail != null) ...[
-                const SizedBox(width: 6),
-                Text(
-                  '(${item.detail})',
-                  style: const TextStyle(
-                    fontSize: 11,
-                    color: AppColors.textHint,
-                  ),
-                ),
-              ],
-              const Spacer(),
-              Text(
-                '¥${_formatNumber(item.amount)}',
-                style: const TextStyle(
-                  fontWeight: FontWeight.w600,
-                  fontSize: 14,
-                  color: AppColors.textPrimary,
-                ),
-              ),
-            ],
+  Widget _buildBreakdownRow(
+      String label, String detail, int amount, Color color) {
+    return Row(
+      children: [
+        Container(
+          width: 4,
+          height: 28,
+          decoration: BoxDecoration(
+            color: color,
+            borderRadius: BorderRadius.circular(2),
           ),
-          const SizedBox(height: 4),
-          ClipRRect(
-            borderRadius: BorderRadius.circular(4),
-            child: LinearProgressIndicator(
-              value: ratio,
-              minHeight: 8,
-              backgroundColor: AppColors.surfaceVariant,
-              valueColor: AlwaysStoppedAnimation(item.color),
+        ),
+        const SizedBox(width: 10),
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              label,
+              style: const TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+                color: AppColors.textPrimary,
+              ),
             ),
+            Text(
+              detail,
+              style: const TextStyle(
+                fontSize: 11,
+                color: AppColors.textHint,
+              ),
+            ),
+          ],
+        ),
+        const Spacer(),
+        Text(
+          '¥${_formatNumber(amount)}',
+          style: const TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 16,
+            color: AppColors.textPrimary,
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 
@@ -674,11 +588,3 @@ class _SalarySummaryScreenState extends ConsumerState<SalarySummaryScreen> {
   }
 }
 
-class _BreakdownItem {
-  final String label;
-  final int amount;
-  final String? detail;
-  final Color color;
-
-  const _BreakdownItem(this.label, this.amount, this.detail, this.color);
-}
