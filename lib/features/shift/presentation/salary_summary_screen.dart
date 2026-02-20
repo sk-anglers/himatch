@@ -56,6 +56,18 @@ class WorkplacesNotifier extends Notifier<List<Workplace>> {
           transportCost: 500,
           colorHex: 'FF6C5CE7',
         ),
+        const Workplace(
+          id: 'wp-2',
+          userId: AppConstants.localUserId,
+          name: 'コンビニ',
+          hourlyWage: 1100,
+          closingDay: 15,
+          transportCost: 300,
+          overtimeMultiplier: 1.25,
+          nightMultiplier: 1.35,
+          holidayMultiplier: 1.35,
+          colorHex: 'FF00B894',
+        ),
       ];
 
   void add(Workplace wp) {
@@ -108,10 +120,13 @@ final salaryBreakdownProvider =
     final regularHours = hours.clamp(0, 8).toDouble();
     final ot = (hours - 8).clamp(0, double.infinity).toDouble();
 
-    // Night hours: 22:00-05:00 portion
+    // Night hours: 22:00-05:00 portion (handles cross-midnight shifts)
     double nightH = 0;
-    for (int h = s.startTime.hour; h < s.endTime.hour; h++) {
+    var cursor = s.startTime;
+    while (cursor.isBefore(s.endTime)) {
+      final h = cursor.hour;
       if (h >= 22 || h < 5) nightH += 1;
+      cursor = cursor.add(const Duration(hours: 1));
     }
 
     // Holiday: Saturday/Sunday
