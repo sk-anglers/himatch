@@ -78,7 +78,7 @@ class _CalendarTabState extends ConsumerState<CalendarTab> {
             selectedDayPredicate: (day) => isSameDay(_selectedDay, day),
             eventLoader: (day) => _getSchedulesForDay(day, schedules),
             startingDayOfWeek: StartingDayOfWeek.monday,
-            rowHeight: 52,
+            rowHeight: 72,
             calendarBuilders: CalendarBuilders(
               defaultBuilder: (context, day, focusedDay) {
                 final key = DateTime(day.year, day.month, day.day);
@@ -543,7 +543,10 @@ class _CalendarCell extends StatelessWidget {
       isSelected: isSelected,
       isOutside: isOutside,
       holidayName: holidayName,
-      // 天気は選択日ヘッダーに表示するのでセル内には出さない
+      middleContent: weather != null
+          ? Text(weather.icon ?? '',
+              style: const TextStyle(fontSize: 13, height: 1.0))
+          : null,
       bottomContent: isOutside
           ? null
           : markerLabel != null

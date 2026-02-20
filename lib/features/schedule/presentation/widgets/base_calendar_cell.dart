@@ -95,11 +95,9 @@ class BaseCalendarCell extends StatelessWidget {
                 color: dayColor,
               ),
             ),
-            const SizedBox(height: 1),
-            // Bottom slot (shift badge — full width)
-            if (bottomContent != null)
-              bottomContent!
-            else if (middleContent != null)
+            const Spacer(),
+            // Middle slot (weather icon / holiday)
+            if (middleContent != null)
               Center(child: middleContent!)
             else if (isHoliday && !isOutside)
               Center(
@@ -113,7 +111,15 @@ class BaseCalendarCell extends StatelessWidget {
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-              ),
+              )
+            else
+              const SizedBox.shrink(),
+            const SizedBox(height: 2),
+            // Bottom slot (shift badge — full width)
+            if (bottomContent != null)
+              bottomContent!
+            else
+              const SizedBox(height: 18),
           ],
         ),
       ),
