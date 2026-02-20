@@ -100,16 +100,15 @@ class BaseCalendarCell extends StatelessWidget {
             if (middleContent != null)
               Center(child: middleContent!)
             else if (isHoliday && !isOutside)
-              Center(
-                child: Text(
-                  holidayName!.length > 3
-                      ? holidayName!.substring(0, 3)
-                      : holidayName!,
-                  style: TextStyle(
-                    fontSize: 8,
-                    color: colors.error,
-                    fontWeight: FontWeight.bold,
-                  ),
+              Text(
+                holidayName!,
+                textAlign: TextAlign.center,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  fontSize: 7,
+                  color: colors.error,
+                  fontWeight: FontWeight.bold,
                 ),
               )
             else

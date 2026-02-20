@@ -703,20 +703,18 @@ class _ShiftPaintPanel extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final shiftTypes = ref.watch(shiftTypesProvider);
     final isActive = activeShiftType != null;
+    final accentColor =
+        isActive ? shiftTypeColor(activeShiftType!) : AppColors.primary;
 
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 12),
       padding: const EdgeInsets.fromLTRB(12, 8, 12, 8),
       decoration: BoxDecoration(
-        color: isActive
-            ? shiftTypeColor(activeShiftType!).withValues(alpha: 0.06)
-            : AppColors.surfaceVariant.withValues(alpha: 0.5),
+        color: accentColor.withValues(alpha: 0.06),
         borderRadius: BorderRadius.circular(12),
-        border: isActive
-            ? Border.all(
-                color: shiftTypeColor(activeShiftType!).withValues(alpha: 0.3),
-              )
-            : null,
+        border: Border.all(
+          color: accentColor.withValues(alpha: 0.3),
+        ),
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -727,62 +725,56 @@ class _ShiftPaintPanel extends ConsumerWidget {
               Icon(
                 isActive ? Icons.touch_app : Icons.edit_calendar,
                 size: 16,
-                color: isActive
-                    ? shiftTypeColor(activeShiftType!)
-                    : AppColors.textSecondary,
+                color: accentColor,
               ),
               const SizedBox(width: 4),
               Text(
                 isActive
                     ? '「${activeShiftType!.name}」を入力中 — 日付をタップ'
-                    : 'シフト入力',
+                    : 'シフトを選択してください',
                 style: TextStyle(
                   fontSize: 12,
                   fontWeight: FontWeight.w600,
-                  color: isActive
-                      ? shiftTypeColor(activeShiftType!)
-                      : AppColors.textSecondary,
+                  color: accentColor,
                 ),
               ),
               const Spacer(),
-              if (!isActive)
-                GestureDetector(
-                  onTap: onEditShiftTypes,
-                  child: const Padding(
-                    padding: EdgeInsets.only(right: 8),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(Icons.tune, size: 14, color: AppColors.textHint),
-                        SizedBox(width: 2),
-                        Text(
-                          '編集',
-                          style: TextStyle(
-                            fontSize: 11,
-                            color: AppColors.textHint,
-                          ),
+              GestureDetector(
+                onTap: onEditShiftTypes,
+                child: Padding(
+                  padding: const EdgeInsets.only(right: 8),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.tune, size: 14,
+                          color: accentColor.withValues(alpha: 0.6)),
+                      const SizedBox(width: 2),
+                      Text(
+                        '編集',
+                        style: TextStyle(
+                          fontSize: 11,
+                          color: accentColor.withValues(alpha: 0.6),
                         ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
                 ),
+              ),
               GestureDetector(
                 onTap: onDone,
                 child: Container(
                   padding: const EdgeInsets.symmetric(
                       horizontal: 10, vertical: 4),
                   decoration: BoxDecoration(
-                    color: isActive
-                        ? AppColors.primary
-                        : AppColors.textHint.withValues(alpha: 0.15),
+                    color: accentColor,
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  child: Text(
-                    isActive ? '完了' : '閉じる',
+                  child: const Text(
+                    '完了',
                     style: TextStyle(
                       fontSize: 11,
                       fontWeight: FontWeight.bold,
-                      color: isActive ? Colors.white : AppColors.textSecondary,
+                      color: Colors.white,
                     ),
                   ),
                 ),

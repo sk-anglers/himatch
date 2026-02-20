@@ -15,7 +15,8 @@ class LocalVotesNotifier extends Notifier<Map<String, List<Vote>>> {
   @override
   Map<String, List<Vote>> build() => {};
 
-  /// Cast or update a vote on a suggestion.
+  /// Cast, update, or toggle a vote on a suggestion.
+  /// If the user already voted with the same [voteType], the vote is removed.
   void castVote({
     required String suggestionId,
     required String userId,
@@ -24,8 +25,16 @@ class LocalVotesNotifier extends Notifier<Map<String, List<Vote>>> {
   }) {
     final currentVotes = List<Vote>.from(state[suggestionId] ?? []);
 
-    // Remove existing vote by this user
+    // Check if user already voted with the same type (toggle off)
+    final existing =
+        currentVotes.where((v) => v.userId == userId).firstOrNull;
     currentVotes.removeWhere((v) => v.userId == userId);
+
+    if (existing?.voteType == voteType) {
+      // Same type → remove only (toggle off)
+      state = {...state, suggestionId: currentVotes};
+      return;
+    }
 
     // Add new vote
     currentVotes.add(Vote(

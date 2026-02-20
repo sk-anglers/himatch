@@ -52,6 +52,13 @@ class LocalGroupsNotifier extends Notifier<List<Group>> {
     return group;
   }
 
+  void updateGroupColor(String groupId, String colorHex) {
+    state = [
+      for (final g in state)
+        if (g.id == groupId) g.copyWith(colorHex: colorHex) else g,
+    ];
+  }
+
   void removeGroup(String id) {
     state = state.where((g) => g.id != id).toList();
     ref.read(localGroupMembersProvider.notifier).removeAllMembers(id);

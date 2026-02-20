@@ -31,6 +31,16 @@ class WeatherLocationNotifier extends Notifier<WeatherLocation> {
     state = const WeatherLocation(useCurrentLocation: true, name: '現在地');
   }
 
+  /// Revert from GPS mode to the default location.
+  void clearCurrentLocation() {
+    state = WeatherLocation(
+      useCurrentLocation: false,
+      latitude: AppConstants.defaultLatitude,
+      longitude: AppConstants.defaultLongitude,
+      name: '東京',
+    );
+  }
+
   /// Set a specific city.
   void setCity(String name, double latitude, double longitude) {
     state = WeatherLocation(

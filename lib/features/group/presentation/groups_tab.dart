@@ -187,8 +187,17 @@ class _GroupCard extends ConsumerWidget {
     final notificationCount =
         ref.watch(groupNotificationCountProvider(group.id));
 
+    final color = groupColor(group);
+
     return Card(
       margin: const EdgeInsets.only(bottom: 8),
+      clipBehavior: Clip.antiAlias,
+      elevation: 0,
+      color: color.withValues(alpha: 0.18),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+        side: BorderSide(color: color.withValues(alpha: 0.4)),
+      ),
       child: InkWell(
         onTap: onTap,
         borderRadius: BorderRadius.circular(16),
@@ -199,13 +208,13 @@ class _GroupCard extends ConsumerWidget {
               // Group avatar
               CircleAvatar(
                 radius: 24,
-                backgroundColor: groupColor(group).withValues(alpha: 0.15),
+                backgroundColor: color.withValues(alpha: 0.2),
                 child: Text(
                   group.name.isNotEmpty ? group.name[0] : '?',
                   style: TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
-                    color: groupColor(group),
+                    color: color,
                   ),
                 ),
               ),
