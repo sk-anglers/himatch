@@ -543,10 +543,7 @@ class _CalendarCell extends StatelessWidget {
       isSelected: isSelected,
       isOutside: isOutside,
       holidayName: holidayName,
-      middleContent: weather != null
-          ? Text(weather.icon ?? '',
-              style: const TextStyle(fontSize: 12, height: 1.2))
-          : null,
+      // 天気は選択日ヘッダーに表示するのでセル内には出さない
       bottomContent: isOutside
           ? null
           : markerLabel != null
