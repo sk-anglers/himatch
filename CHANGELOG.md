@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed (Calendar UX)
+- カレンダーセルの視認性改善:
+  - rowHeight: 64→72 に拡大（天気アイコン + シフトバッジの3段レイアウト）
+  - シフトバッジ: 全幅ソリッドカラー背景 + 白文字11px太字（旧: 小さな半透明ドット）
+  - BaseCalendarCell: crossAxisAlignment.stretch + Spacer ベースの3段構成（日付/天気/バッジ）
+- 月/週/日の ChoiceChip 切り替えトグルを廃止（TableCalendar ヘッダーのフォーマットボタンに統合）
+  - _buildViewModeToggle(), _buildWeekView(), _buildDayView() を削除
+  - week_view.dart, day_view.dart の未使用 import を削除
+
 ### Changed (Glassmorphism UI)
 - デザインシステム基盤: グラスモーフィズム対応
   - AppColorsExtension に6フィールド追加 (glassBackground/glassBorder/glassShadow/gradientStart/gradientMiddle/gradientEnd)

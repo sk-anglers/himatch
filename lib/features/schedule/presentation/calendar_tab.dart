@@ -15,11 +15,7 @@ import 'package:himatch/features/schedule/presentation/widgets/shift_type_editor
 import 'package:himatch/features/suggestion/presentation/providers/weather_providers.dart';
 import 'package:himatch/providers/holiday_providers.dart';
 import 'package:himatch/features/schedule/presentation/providers/month_data_providers.dart';
-import 'package:himatch/features/schedule/presentation/widgets/week_view.dart';
-import 'package:himatch/features/schedule/presentation/widgets/day_view.dart';
 import 'package:himatch/features/schedule/presentation/widgets/quick_input_field.dart';
-
-enum _CalendarViewMode { calendar, week, day }
 
 class CalendarTab extends ConsumerStatefulWidget {
   const CalendarTab({super.key});
@@ -32,7 +28,6 @@ class _CalendarTabState extends ConsumerState<CalendarTab> {
   CalendarFormat _calendarFormat = CalendarFormat.month;
   DateTime _focusedDay = DateTime.now();
   DateTime? _selectedDay;
-  _CalendarViewMode _viewMode = _CalendarViewMode.calendar;
 
   /// シフトペイントモード
   bool _showShiftPanel = false;
@@ -59,11 +54,8 @@ class _CalendarTabState extends ConsumerState<CalendarTab> {
     return Scaffold(
       body: Column(
         children: [
-          // 表示モード切替
-          _buildViewModeToggle(),
-          if (_viewMode == _CalendarViewMode.calendar)
-            Expanded(
-              child: SingleChildScrollView(
+          Expanded(
+            child: SingleChildScrollView(
                 child: Column(
                   children: [
                     // クイック入力フィールド
@@ -274,10 +266,6 @@ class _CalendarTabState extends ConsumerState<CalendarTab> {
                 ),
               ),
             ),
-          if (_viewMode == _CalendarViewMode.week)
-            Expanded(child: _buildWeekView(schedules)),
-          if (_viewMode == _CalendarViewMode.day)
-            Expanded(child: _buildDayView(schedules)),
         ],
       ),
       floatingActionButton: FloatingActionButton(
@@ -412,88 +400,6 @@ class _CalendarTabState extends ConsumerState<CalendarTab> {
     );
   }
 
-  Widget _buildViewModeToggle() {
-    final colors = Theme.of(context).extension<AppColorsExtension>()!;
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: _CalendarViewMode.values.map((mode) {
-          final isSelected = _viewMode == mode;
-          final (icon, label) = switch (mode) {
-            _CalendarViewMode.calendar => (Icons.calendar_month, '月'),
-            _CalendarViewMode.week => (Icons.view_week, '週'),
-            _CalendarViewMode.day => (Icons.view_day, '日'),
-          };
-          return Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 4),
-            child: ChoiceChip(
-              avatar: Icon(icon, size: 16,
-                  color: isSelected ? Colors.white : colors.textSecondary),
-              label: Text(label),
-              selected: isSelected,
-              selectedColor: colors.primary,
-              labelStyle: TextStyle(
-                color: isSelected ? Colors.white : colors.textSecondary,
-                fontWeight: FontWeight.w600,
-                fontSize: 13,
-              ),
-              shape: const StadiumBorder(),
-              side: BorderSide.none,
-              showCheckmark: false,
-              onSelected: (_) => setState(() => _viewMode = mode),
-            ),
-          );
-        }).toList(),
-      ),
-    );
-  }
-
-  Widget _buildWeekView(List<Schedule> schedules) {
-    final weatherAsync = ref.watch(weatherForecastProvider);
-    final weatherData = weatherAsync.value;
-
-    return WeekView(
-      selectedDay: _selectedDay ?? DateTime.now(),
-      schedules: schedules,
-      onDaySelected: (day) {
-        setState(() {
-          _selectedDay = day;
-          _focusedDay = day;
-        });
-      },
-      onTimeSlotTapped: (time) {
-        context.pushNamed(
-          AppRoute.scheduleForm.name,
-          extra: {'initialDate': time},
-        );
-      },
-      weatherData: weatherData,
-      holidayService: (date) {
-        final key = DateTime(date.year, date.month, date.day);
-        return ref.read(holidayForDateProvider(key));
-      },
-    );
-  }
-
-  Widget _buildDayView(List<Schedule> schedules) {
-    final day = _selectedDay ?? DateTime.now();
-    final daySchedules = _getSchedulesForDay(day, schedules);
-    final weather = ref.watch(weatherForDateProvider(
-        DateTime(day.year, day.month, day.day)));
-
-    return DayView(
-      selectedDay: day,
-      schedules: daySchedules,
-      onTimeSlotTapped: (time) {
-        context.pushNamed(
-          AppRoute.scheduleForm.name,
-          extra: {'initialDate': time},
-        );
-      },
-      weather: weather,
-    );
-  }
 }
 
 // ─── Custom calendar cell with border + weather ───
