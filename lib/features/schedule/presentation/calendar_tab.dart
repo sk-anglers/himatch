@@ -78,7 +78,7 @@ class _CalendarTabState extends ConsumerState<CalendarTab> {
             selectedDayPredicate: (day) => isSameDay(_selectedDay, day),
             eventLoader: (day) => _getSchedulesForDay(day, schedules),
             startingDayOfWeek: StartingDayOfWeek.monday,
-            rowHeight: 64,
+            rowHeight: 52,
             calendarBuilders: CalendarBuilders(
               defaultBuilder: (context, day, focusedDay) {
                 final key = DateTime(day.year, day.month, day.day);
@@ -551,29 +551,38 @@ class _CalendarCell extends StatelessWidget {
           ? null
           : markerLabel != null
               ? Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 3),
+                  width: double.infinity,
+                  padding: const EdgeInsets.symmetric(vertical: 2),
                   decoration: BoxDecoration(
-                    color: markerColor?.withValues(alpha: 0.2) ??
-                        AppColors.surfaceVariant,
-                    borderRadius: BorderRadius.circular(3),
+                    color: markerColor ?? AppColors.primary,
+                    borderRadius: BorderRadius.circular(4),
                   ),
                   child: Text(
-                    markerLabel.length > 2
-                        ? markerLabel.substring(0, 2)
-                        : markerLabel,
-                    style: TextStyle(
-                      fontSize: 9,
+                    markerLabel,
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(
+                      fontSize: 11,
                       fontWeight: FontWeight.bold,
-                      color: markerColor ?? AppColors.textSecondary,
+                      color: Colors.white,
                     ),
                   ),
                 )
               : scheduleCount > 0
-                  ? Text(
-                      '$scheduleCount件',
-                      style: const TextStyle(
-                        fontSize: 9,
-                        color: AppColors.textSecondary,
+                  ? Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.symmetric(vertical: 2),
+                      decoration: BoxDecoration(
+                        color: AppColors.textSecondary.withValues(alpha: 0.15),
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                      child: Text(
+                        '$scheduleCount件',
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(
+                          fontSize: 10,
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.textSecondary,
+                        ),
                       ),
                     )
                   : null,
