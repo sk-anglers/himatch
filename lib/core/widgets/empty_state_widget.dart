@@ -29,22 +29,10 @@ class EmptyStateWidget extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Container(
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                boxShadow: [
-                  BoxShadow(
-                    color: colors.primary.withValues(alpha: 0.2),
-                    blurRadius: 32,
-                    spreadRadius: 8,
-                  ),
-                ],
-              ),
-              child: Icon(
-                icon,
-                size: 80,
-                color: colors.primary.withValues(alpha: 0.3),
-              ),
+            Icon(
+              icon,
+              size: 80,
+              color: colors.primary.withValues(alpha: 0.3),
             ),
             const SizedBox(height: 24),
             Text(

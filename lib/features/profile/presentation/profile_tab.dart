@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:himatch/core/theme/app_theme.dart';
-import 'package:himatch/core/widgets/glass_card.dart';
 import 'package:himatch/routing/app_routes.dart';
 import 'package:himatch/features/auth/providers/auth_providers.dart';
 import 'package:himatch/features/profile/presentation/providers/profile_providers.dart';
@@ -26,9 +25,21 @@ class ProfileTab extends ConsumerWidget {
         children: [
           // Demo mode banner
           if (authState.isDemo)
-            GlassCard.lite(
+            Container(
               margin: const EdgeInsets.only(bottom: 12),
               padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [
+                    AppColors.warning.withValues(alpha: 0.18),
+                    AppColors.warning.withValues(alpha: 0.08),
+                  ],
+                ),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                  color: AppColors.warning.withValues(alpha: 0.3),
+                ),
+              ),
               child: Row(
                 children: [
                   const Icon(Icons.science, size: 18, color: AppColors.warning),
@@ -232,15 +243,10 @@ class ProfileTab extends ConsumerWidget {
           ),
           const SizedBox(height: 32),
 
-          Center(
+          const Center(
             child: Text(
               'Himatch',
-              style: TextStyle(
-                color: Theme.of(context)
-                    .extension<AppColorsExtension>()!
-                    .textHint,
-                fontSize: 12,
-              ),
+              style: TextStyle(color: AppColors.textHint, fontSize: 12),
             ),
           ),
           const SizedBox(height: 16),
@@ -384,15 +390,7 @@ class _NavTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListTile(
-      leading: Container(
-        width: 36,
-        height: 36,
-        decoration: BoxDecoration(
-          color: iconColor.withValues(alpha: 0.12),
-          borderRadius: BorderRadius.circular(10),
-        ),
-        child: Icon(icon, color: iconColor, size: 20),
-      ),
+      leading: Icon(icon, color: iconColor),
       title: Text(title),
       subtitle: Text(subtitle, style: const TextStyle(fontSize: 12)),
       trailing: const Icon(Icons.chevron_right, size: 18),
@@ -416,80 +414,60 @@ class _ProfileHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = Theme.of(context).extension<AppColorsExtension>()!;
-
-    return GlassCard(
-      child: Column(
-        children: [
-          // Glass-ring avatar
-          Container(
-            padding: const EdgeInsets.all(3),
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              border: Border.all(
-                color: colors.glassBorder,
-                width: 2,
-              ),
-              boxShadow: [
-                BoxShadow(
-                  color: colors.primary.withValues(alpha: 0.2),
-                  blurRadius: 12,
-                ),
-              ],
-            ),
-            child: CircleAvatar(
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          children: [
+            CircleAvatar(
               radius: 40,
-              backgroundColor: colors.primary.withValues(alpha: 0.15),
+              backgroundColor: AppColors.primaryLight.withValues(alpha: 0.3),
               child: Text(
                 displayName.isNotEmpty ? displayName[0] : '?',
-                style: TextStyle(
+                style: const TextStyle(
                   fontSize: 32,
                   fontWeight: FontWeight.bold,
-                  color: colors.primary,
+                  color: AppColors.primary,
                 ),
               ),
             ),
-          ),
-          const SizedBox(height: 12),
-          GestureDetector(
-            onTap: onNameTap,
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  displayName,
-                  style: const TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
+            const SizedBox(height: 12),
+            GestureDetector(
+              onTap: onNameTap,
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    displayName,
+                    style: const TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
+                  const SizedBox(width: 4),
+                  const Icon(Icons.edit, size: 16, color: AppColors.textHint),
+                ],
+              ),
+            ),
+            const SizedBox(height: 16),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                _StatItem(
+                  icon: Icons.group,
+                  count: groupCount,
+                  label: 'グループ',
                 ),
-                const SizedBox(width: 4),
-                Icon(Icons.edit, size: 16, color: colors.textHint),
+                Container(width: 1, height: 32, color: AppColors.surfaceVariant),
+                _StatItem(
+                  icon: Icons.calendar_month,
+                  count: scheduleCount,
+                  label: 'スケジュール',
+                ),
               ],
             ),
-          ),
-          const SizedBox(height: 16),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              _StatItem(
-                icon: Icons.group,
-                count: groupCount,
-                label: 'グループ',
-              ),
-              Container(
-                width: 1,
-                height: 32,
-                color: colors.glassBorder,
-              ),
-              _StatItem(
-                icon: Icons.calendar_month,
-                count: scheduleCount,
-                label: 'スケジュール',
-              ),
-            ],
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -508,19 +486,18 @@ class _StatItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = Theme.of(context).extension<AppColorsExtension>()!;
     return Column(
       children: [
         Row(
           children: [
-            Icon(icon, size: 16, color: colors.primary),
+            Icon(icon, size: 16, color: AppColors.primary),
             const SizedBox(width: 4),
             Text(
               '$count',
-              style: TextStyle(
+              style: const TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
-                color: colors.primary,
+                color: AppColors.primary,
               ),
             ),
           ],
@@ -528,7 +505,7 @@ class _StatItem extends StatelessWidget {
         const SizedBox(height: 2),
         Text(
           label,
-          style: TextStyle(fontSize: 12, color: colors.textSecondary),
+          style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
         ),
       ],
     );
@@ -557,9 +534,6 @@ class _SettingsCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GlassCard(
-      padding: EdgeInsets.zero,
-      child: Column(children: children),
-    );
+    return Card(child: Column(children: children));
   }
 }

@@ -54,8 +54,23 @@ import 'package:himatch/features/profile/presentation/contact_screen.dart';
 import 'package:himatch/features/history/presentation/history_screen.dart';
 import 'package:himatch/features/wellbeing/presentation/wellbeing_screen.dart';
 
-/// Fade + scale transition (glassmorphism style, 400ms) for regular pages.
+/// Fade-through transition (Material motion, 300ms) for regular pages.
 CustomTransitionPage<T> _fadeThroughPage<T>({
+  required LocalKey key,
+  required Widget child,
+}) {
+  return CustomTransitionPage<T>(
+    key: key,
+    child: child,
+    transitionsBuilder: (context, animation, secondaryAnimation, child) {
+      return FadeTransition(opacity: animation, child: child);
+    },
+    transitionDuration: const Duration(milliseconds: 300),
+  );
+}
+
+/// Slide-up transition for modal-like pages (schedule form, chat, etc.).
+CustomTransitionPage<T> _slideUpPage<T>({
   required LocalKey key,
   required Widget child,
 }) {
@@ -67,40 +82,12 @@ CustomTransitionPage<T> _fadeThroughPage<T>({
         parent: animation,
         curve: Curves.easeOutCubic,
       );
-      return FadeTransition(
-        opacity: curved,
-        child: ScaleTransition(
-          scale: Tween<double>(begin: 0.96, end: 1.0).animate(curved),
-          child: child,
-        ),
-      );
-    },
-    transitionDuration: const Duration(milliseconds: 400),
-  );
-}
-
-/// Slide-up + scale transition for modal-like pages (schedule form, chat, etc.).
-CustomTransitionPage<T> _slideUpPage<T>({
-  required LocalKey key,
-  required Widget child,
-}) {
-  return CustomTransitionPage<T>(
-    key: key,
-    child: child,
-    transitionsBuilder: (context, animation, secondaryAnimation, child) {
-      final curved = CurvedAnimation(
-        parent: animation,
-        curve: Curves.easeOutBack,
-      );
       return SlideTransition(
         position: Tween<Offset>(
-          begin: const Offset(0, 0.08),
+          begin: const Offset(0, 0.15),
           end: Offset.zero,
         ).animate(curved),
-        child: ScaleTransition(
-          scale: Tween<double>(begin: 0.98, end: 1.0).animate(curved),
-          child: FadeTransition(opacity: curved, child: child),
-        ),
+        child: FadeTransition(opacity: curved, child: child),
       );
     },
     transitionDuration: const Duration(milliseconds: 400),

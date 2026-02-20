@@ -1,16 +1,14 @@
-import 'dart:ui';
-
 import 'package:himatch/core/constants/app_constants.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:himatch/core/constants/app_spacing.dart';
 import 'package:himatch/core/theme/app_theme.dart';
-import 'package:himatch/core/widgets/gradient_scaffold.dart';
 import 'package:himatch/models/chat_message.dart';
 import 'package:himatch/features/chat/presentation/providers/chat_providers.dart';
-import 'package:himatch/providers/theme_providers.dart';
 
-/// Group chat screen with glassmorphism bubble-based messaging layout.
+/// Group chat screen with bubble-based messaging layout.
+///
+/// Displays a real-time message list with bubbles, reactions, and
+/// a compose bar at the bottom.
 class ChatScreen extends ConsumerStatefulWidget {
   final String groupId;
   final String groupName;
@@ -32,11 +30,11 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
   final _scrollController = ScrollController();
   static const _currentUserId = AppConstants.localUserId;
   static const _reactionEmojis = [
-    '\u{1F44D}',
-    '\u{2764}\u{FE0F}',
-    '\u{1F602}',
-    '\u{1F389}',
-    '\u{1F64C}',
+    '\u{1F44D}', // thumbs up
+    '\u{2764}\u{FE0F}', // heart
+    '\u{1F602}', // joy
+    '\u{1F389}', // party
+    '\u{1F64C}', // raising hands
   ];
 
   @override
@@ -56,6 +54,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
         );
     _textController.clear();
 
+    // Scroll to bottom after send
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (_scrollController.hasClients) {
         _scrollController.animateTo(
@@ -100,9 +99,8 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
   Widget build(BuildContext context) {
     final allMessages = ref.watch(chatMessagesProvider);
     final messages = allMessages[widget.groupId] ?? [];
-    final colors = Theme.of(context).extension<AppColorsExtension>()!;
 
-    return GradientScaffold(
+    return Scaffold(
       appBar: AppBar(
         title: Column(
           children: [
@@ -112,7 +110,10 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
             ),
             Text(
               '${widget.memberCount}人のメンバー',
-              style: TextStyle(fontSize: 12, color: colors.textSecondary),
+              style: const TextStyle(
+                fontSize: 12,
+                color: AppColors.textSecondary,
+              ),
             ),
           ],
         ),
@@ -122,11 +123,11 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
           // Message list
           Expanded(
             child: messages.isEmpty
-                ? Center(
+                ? const Center(
                     child: Text(
                       'メッセージがありません\n最初のメッセージを送りましょう',
                       textAlign: TextAlign.center,
-                      style: TextStyle(color: colors.textSecondary),
+                      style: TextStyle(color: AppColors.textSecondary),
                     ),
                   )
                 : ListView.builder(
@@ -147,7 +148,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                   ),
           ),
 
-          // Glass compose bar
+          // Compose bar
           _ComposeBar(
             controller: _textController,
             onSend: _sendMessage,
@@ -159,7 +160,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
 }
 
 // ---------------------------------------------------------------------------
-// Message bubble — semi-transparent glass style (no BackdropFilter for perf)
+// Message bubble
 // ---------------------------------------------------------------------------
 
 class _MessageBubble extends StatelessWidget {
@@ -175,8 +176,6 @@ class _MessageBubble extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = Theme.of(context).extension<AppColorsExtension>()!;
-
     // System messages
     if (message.messageType == MessageType.system) {
       return Padding(
@@ -184,8 +183,8 @@ class _MessageBubble extends StatelessWidget {
         child: Center(
           child: Text(
             message.content,
-            style: TextStyle(
-              color: colors.textSecondary,
+            style: const TextStyle(
+              color: AppColors.textSecondary,
               fontSize: 12,
               fontStyle: FontStyle.italic,
             ),
@@ -204,13 +203,13 @@ class _MessageBubble extends StatelessWidget {
           if (!isOwn) ...[
             CircleAvatar(
               radius: 16,
-              backgroundColor: colors.primary.withValues(alpha: 0.15),
+              backgroundColor: AppColors.primaryLight.withValues(alpha: 0.3),
               child: Text(
                 message.displayName.isNotEmpty ? message.displayName[0] : '?',
-                style: TextStyle(
+                style: const TextStyle(
                   fontSize: 12,
                   fontWeight: FontWeight.bold,
-                  color: colors.primary,
+                  color: AppColors.primary,
                 ),
               ),
             ),
@@ -228,9 +227,9 @@ class _MessageBubble extends StatelessWidget {
                       padding: const EdgeInsets.only(left: 4, bottom: 2),
                       child: Text(
                         message.displayName,
-                        style: TextStyle(
+                        style: const TextStyle(
                           fontSize: 11,
-                          color: colors.textSecondary,
+                          color: AppColors.textSecondary,
                           fontWeight: FontWeight.w500,
                         ),
                       ),
@@ -244,23 +243,20 @@ class _MessageBubble extends StatelessWidget {
                       vertical: 10,
                     ),
                     decoration: BoxDecoration(
-                      // Glass-style bubbles: own = seedColor semi-transparent, other = white semi-transparent
                       color: isOwn
-                          ? colors.primary.withValues(alpha: 0.85)
-                          : colors.glassBackground,
+                          ? AppColors.primary
+                          : AppColors.surfaceVariant,
                       borderRadius: BorderRadius.only(
                         topLeft: const Radius.circular(16),
                         topRight: const Radius.circular(16),
                         bottomLeft: Radius.circular(isOwn ? 16 : 4),
                         bottomRight: Radius.circular(isOwn ? 4 : 16),
                       ),
-                      border: isOwn
-                          ? null
-                          : Border.all(color: colors.glassBorder),
                     ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
+                        // Image message
                         if (message.messageType == MessageType.image &&
                             message.imageUrl != null)
                           ClipRRect(
@@ -273,22 +269,24 @@ class _MessageBubble extends StatelessWidget {
                               errorBuilder: (_, _, _) => Container(
                                 width: 200,
                                 height: 150,
-                                color: colors.surfaceVariant,
-                                child: Icon(Icons.broken_image,
-                                    color: colors.textHint),
+                                color: AppColors.surfaceVariant,
+                                child: const Icon(Icons.broken_image,
+                                    color: AppColors.textHint),
                               ),
                             ),
                           ),
 
+                        // Text content
                         if (message.content.isNotEmpty)
                           Text(
                             message.content,
                             style: TextStyle(
-                              color: isOwn ? Colors.white : colors.textPrimary,
+                              color: isOwn ? Colors.white : AppColors.textPrimary,
                               fontSize: 15,
                             ),
                           ),
 
+                        // Related suggestion badge
                         if (message.relatedSuggestionId != null)
                           Padding(
                             padding: const EdgeInsets.only(top: 6),
@@ -300,7 +298,7 @@ class _MessageBubble extends StatelessWidget {
                               decoration: BoxDecoration(
                                 color: isOwn
                                     ? Colors.white.withValues(alpha: 0.2)
-                                    : colors.primary.withValues(alpha: 0.1),
+                                    : AppColors.primary.withValues(alpha: 0.1),
                                 borderRadius: BorderRadius.circular(8),
                               ),
                               child: Row(
@@ -311,7 +309,7 @@ class _MessageBubble extends StatelessWidget {
                                     size: 12,
                                     color: isOwn
                                         ? Colors.white70
-                                        : colors.primary,
+                                        : AppColors.primary,
                                   ),
                                   const SizedBox(width: 4),
                                   Text(
@@ -320,7 +318,7 @@ class _MessageBubble extends StatelessWidget {
                                       fontSize: 10,
                                       color: isOwn
                                           ? Colors.white70
-                                          : colors.primary,
+                                          : AppColors.primary,
                                     ),
                                   ),
                                 ],
@@ -336,7 +334,10 @@ class _MessageBubble extends StatelessWidget {
                     padding: const EdgeInsets.only(top: 2, left: 4, right: 4),
                     child: Text(
                       _formatTime(message.createdAt),
-                      style: TextStyle(fontSize: 10, color: colors.textHint),
+                      style: const TextStyle(
+                        fontSize: 10,
+                        color: AppColors.textHint,
+                      ),
                     ),
                   ),
 
@@ -355,9 +356,8 @@ class _MessageBubble extends StatelessWidget {
                                   vertical: 2,
                                 ),
                                 decoration: BoxDecoration(
-                                  color: colors.glassBackground,
+                                  color: AppColors.surfaceVariant,
                                   borderRadius: BorderRadius.circular(10),
-                                  border: Border.all(color: colors.glassBorder),
                                 ),
                                 child: Text(
                                   '${entry.key} ${entry.value.length}',
@@ -387,10 +387,10 @@ class _MessageBubble extends StatelessWidget {
 }
 
 // ---------------------------------------------------------------------------
-// Glass compose bar
+// Compose bar
 // ---------------------------------------------------------------------------
 
-class _ComposeBar extends ConsumerWidget {
+class _ComposeBar extends StatelessWidget {
   final TextEditingController controller;
   final VoidCallback onSend;
 
@@ -400,23 +400,18 @@ class _ComposeBar extends ConsumerWidget {
   });
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final colors = Theme.of(context).extension<AppColorsExtension>()!;
-    final glassEnabled = ref.watch(
-      themeSettingsProvider.select((s) => s.glassEffectEnabled),
-    );
-
-    Widget bar = Container(
+  Widget build(BuildContext context) {
+    return Container(
       padding: EdgeInsets.only(
         left: 12,
         right: 8,
         top: 8,
         bottom: MediaQuery.of(context).padding.bottom + 8,
       ),
-      decoration: BoxDecoration(
-        color: colors.glassBackground,
+      decoration: const BoxDecoration(
+        color: Colors.white,
         border: Border(
-          top: BorderSide(color: colors.glassBorder),
+          top: BorderSide(color: AppColors.surfaceVariant),
         ),
       ),
       child: Row(
@@ -430,9 +425,9 @@ class _ComposeBar extends ConsumerWidget {
               onSubmitted: (_) => onSend(),
               decoration: InputDecoration(
                 hintText: 'メッセージを入力...',
-                hintStyle: TextStyle(color: colors.textHint),
+                hintStyle: const TextStyle(color: AppColors.textHint),
                 filled: true,
-                fillColor: colors.surfaceVariant.withValues(alpha: 0.5),
+                fillColor: AppColors.surfaceVariant,
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(24),
                   borderSide: BorderSide.none,
@@ -446,7 +441,7 @@ class _ComposeBar extends ConsumerWidget {
           ),
           const SizedBox(width: 8),
           Material(
-            color: colors.primary,
+            color: AppColors.primary,
             shape: const CircleBorder(),
             child: InkWell(
               onTap: onSend,
@@ -460,19 +455,5 @@ class _ComposeBar extends ConsumerWidget {
         ],
       ),
     );
-
-    if (glassEnabled) {
-      bar = ClipRect(
-        child: BackdropFilter(
-          filter: ImageFilter.blur(
-            sigmaX: AppSpacing.glassBlur,
-            sigmaY: AppSpacing.glassBlur,
-          ),
-          child: bar,
-        ),
-      );
-    }
-
-    return bar;
   }
 }
