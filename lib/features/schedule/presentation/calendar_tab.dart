@@ -138,8 +138,9 @@ class _CalendarTabState extends ConsumerState<CalendarTab> {
               markersMaxCount: 0,
             ),
             headerStyle: const HeaderStyle(
-              formatButtonVisible: false,
+              formatButtonVisible: true,
               titleCentered: true,
+              formatButtonShowsNext: false,
             ),
             onDaySelected: (selectedDay, focusedDay) {
               if (_isShiftInputMode) {
