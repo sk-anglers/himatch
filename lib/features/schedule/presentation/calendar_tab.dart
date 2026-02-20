@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:himatch/core/theme/app_theme.dart';
+import 'package:himatch/core/widgets/glass_card.dart';
 import 'package:himatch/core/utils/date_utils.dart';
 import 'package:himatch/models/schedule.dart';
 import 'package:himatch/models/shift_type.dart';
@@ -328,8 +329,9 @@ class _CalendarTabState extends ConsumerState<CalendarTab> {
         final colors = Theme.of(ctx).extension<AppColorsExtension>()!;
         return Container(
         decoration: BoxDecoration(
-          color: colors.surface,
+          color: colors.glassBackground,
           borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+          border: Border(top: BorderSide(color: colors.glassBorder)),
         ),
         padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
         child: Column(
@@ -603,8 +605,9 @@ class _ScheduleListSheet extends StatelessWidget {
     final colors = Theme.of(context).extension<AppColorsExtension>()!;
     return Container(
       decoration: BoxDecoration(
-        color: colors.surface,
+        color: colors.glassBackground,
         borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+        border: Border(top: BorderSide(color: colors.glassBorder)),
       ),
       constraints: BoxConstraints(
         maxHeight: MediaQuery.of(context).size.height * 0.55,
@@ -631,10 +634,10 @@ class _ScheduleListSheet extends StatelessWidget {
               children: [
                 Text(
                   AppDateUtils.formatMonthDayWeek(day),
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontWeight: FontWeight.bold,
                     fontSize: 18,
-                    color: AppColors.textPrimary,
+                    color: colors.textPrimary,
                   ),
                 ),
                 const Spacer(),
@@ -711,95 +714,90 @@ class _ScheduleCard extends StatelessWidget {
         ? shiftTypeMap[schedule.shiftTypeId]
         : null;
 
-    return Card(
+    return GlassCard.lite(
       margin: const EdgeInsets.only(bottom: 8),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(16),
-        child: Padding(
-          padding: const EdgeInsets.all(12),
-          child: Row(
-            children: [
-              // Color indicator
-              Container(
-                width: 4,
-                height: 48,
-                decoration: BoxDecoration(
-                  color: shiftType != null
-                      ? shiftTypeColor(shiftType)
-                      : _getTypeColor(schedule.scheduleType),
-                  borderRadius: BorderRadius.circular(2),
-                ),
-              ),
-              const SizedBox(width: 12),
-              // Content
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+      onTap: onTap,
+      padding: const EdgeInsets.all(12),
+      child: Row(
+        children: [
+          // Color indicator
+          Container(
+            width: 4,
+            height: 48,
+            decoration: BoxDecoration(
+              color: shiftType != null
+                  ? shiftTypeColor(shiftType)
+                  : _getTypeColor(schedule.scheduleType),
+              borderRadius: BorderRadius.circular(2),
+            ),
+          ),
+          const SizedBox(width: 12),
+          // Content
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
                   children: [
-                    Row(
-                      children: [
-                        if (shiftType != null)
-                          ShiftBadgeInline(shiftType: shiftType)
-                        else
-                          _ScheduleTypeBadge(type: schedule.scheduleType),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: Text(
-                            schedule.title,
-                            style: const TextStyle(
-                              fontWeight: FontWeight.w600,
-                              fontSize: 15,
-                            ),
-                            overflow: TextOverflow.ellipsis,
-                          ),
+                    if (shiftType != null)
+                      ShiftBadgeInline(shiftType: shiftType)
+                    else
+                      _ScheduleTypeBadge(type: schedule.scheduleType),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        schedule.title,
+                        style: const TextStyle(
+                          fontWeight: FontWeight.w600,
+                          fontSize: 15,
                         ),
-                      ],
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      schedule.isAllDay
-                          ? '終日'
-                          : '${AppDateUtils.formatTime(schedule.startTime)} - ${AppDateUtils.formatTime(schedule.endTime)}',
-                      style: const TextStyle(
-                        color: AppColors.textSecondary,
-                        fontSize: 13,
+                        overflow: TextOverflow.ellipsis,
                       ),
                     ),
                   ],
                 ),
-              ),
-              // Delete
-              IconButton(
-                icon: const Icon(Icons.delete_outline, size: 20),
-                color: AppColors.textHint,
-                onPressed: () {
-                  showDialog(
-                    context: context,
-                    builder: (ctx) => AlertDialog(
-                      title: const Text('削除確認'),
-                      content: Text('「${schedule.title}」を削除しますか？'),
-                      actions: [
-                        TextButton(
-                          onPressed: () => Navigator.pop(ctx),
-                          child: const Text('キャンセル'),
-                        ),
-                        TextButton(
-                          onPressed: () {
-                            Navigator.pop(ctx);
-                            onDelete();
-                          },
-                          child: const Text('削除',
-                              style: TextStyle(color: AppColors.error)),
-                        ),
-                      ],
-                    ),
-                  );
-                },
-              ),
-            ],
+                const SizedBox(height: 4),
+                Text(
+                  schedule.isAllDay
+                      ? '終日'
+                      : '${AppDateUtils.formatTime(schedule.startTime)} - ${AppDateUtils.formatTime(schedule.endTime)}',
+                  style: const TextStyle(
+                    color: AppColors.textSecondary,
+                    fontSize: 13,
+                  ),
+                ),
+              ],
+            ),
           ),
-        ),
+          // Delete
+          IconButton(
+            icon: const Icon(Icons.delete_outline, size: 20),
+            color: AppColors.textHint,
+            onPressed: () {
+              showDialog(
+                context: context,
+                builder: (ctx) => AlertDialog(
+                  title: const Text('削除確認'),
+                  content: Text('「${schedule.title}」を削除しますか？'),
+                  actions: [
+                    TextButton(
+                      onPressed: () => Navigator.pop(ctx),
+                      child: const Text('キャンセル'),
+                    ),
+                    TextButton(
+                      onPressed: () {
+                        Navigator.pop(ctx);
+                        onDelete();
+                      },
+                      child: const Text('削除',
+                          style: TextStyle(color: AppColors.error)),
+                    ),
+                  ],
+                ),
+              );
+            },
+          ),
+        ],
       ),
     );
   }
@@ -924,20 +922,9 @@ class _ShiftPaintPanel extends ConsumerWidget {
     final shiftTypes = ref.watch(shiftTypesProvider);
     final isActive = activeShiftType != null;
 
-    return Container(
+    return GlassCard.lite(
       margin: const EdgeInsets.symmetric(horizontal: 12),
       padding: const EdgeInsets.fromLTRB(12, 8, 12, 8),
-      decoration: BoxDecoration(
-        color: isActive
-            ? shiftTypeColor(activeShiftType!).withValues(alpha: 0.06)
-            : AppColors.surfaceVariant.withValues(alpha: 0.5),
-        borderRadius: BorderRadius.circular(12),
-        border: isActive
-            ? Border.all(
-                color: shiftTypeColor(activeShiftType!).withValues(alpha: 0.3),
-              )
-            : null,
-      ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [

@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:himatch/core/theme/app_theme.dart';
+import 'package:himatch/core/widgets/glass_card.dart';
+import 'package:himatch/core/widgets/gradient_scaffold.dart';
 import 'package:himatch/providers/theme_providers.dart';
 
 /// Theme customization screen.
-/// Allows users to customize color theme, dark mode, and font preferences.
+/// Allows users to customize color theme, dark mode, glass effects, and font.
 class ThemeSettingsScreen extends ConsumerWidget {
   const ThemeSettingsScreen({super.key});
 
@@ -13,8 +15,9 @@ class ThemeSettingsScreen extends ConsumerWidget {
     final themeSettings = ref.watch(themeSettingsProvider);
     final selectedPreset = themeSettings.preset;
     final isDarkMode = themeSettings.isDarkMode;
+    final glassEnabled = themeSettings.glassEffectEnabled;
 
-    return Scaffold(
+    return GradientScaffold(
       appBar: AppBar(
         title: const Text('テーマ設定'),
       ),
@@ -43,12 +46,21 @@ class ThemeSettingsScreen extends ConsumerWidget {
           ),
           const SizedBox(height: 24),
 
+          // Glass effect toggle
+          _SectionHeader(title: 'グラスエフェクト'),
+          const SizedBox(height: 8),
+          _GlassEffectToggle(
+            isEnabled: glassEnabled,
+            onChanged: (value) {
+              ref.read(themeSettingsProvider.notifier).setGlassEffect(value);
+            },
+          ),
+          const SizedBox(height: 24),
+
           // Font section (placeholder)
           _SectionHeader(title: 'フォント'),
           const SizedBox(height: 8),
-          const _FontSelector(
-            selectedFont: 'gothic',
-          ),
+          const _FontSelector(selectedFont: 'gothic'),
           const SizedBox(height: 24),
 
           // Live preview
@@ -57,9 +69,47 @@ class ThemeSettingsScreen extends ConsumerWidget {
           _ThemePreviewCard(
             preset: selectedPreset,
             isDarkMode: isDarkMode,
+            glassEnabled: glassEnabled,
           ),
           const SizedBox(height: 32),
         ],
+      ),
+    );
+  }
+}
+
+// ── Glass effect toggle ──
+
+class _GlassEffectToggle extends StatelessWidget {
+  final bool isEnabled;
+  final ValueChanged<bool> onChanged;
+
+  const _GlassEffectToggle({
+    required this.isEnabled,
+    required this.onChanged,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GlassCard(
+      padding: EdgeInsets.zero,
+      child: SwitchListTile(
+        title: const Text('グラスモーフィズム'),
+        subtitle: Text(
+          isEnabled ? 'フロストガラス効果ON' : 'パフォーマンス優先モード',
+          style: TextStyle(
+            fontSize: 13,
+            color: Theme.of(context)
+                .extension<AppColorsExtension>()!
+                .textSecondary,
+          ),
+        ),
+        value: isEnabled,
+        onChanged: onChanged,
+        secondary: Icon(
+          isEnabled ? Icons.blur_on : Icons.blur_off,
+          color: Theme.of(context).extension<AppColorsExtension>()!.primary,
+        ),
       ),
     );
   }
@@ -78,25 +128,22 @@ class _ColorThemeGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: GridView.count(
-          crossAxisCount: 3,
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          mainAxisSpacing: 12,
-          crossAxisSpacing: 12,
-          childAspectRatio: 1.0,
-          children: ThemePreset.values.map((preset) {
-            final isSelected = preset == selectedPreset;
-            return _ColorSwatch(
-              preset: preset,
-              isSelected: isSelected,
-              onTap: () => onSelected(preset),
-            );
-          }).toList(),
-        ),
+    return GlassCard(
+      child: GridView.count(
+        crossAxisCount: 3,
+        shrinkWrap: true,
+        physics: const NeverScrollableScrollPhysics(),
+        mainAxisSpacing: 12,
+        crossAxisSpacing: 12,
+        childAspectRatio: 1.0,
+        children: ThemePreset.values.map((preset) {
+          final isSelected = preset == selectedPreset;
+          return _ColorSwatch(
+            preset: preset,
+            isSelected: isSelected,
+            onTap: () => onSelected(preset),
+          );
+        }).toList(),
       ),
     );
   }
@@ -123,7 +170,12 @@ class _ColorSwatch extends StatelessWidget {
           borderRadius: BorderRadius.circular(16),
           border: isSelected
               ? Border.all(color: preset.seedColor, width: 3)
-              : Border.all(color: AppColors.surfaceVariant, width: 1),
+              : Border.all(
+                  color: Theme.of(context)
+                      .extension<AppColorsExtension>()!
+                      .glassBorder,
+                  width: 1,
+                ),
         ),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -141,8 +193,8 @@ class _ColorSwatch extends StatelessWidget {
                         ? [
                             BoxShadow(
                               color: preset.seedColor.withValues(alpha: 0.4),
-                              blurRadius: 8,
-                              spreadRadius: 1,
+                              blurRadius: 12,
+                              spreadRadius: 2,
                             ),
                           ]
                         : null,
@@ -160,7 +212,9 @@ class _ColorSwatch extends StatelessWidget {
                 fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
                 color: isSelected
                     ? preset.seedColor
-                    : AppColors.textSecondary,
+                    : Theme.of(context)
+                        .extension<AppColorsExtension>()!
+                        .textSecondary,
               ),
             ),
           ],
@@ -183,22 +237,20 @@ class _DarkModeToggle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
+    final colors = Theme.of(context).extension<AppColorsExtension>()!;
+    return GlassCard(
+      padding: EdgeInsets.zero,
       child: SwitchListTile(
         title: const Text('ダークモード'),
         subtitle: Text(
           isDarkMode ? 'ダークテーマ適用中' : 'ライトテーマ適用中',
-          style: const TextStyle(
-            fontSize: 13,
-            color: AppColors.textSecondary,
-          ),
+          style: TextStyle(fontSize: 13, color: colors.textSecondary),
         ),
         value: isDarkMode,
         onChanged: onChanged,
-        activeThumbColor: AppColors.primary,
         secondary: Icon(
           isDarkMode ? Icons.dark_mode : Icons.light_mode,
-          color: isDarkMode ? AppColors.primary : AppColors.warning,
+          color: isDarkMode ? colors.primary : AppColors.warning,
         ),
       ),
     );
@@ -216,67 +268,62 @@ class _FontSelector extends StatelessWidget {
     ('handwritten', '手書き風', '近日公開'),
   ];
 
-  const _FontSelector({
-    required this.selectedFont,
-  });
+  const _FontSelector({required this.selectedFont});
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 4),
-        child: Column(
-          children: _fonts.asMap().entries.map((entry) {
-            final index = entry.key;
-            final (id, label, note) = entry.value;
-            final isSelected = selectedFont == id;
-            final isAvailable = id == 'gothic'; // Only gothic is functional
+    final colors = Theme.of(context).extension<AppColorsExtension>()!;
+    return GlassCard(
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: Column(
+        children: _fonts.asMap().entries.map((entry) {
+          final index = entry.key;
+          final (id, label, note) = entry.value;
+          final isSelected = selectedFont == id;
+          final isAvailable = id == 'gothic';
 
-            return Column(
-              children: [
-                if (index > 0) const Divider(height: 1),
-                ListTile(
-                  leading: Icon(
-                    isSelected
-                        ? Icons.radio_button_checked
-                        : Icons.radio_button_unchecked,
-                    color: isSelected
-                        ? AppColors.primary
-                        : isAvailable
-                            ? AppColors.textHint
-                            : AppColors.textHint.withValues(alpha: 0.5),
-                  ),
-                  title: Text(
-                    label,
-                    style: TextStyle(
-                      color: isAvailable
-                          ? AppColors.textPrimary
-                          : AppColors.textHint,
-                    ),
-                  ),
-                  trailing: !isAvailable
-                      ? Container(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 8, vertical: 2),
-                          decoration: BoxDecoration(
-                            color: AppColors.surfaceVariant,
-                            borderRadius: BorderRadius.circular(6),
-                          ),
-                          child: Text(
-                            note,
-                            style: const TextStyle(
-                              fontSize: 11,
-                              color: AppColors.textHint,
-                            ),
-                          ),
-                        )
-                      : null,
-                  onTap: isAvailable ? () {} : null,
+          return Column(
+            children: [
+              if (index > 0) const Divider(height: 1),
+              ListTile(
+                leading: Icon(
+                  isSelected
+                      ? Icons.radio_button_checked
+                      : Icons.radio_button_unchecked,
+                  color: isSelected
+                      ? colors.primary
+                      : isAvailable
+                          ? colors.textHint
+                          : colors.textHint.withValues(alpha: 0.5),
                 ),
-              ],
-            );
-          }).toList(),
-        ),
+                title: Text(
+                  label,
+                  style: TextStyle(
+                    color: isAvailable ? colors.textPrimary : colors.textHint,
+                  ),
+                ),
+                trailing: !isAvailable
+                    ? Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 8, vertical: 2),
+                        decoration: BoxDecoration(
+                          color: colors.surfaceVariant,
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                        child: Text(
+                          note,
+                          style: TextStyle(
+                            fontSize: 11,
+                            color: colors.textHint,
+                          ),
+                        ),
+                      )
+                    : null,
+                onTap: isAvailable ? () {} : null,
+              ),
+            ],
+          );
+        }).toList(),
       ),
     );
   }
@@ -287,25 +334,37 @@ class _FontSelector extends StatelessWidget {
 class _ThemePreviewCard extends StatelessWidget {
   final ThemePreset preset;
   final bool isDarkMode;
+  final bool glassEnabled;
 
   const _ThemePreviewCard({
     required this.preset,
     required this.isDarkMode,
+    required this.glassEnabled,
   });
 
   @override
   Widget build(BuildContext context) {
-    final bgColor = isDarkMode ? const Color(0xFF1A1A2E) : AppColors.background;
-    final surfaceColor = isDarkMode ? const Color(0xFF16213E) : AppColors.surface;
+    final grad = AppColorsExtension.gradientFromSeed(
+      preset.seedColor,
+      isDark: isDarkMode,
+    );
     final textColor = isDarkMode ? Colors.white : AppColors.textPrimary;
     final textSecondary =
         isDarkMode ? Colors.white70 : AppColors.textSecondary;
 
     return Container(
       decoration: BoxDecoration(
-        color: bgColor,
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [grad.start, grad.middle, grad.end],
+        ),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.surfaceVariant),
+        border: Border.all(
+          color: Theme.of(context)
+              .extension<AppColorsExtension>()!
+              .glassBorder,
+        ),
       ),
       padding: const EdgeInsets.all(16),
       child: Column(
@@ -315,7 +374,8 @@ class _ThemePreviewCard extends StatelessWidget {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
             decoration: BoxDecoration(
-              color: surfaceColor,
+              color: (isDarkMode ? Colors.white : Colors.black)
+                  .withValues(alpha: 0.08),
               borderRadius: BorderRadius.circular(10),
             ),
             child: Row(
@@ -375,7 +435,6 @@ class _ThemePreviewCard extends StatelessWidget {
             }).toList(),
           ),
           const SizedBox(height: 4),
-          // Sample day cells
           Row(
             children: List.generate(7, (i) {
               final hasEvent = i == 2 || i == 5;
@@ -386,13 +445,14 @@ class _ThemePreviewCard extends StatelessWidget {
                   decoration: BoxDecoration(
                     color: hasEvent
                         ? preset.seedColor.withValues(alpha: 0.15)
-                        : surfaceColor,
+                        : (isDarkMode ? Colors.white : Colors.black)
+                            .withValues(alpha: 0.05),
                     borderRadius: BorderRadius.circular(4),
                     border: Border.all(
                       color: hasEvent
                           ? preset.seedColor
-                          : surfaceColor,
-                      width: hasEvent ? 1 : 0.5,
+                          : Colors.transparent,
+                      width: hasEvent ? 1 : 0,
                     ),
                   ),
                   alignment: Alignment.center,
@@ -410,6 +470,30 @@ class _ThemePreviewCard extends StatelessWidget {
             }),
           ),
           const SizedBox(height: 12),
+
+          // Glass effect label
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+            decoration: BoxDecoration(
+              color: (isDarkMode ? Colors.white : Colors.black)
+                  .withValues(alpha: glassEnabled ? 0.1 : 0.05),
+              borderRadius: BorderRadius.circular(8),
+              border: glassEnabled
+                  ? Border.all(
+                      color: Colors.white.withValues(alpha: 0.3),
+                    )
+                  : null,
+            ),
+            child: Text(
+              glassEnabled ? 'Glass ON' : 'Glass OFF',
+              style: TextStyle(
+                fontSize: 11,
+                fontWeight: FontWeight.w600,
+                color: textSecondary,
+              ),
+            ),
+          ),
+          const SizedBox(height: 8),
 
           // Mini button
           Container(
@@ -446,7 +530,9 @@ class _SectionHeader extends StatelessWidget {
       title,
       style: Theme.of(context).textTheme.titleSmall?.copyWith(
             fontWeight: FontWeight.bold,
-            color: AppColors.textSecondary,
+            color: Theme.of(context)
+                .extension<AppColorsExtension>()!
+                .textSecondary,
           ),
     );
   }

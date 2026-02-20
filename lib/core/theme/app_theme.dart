@@ -121,15 +121,18 @@ abstract class AppTheme {
       surface: AppColors.surface,
       error: AppColors.error,
     );
+    final colorsExt =
+        AppColorsExtension.light.withSeedGradient(seed, isDark: false);
     return ThemeData(
       useMaterial3: true,
       colorScheme: colorScheme,
       textTheme: _textThemeLight,
-      scaffoldBackgroundColor: AppColors.background,
+      scaffoldBackgroundColor: Colors.transparent,
       appBarTheme: const AppBarTheme(
-        backgroundColor: Colors.white,
+        backgroundColor: Colors.transparent,
         foregroundColor: AppColors.textPrimary,
         elevation: 0,
+        scrolledUnderElevation: 0,
         centerTitle: true,
       ),
       cardTheme: CardThemeData(
@@ -173,10 +176,11 @@ abstract class AppTheme {
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
         ),
-        backgroundColor: AppColors.surface,
+        backgroundColor: Colors.transparent,
         showDragHandle: true,
       ),
       navigationBarTheme: NavigationBarThemeData(
+        backgroundColor: Colors.transparent,
         indicatorShape: const StadiumBorder(),
         indicatorColor: seed.withValues(alpha: 0.12),
         labelTextStyle: WidgetStateProperty.resolveWith((states) {
@@ -202,7 +206,7 @@ abstract class AppTheme {
           vertical: 14,
         ),
       ),
-      extensions: const [AppColorsExtension.light],
+      extensions: [colorsExt],
     );
   }
 
@@ -215,16 +219,19 @@ abstract class AppTheme {
       secondary: AppColors.secondaryLight,
       error: AppColors.error,
     );
+    final colorsExt =
+        AppColorsExtension.dark.withSeedGradient(seed, isDark: true);
     return ThemeData(
       useMaterial3: true,
       brightness: Brightness.dark,
       colorScheme: colorScheme,
       textTheme: _textThemeDark,
-      scaffoldBackgroundColor: const Color(0xFF1A1A2E),
+      scaffoldBackgroundColor: Colors.transparent,
       appBarTheme: const AppBarTheme(
-        backgroundColor: Color(0xFF16213E),
+        backgroundColor: Colors.transparent,
         foregroundColor: Colors.white,
         elevation: 0,
+        scrolledUnderElevation: 0,
         centerTitle: true,
       ),
       cardTheme: CardThemeData(
@@ -269,10 +276,11 @@ abstract class AppTheme {
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
         ),
-        backgroundColor: Color(0xFF16213E),
+        backgroundColor: Colors.transparent,
         showDragHandle: true,
       ),
       navigationBarTheme: NavigationBarThemeData(
+        backgroundColor: Colors.transparent,
         indicatorShape: const StadiumBorder(),
         indicatorColor: seed.withValues(alpha: 0.18),
         labelTextStyle: WidgetStateProperty.resolveWith((states) {
@@ -298,7 +306,7 @@ abstract class AppTheme {
           vertical: 14,
         ),
       ),
-      extensions: const [AppColorsExtension.dark],
+      extensions: [colorsExt],
     );
   }
 }

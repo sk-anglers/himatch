@@ -5,6 +5,8 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:himatch/core/theme/app_theme.dart';
+import 'package:himatch/core/widgets/glass_card.dart';
+import 'package:himatch/core/widgets/gradient_scaffold.dart';
 import 'package:himatch/models/group.dart';
 import 'package:himatch/routing/app_routes.dart';
 import 'package:himatch/features/group/presentation/providers/group_providers.dart';
@@ -18,10 +20,11 @@ class GroupDetailScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final colors = Theme.of(context).extension<AppColorsExtension>()!;
     final membersMap = ref.watch(localGroupMembersProvider);
     final members = membersMap[group.id] ?? [];
 
-    return Scaffold(
+    return GradientScaffold(
       appBar: AppBar(
         title: Text(group.name),
         actions: [
@@ -94,7 +97,7 @@ class GroupDetailScreen extends ConsumerWidget {
               _FeatureButton(
                 icon: Icons.chat_bubble_outline,
                 label: 'チャット',
-                color: AppColors.primary,
+                color: colors.primary,
                 badgeCount: ref.watch(unreadCountProvider(group.id)),
                 onTap: () => context.pushNamed(
                   AppRoute.chat.name,
@@ -175,7 +178,10 @@ class GroupDetailScreen extends ConsumerWidget {
                 ),
               ),
             ],
-          ).animate().fadeIn(duration: 400.ms).slideY(begin: 0.05, duration: 400.ms),
+          )
+              .animate()
+              .fadeIn(duration: 400.ms)
+              .slideY(begin: 0.05, duration: 400.ms),
           const SizedBox(height: 20),
 
           // Invite code card
@@ -194,8 +200,8 @@ class GroupDetailScreen extends ConsumerWidget {
               const Spacer(),
               Text(
                 '上限 ${group.maxMembers}人',
-                style: const TextStyle(
-                  color: AppColors.textSecondary,
+                style: TextStyle(
+                  color: colors.textSecondary,
                   fontSize: 13,
                 ),
               ),
@@ -204,12 +210,12 @@ class GroupDetailScreen extends ConsumerWidget {
           const SizedBox(height: 8),
           ...members.map((member) => _MemberTile(member: member)),
           if (members.isEmpty)
-            const Padding(
-              padding: EdgeInsets.symmetric(vertical: 32),
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 32),
               child: Center(
                 child: Text(
                   'メンバーがいません',
-                  style: TextStyle(color: AppColors.textSecondary),
+                  style: TextStyle(color: colors.textSecondary),
                 ),
               ),
             ),
@@ -253,7 +259,9 @@ class _SectionLabel extends StatelessWidget {
       title,
       style: Theme.of(context).textTheme.titleSmall?.copyWith(
             fontWeight: FontWeight.bold,
-            color: AppColors.textSecondary,
+            color: Theme.of(context)
+                .extension<AppColorsExtension>()!
+                .textSecondary,
           ),
     );
   }
@@ -276,33 +284,27 @@ class _FeatureButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(
+    return GlassCard.lite(
+      padding: EdgeInsets.zero,
       onTap: onTap,
-      borderRadius: BorderRadius.circular(12),
-      child: Container(
-        decoration: BoxDecoration(
-          color: color.withValues(alpha: 0.08),
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Badge(
-              isLabelVisible: badgeCount > 0,
-              label: Text('$badgeCount'),
-              child: Icon(icon, color: color, size: 24),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Badge(
+            isLabelVisible: badgeCount > 0,
+            label: Text('$badgeCount'),
+            child: Icon(icon, color: color, size: 24),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 11,
+              fontWeight: FontWeight.w600,
+              color: color,
             ),
-            const SizedBox(height: 4),
-            Text(
-              label,
-              style: TextStyle(
-                fontSize: 11,
-                fontWeight: FontWeight.w600,
-                color: color,
-              ),
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
@@ -315,52 +317,50 @@ class _GroupInfoCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Row(
-          children: [
-            CircleAvatar(
-              radius: 28,
-              backgroundColor: AppColors.primaryLight.withValues(alpha: 0.3),
-              child: Text(
-                group.name.isNotEmpty ? group.name[0] : '?',
-                style: const TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.primary,
-                ),
+    final colors = Theme.of(context).extension<AppColorsExtension>()!;
+    return GlassCard(
+      child: Row(
+        children: [
+          CircleAvatar(
+            radius: 28,
+            backgroundColor: colors.primary.withValues(alpha: 0.15),
+            child: Text(
+              group.name.isNotEmpty ? group.name[0] : '?',
+              style: TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+                color: colors.primary,
               ),
             ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    group.name,
-                    style: const TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  group.name,
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
                   ),
-                  if (group.description != null &&
-                      group.description!.isNotEmpty)
-                    Padding(
-                      padding: const EdgeInsets.only(top: 4),
-                      child: Text(
-                        group.description!,
-                        style: const TextStyle(
-                          color: AppColors.textSecondary,
-                          fontSize: 14,
-                        ),
+                ),
+                if (group.description != null &&
+                    group.description!.isNotEmpty)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 4),
+                    child: Text(
+                      group.description!,
+                      style: TextStyle(
+                        color: colors.textSecondary,
+                        fontSize: 14,
                       ),
                     ),
-                ],
-              ),
+                  ),
+              ],
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
@@ -373,77 +373,75 @@ class _InviteCodeCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Row(
-              children: [
-                Icon(Icons.link, size: 18, color: AppColors.primary),
-                SizedBox(width: 8),
-                Text(
-                  '招待コード',
-                  style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
-                ),
-              ],
-            ),
-            const SizedBox(height: 12),
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.symmetric(vertical: 12),
-              decoration: BoxDecoration(
-                color: AppColors.surfaceVariant,
-                borderRadius: BorderRadius.circular(8),
+    final colors = Theme.of(context).extension<AppColorsExtension>()!;
+    return GlassCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(Icons.link, size: 18, color: colors.primary),
+              const SizedBox(width: 8),
+              const Text(
+                '招待コード',
+                style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
               ),
-              child: Center(
-                child: Text(
-                  inviteCode,
-                  style: const TextStyle(
-                    fontSize: 28,
-                    fontWeight: FontWeight.bold,
-                    letterSpacing: 6,
-                    color: AppColors.primary,
-                  ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(vertical: 12),
+            decoration: BoxDecoration(
+              color: colors.glassBackground,
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Center(
+              child: Text(
+                inviteCode,
+                style: TextStyle(
+                  fontSize: 28,
+                  fontWeight: FontWeight.bold,
+                  letterSpacing: 6,
+                  color: colors.primary,
                 ),
               ),
             ),
-            const SizedBox(height: 12),
-            Row(
-              children: [
-                Expanded(
-                  child: OutlinedButton.icon(
-                    onPressed: () {
-                      Clipboard.setData(ClipboardData(text: inviteCode));
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('コードをコピーしました')),
-                      );
-                    },
-                    icon: const Icon(Icons.copy, size: 16),
-                    label: const Text('コピー'),
-                  ),
+          ),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              Expanded(
+                child: OutlinedButton.icon(
+                  onPressed: () {
+                    Clipboard.setData(ClipboardData(text: inviteCode));
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('コードをコピーしました')),
+                    );
+                  },
+                  icon: const Icon(Icons.copy, size: 16),
+                  label: const Text('コピー'),
                 ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: ElevatedButton.icon(
-                    onPressed: () {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text(
-                            'Himatchに参加しよう！招待コード: $inviteCode',
-                          ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: ElevatedButton.icon(
+                  onPressed: () {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(
+                          'Himatchに参加しよう！招待コード: $inviteCode',
                         ),
-                      );
-                    },
-                    icon: const Icon(Icons.share, size: 16),
-                    label: const Text('共有'),
-                  ),
+                      ),
+                    );
+                  },
+                  icon: const Icon(Icons.share, size: 16),
+                  label: const Text('共有'),
                 ),
-              ],
-            ),
-          ],
-        ),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }
@@ -456,16 +454,17 @@ class _MemberTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = Theme.of(context).extension<AppColorsExtension>()!;
     final isOwner = member.role == 'owner';
 
     return ListTile(
       leading: CircleAvatar(
         backgroundColor: isOwner
             ? AppColors.warning.withValues(alpha: 0.2)
-            : AppColors.primaryLight.withValues(alpha: 0.2),
+            : colors.primary.withValues(alpha: 0.15),
         child: Icon(
           isOwner ? Icons.star : Icons.person,
-          color: isOwner ? AppColors.warning : AppColors.primary,
+          color: isOwner ? AppColors.warning : colors.primary,
           size: 20,
         ),
       ),
@@ -475,19 +474,19 @@ class _MemberTile extends StatelessWidget {
       ),
       subtitle: Text(
         isOwner ? 'オーナー' : 'メンバー',
-        style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
+        style: TextStyle(fontSize: 12, color: colors.textSecondary),
       ),
       trailing: member.userId == AppConstants.localUserId
           ? Container(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
               decoration: BoxDecoration(
-                color: AppColors.primary.withValues(alpha: 0.1),
+                color: colors.primary.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(4),
               ),
-              child: const Text(
+              child: Text(
                 '自分',
                 style: TextStyle(
-                  color: AppColors.primary,
+                  color: colors.primary,
                   fontSize: 11,
                   fontWeight: FontWeight.bold,
                 ),

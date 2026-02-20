@@ -157,23 +157,30 @@ class _GroupSelector extends StatelessWidget {
       padding: const EdgeInsets.only(right: 8),
       child: GestureDetector(
         onTap: onTap,
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
-          decoration: BoxDecoration(
-            color: isSelected
-                ? AppColors.primary
-                : AppColors.surfaceVariant,
-            borderRadius: BorderRadius.circular(20),
-          ),
-          child: Text(
-            label,
-            style: TextStyle(
-              fontSize: 13,
-              fontWeight: FontWeight.w600,
-              color: isSelected ? Colors.white : AppColors.textSecondary,
+        child: Builder(builder: (context) {
+          final colors =
+              Theme.of(context).extension<AppColorsExtension>()!;
+          return Container(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+            decoration: BoxDecoration(
+              color: isSelected
+                  ? colors.primary
+                  : colors.glassBackground,
+              borderRadius: BorderRadius.circular(20),
+              border: isSelected
+                  ? null
+                  : Border.all(color: colors.glassBorder),
             ),
-          ),
-        ),
+            child: Text(
+              label,
+              style: TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+                color: isSelected ? Colors.white : colors.textSecondary,
+              ),
+            ),
+          );
+        }),
       ),
     );
   }
@@ -572,8 +579,9 @@ class _DayDetailSheet extends ConsumerWidget {
 
     return Container(
       decoration: BoxDecoration(
-        color: colors.surface,
+        color: colors.glassBackground,
         borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+        border: Border(top: BorderSide(color: colors.glassBorder)),
       ),
       constraints: BoxConstraints(
         maxHeight: MediaQuery.of(context).size.height * 0.6,
@@ -606,7 +614,7 @@ class _DayDetailSheet extends ConsumerWidget {
                         ? AppColors.success.withValues(alpha: 0.1)
                         : isWeekend
                             ? AppColors.secondary.withValues(alpha: 0.1)
-                            : AppColors.primary.withValues(alpha: 0.1),
+                            : colors.primary.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: Text(
@@ -707,14 +715,16 @@ class _SuggestionTile extends ConsumerWidget {
             ? AppColors.warning
             : AppColors.textSecondary;
 
+    final colors = Theme.of(context).extension<AppColorsExtension>()!;
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surfaceContainerLow,
+        color: colors.glassBackground,
         borderRadius: BorderRadius.circular(14),
-        border: isConfirmed
-            ? Border.all(color: AppColors.success, width: 2)
-            : null,
+        border: Border.all(
+          color: isConfirmed ? AppColors.success : colors.glassBorder,
+          width: isConfirmed ? 2 : 1,
+        ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1290,8 +1300,9 @@ class _InviteDestinationSheet extends StatelessWidget {
     final colors = Theme.of(context).extension<AppColorsExtension>()!;
     return Container(
       decoration: BoxDecoration(
-        color: colors.surface,
+        color: colors.glassBackground,
         borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+        border: Border(top: BorderSide(color: colors.glassBorder)),
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,

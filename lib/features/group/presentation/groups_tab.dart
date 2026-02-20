@@ -3,6 +3,7 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:himatch/core/theme/app_theme.dart';
 import 'package:himatch/core/widgets/empty_state_widget.dart';
+import 'package:himatch/core/widgets/glass_card.dart';
 import 'package:himatch/models/group.dart';
 import 'package:himatch/features/group/presentation/providers/group_providers.dart';
 import 'package:go_router/go_router.dart';
@@ -22,7 +23,7 @@ class GroupsTab extends ConsumerWidget {
       body: groups.isEmpty ? const _EmptyState() : _GroupList(groups: groups),
       floatingActionButton: FloatingActionButton(
         onPressed: () => _showCreateDialog(context, ref),
-        backgroundColor: AppColors.primary,
+        backgroundColor: Theme.of(context).extension<AppColorsExtension>()!.primary,
         child: const Icon(Icons.group_add, color: Colors.white),
       ),
     );
@@ -125,13 +126,19 @@ class _GroupList extends ConsumerWidget {
               )
                   .animate()
                   .fadeIn(
-                    duration: 300.ms,
-                    delay: (50 * index).ms,
+                    duration: 400.ms,
+                    delay: (60 * index).ms,
                   )
                   .slideY(
-                    begin: 0.1,
-                    duration: 300.ms,
-                    delay: (50 * index).ms,
+                    begin: 0.08,
+                    duration: 400.ms,
+                    delay: (60 * index).ms,
+                    curve: Curves.easeOut,
+                  )
+                  .scale(
+                    begin: const Offset(0.96, 0.96),
+                    duration: 400.ms,
+                    delay: (60 * index).ms,
                     curve: Curves.easeOut,
                   );
             },
@@ -181,95 +188,90 @@ class _GroupCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final colors = Theme.of(context).extension<AppColorsExtension>()!;
     final membersMap = ref.watch(localGroupMembersProvider);
     final memberCount = (membersMap[group.id] ?? []).length;
     final notificationCount =
         ref.watch(groupNotificationCountProvider(group.id));
 
-    return Card(
+    return GlassCard(
       margin: const EdgeInsets.only(bottom: 8),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(16),
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Row(
-            children: [
-              // Group avatar
-              CircleAvatar(
-                radius: 24,
-                backgroundColor: AppColors.primaryLight.withValues(alpha: 0.3),
-                child: Text(
-                  group.name.isNotEmpty ? group.name[0] : '?',
-                  style: const TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.primary,
-                  ),
-                ),
+      onTap: onTap,
+      child: Row(
+        children: [
+          // Group avatar
+          CircleAvatar(
+            radius: 24,
+            backgroundColor: colors.primary.withValues(alpha: 0.15),
+            child: Text(
+              group.name.isNotEmpty ? group.name[0] : '?',
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: colors.primary,
               ),
-              const SizedBox(width: 12),
-              // Group info
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+            ),
+          ),
+          const SizedBox(width: 12),
+          // Group info
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  group.name,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w600,
+                    fontSize: 16,
+                  ),
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(height: 4),
+                Row(
                   children: [
+                    Icon(Icons.people_outline,
+                        size: 14, color: colors.textSecondary),
+                    const SizedBox(width: 4),
                     Text(
-                      group.name,
-                      style: const TextStyle(
-                        fontWeight: FontWeight.w600,
-                        fontSize: 16,
+                      '$memberCount人',
+                      style: TextStyle(
+                        color: colors.textSecondary,
+                        fontSize: 13,
                       ),
-                      overflow: TextOverflow.ellipsis,
                     ),
-                    const SizedBox(height: 4),
-                    Row(
-                      children: [
-                        const Icon(Icons.people_outline,
-                            size: 14, color: AppColors.textSecondary),
-                        const SizedBox(width: 4),
-                        Text(
-                          '$memberCount人',
-                          style: const TextStyle(
-                            color: AppColors.textSecondary,
-                            fontSize: 13,
+                    if (group.description != null &&
+                        group.description!.isNotEmpty) ...[
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Text(
+                          group.description!,
+                          style: TextStyle(
+                            color: colors.textHint,
+                            fontSize: 12,
                           ),
+                          overflow: TextOverflow.ellipsis,
                         ),
-                        if (group.description != null &&
-                            group.description!.isNotEmpty) ...[
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: Text(
-                              group.description!,
-                              style: const TextStyle(
-                                color: AppColors.textHint,
-                                fontSize: 12,
-                              ),
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ),
-                        ],
-                      ],
-                    ),
+                      ),
+                    ],
                   ],
                 ),
-              ),
-              // Notification badge + Arrow
-              if (notificationCount > 0)
-                Padding(
-                  padding: const EdgeInsets.only(right: 4),
-                  child: Badge(
-                    label: Text('$notificationCount'),
-                    child: const SizedBox.shrink(),
-                  ),
-                ),
-              const Icon(
-                Icons.chevron_right,
-                color: AppColors.textHint,
-              ),
-            ],
+              ],
+            ),
           ),
-        ),
+          // Notification badge + Arrow
+          if (notificationCount > 0)
+            Padding(
+              padding: const EdgeInsets.only(right: 4),
+              child: Badge(
+                label: Text('$notificationCount'),
+                child: const SizedBox.shrink(),
+              ),
+            ),
+          Icon(
+            Icons.chevron_right,
+            color: colors.textHint,
+          ),
+        ],
       ),
     );
   }
