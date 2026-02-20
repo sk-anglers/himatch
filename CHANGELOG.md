@@ -7,6 +7,44 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed (Calendar UX)
+- カレンダーセルの視認性改善:
+  - rowHeight: 64→72 に拡大（天気アイコン + シフトバッジの3段レイアウト）
+  - シフトバッジ: 全幅ソリッドカラー背景 + 白文字11px太字（旧: 小さな半透明ドット）
+  - BaseCalendarCell: crossAxisAlignment.stretch + Spacer ベースの3段構成（日付/天気/バッジ）
+- 月/週/日の ChoiceChip 切り替えトグルを廃止（TableCalendar ヘッダーのフォーマットボタンに統合）
+  - _buildViewModeToggle(), _buildWeekView(), _buildDayView() を削除
+  - week_view.dart, day_view.dart の未使用 import を削除
+
+### Changed (Glassmorphism UI)
+- デザインシステム基盤: グラスモーフィズム対応
+  - AppColorsExtension に6フィールド追加 (glassBackground/glassBorder/glassShadow/gradientStart/gradientMiddle/gradientEnd)
+  - seedColor から HSL±20度ずらしで動的グラデーション生成 (gradientFromSeed/withSeedGradient)
+  - AppSpacing に borderRadius/glassBlur 定数追加
+  - ThemeSettings に glassEffectEnabled トグル追加 (BackdropFilter ON/OFF)
+  - AppBar/Scaffold/NavigationBar/BottomSheet の backgroundColor を透明化
+- 新規共通ウィジェット5種:
+  - GlassCard / GlassCard.lite: フロストガラスカード (blur 20σ / 10σ、無効時は半透明フォールバック)
+  - GradientScaffold: 3色グラデーション背景 Scaffold
+  - showGlassBottomSheet: グラス風ボトムシート
+  - GlassTapEffect: タップ時スケール縮小アニメーション (0.97→1.0, 200ms)
+  - showGlassSnackBar: オーバーレイベースのグラス風トップ通知
+- 主要画面のグラス化:
+  - HomeScreen: GradientScaffold + グラス AppBar + グラス NavigationBar
+  - GroupsTab: Card → GlassCard + stagger アニメーション強化
+  - ProfileTab: GlassCard 化 + グラスリングアバター + アイコン半透明背景
+  - CalendarTab: シフトペイントパネル→GlassCard.lite、スケジュールカード→GlassCard.lite、ボトムシート→グラス背景
+  - SuggestionsTab: グループセレクターチップ→グラス装飾、候補タイル→glassBackground、ボトムシート→グラス背景
+- 詳細画面のグラス化:
+  - LoginScreen: GradientScaffold + GlassCard アイコン + パルスアニメーション + stagger入場演出
+  - ThemeSettingsScreen: GradientScaffold + グラスエフェクトON/OFFトグル + プレビューカードにグラデーション
+  - GroupDetailScreen: GradientScaffold + 全カード→GlassCard + 機能ボタン→GlassCard.lite
+  - ChatScreen: GradientScaffold + グラスバブル (自分=seedColor半透明 / 相手=glassBackground) + グラスComposeBar
+- アニメーション強化:
+  - ページ遷移: _fadeThroughPage → Fade+Scale(0.96→1.0, 400ms easeOutCubic)
+  - ページ遷移: _slideUpPage → Slide(0,0.08)+Scale(0.98→1.0)+Fade (400ms easeOutBack)
+  - EmptyStateWidget: アイコンにグロー効果 (primary色 boxShadow)
+
 ### Fixed
 - HomeScreen AppBar の通知ボタンが空実装（TODO）で機能していなかった問題を修正 → NotificationSettingsScreen に遷移するように接続
 - HomeScreen AppBar のナビゲーションを context.pushNamed から ref.read(appRouterProvider).push に変更（GoRouter.of(context) の解決失敗を回避）

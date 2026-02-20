@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:himatch/core/theme/app_theme.dart';
+import 'package:himatch/models/group.dart';
 
 class CreateGroupDialog extends StatefulWidget {
   const CreateGroupDialog({super.key});
@@ -12,6 +13,7 @@ class _CreateGroupDialogState extends State<CreateGroupDialog> {
   final _nameController = TextEditingController();
   final _descController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
+  int _selectedColorIndex = 0;
 
   @override
   void dispose() {
@@ -52,6 +54,48 @@ class _CreateGroupDialogState extends State<CreateGroupDialog> {
               ),
               maxLines: 2,
             ),
+            const SizedBox(height: 16),
+            // Color picker
+            Align(
+              alignment: Alignment.centerLeft,
+              child: Text(
+                'カラー',
+                style: TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.textSecondary,
+                ),
+              ),
+            ),
+            const SizedBox(height: 8),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: List.generate(groupColorOptions.length, (index) {
+                final color =
+                    Color(int.parse(groupColorOptions[index], radix: 16));
+                final isSelected = index == _selectedColorIndex;
+                return GestureDetector(
+                  onTap: () => setState(() => _selectedColorIndex = index),
+                  child: Container(
+                    width: 32,
+                    height: 32,
+                    decoration: BoxDecoration(
+                      color: color,
+                      shape: BoxShape.circle,
+                      border: isSelected
+                          ? Border.all(
+                              color: AppColors.textPrimary, width: 3)
+                          : null,
+                    ),
+                    child: isSelected
+                        ? const Icon(Icons.check,
+                            color: Colors.white, size: 16)
+                        : null,
+                  ),
+                );
+              }),
+            ),
           ],
         ),
       ),
@@ -68,6 +112,7 @@ class _CreateGroupDialogState extends State<CreateGroupDialog> {
                 'description': _descController.text.trim().isEmpty
                     ? null
                     : _descController.text.trim(),
+                'colorHex': groupColorOptions[_selectedColorIndex],
               });
             }
           },

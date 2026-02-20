@@ -16,6 +16,7 @@ abstract class DemoData {
       description: '田中ゼミ 3年メンバー',
       inviteCode: 'ZEMI2026',
       createdBy: AppConstants.localUserId,
+      colorHex: 'FF3498DB',
       createdAt: DateTime(2026, 1, 15),
     ),
     Group(
@@ -24,6 +25,7 @@ abstract class DemoData {
       description: 'カフェ☕ シフト共有用',
       inviteCode: 'CAFE2026',
       createdBy: 'demo-user-a',
+      colorHex: 'FFF39C12',
       createdAt: DateTime(2026, 2, 1),
     ),
   ];
@@ -347,17 +349,150 @@ abstract class DemoData {
   static List<Schedule> generateMySchedules() {
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
+
+    // 今月1日を基準にシフトデータを生成（給与計算用）
+    final monthStart = DateTime(now.year, now.month, 1);
+
     return [
-      // 今日: バイト
+      // ── 今月の過去シフト（給与計算に反映される） ──
+      // 1日: 早番 6:00-14:00 (8h)
+      if (monthStart.isBefore(today))
+        Schedule(
+          id: 'demo-shift-01',
+          userId: AppConstants.localUserId,
+          title: 'バイト（早番）',
+          scheduleType: ScheduleType.shift,
+          startTime: monthStart.add(const Duration(hours: 6)),
+          endTime: monthStart.add(const Duration(hours: 14)),
+          shiftTypeId: 'type-parttime',
+          workplaceId: 'wp-1',
+          color: 'FFF39C12',
+          createdAt: monthStart,
+        ),
+      // 3日: 遅番 14:00-22:00 (8h)
+      if (monthStart.add(const Duration(days: 2)).isBefore(today))
+        Schedule(
+          id: 'demo-shift-03',
+          userId: AppConstants.localUserId,
+          title: 'バイト（遅番）',
+          scheduleType: ScheduleType.shift,
+          startTime: monthStart.add(const Duration(days: 2, hours: 14)),
+          endTime: monthStart.add(const Duration(days: 2, hours: 22)),
+          shiftTypeId: 'type-parttime',
+          workplaceId: 'wp-1',
+          color: 'FFF39C12',
+          createdAt: monthStart,
+        ),
+      // 5日: 早番 6:00-14:00 (8h)
+      if (monthStart.add(const Duration(days: 4)).isBefore(today))
+        Schedule(
+          id: 'demo-shift-05',
+          userId: AppConstants.localUserId,
+          title: 'バイト（早番）',
+          scheduleType: ScheduleType.shift,
+          startTime: monthStart.add(const Duration(days: 4, hours: 6)),
+          endTime: monthStart.add(const Duration(days: 4, hours: 14)),
+          shiftTypeId: 'type-parttime',
+          workplaceId: 'wp-1',
+          color: 'FFF39C12',
+          createdAt: monthStart,
+        ),
+      // 8日(土): 早番 9:00-17:00 (8h, 休日手当)
+      if (monthStart.add(const Duration(days: 7)).isBefore(today))
+        Schedule(
+          id: 'demo-shift-08',
+          userId: AppConstants.localUserId,
+          title: 'バイト（土曜）',
+          scheduleType: ScheduleType.shift,
+          startTime: monthStart.add(const Duration(days: 7, hours: 9)),
+          endTime: monthStart.add(const Duration(days: 7, hours: 17)),
+          shiftTypeId: 'type-parttime',
+          workplaceId: 'wp-1',
+          color: 'FFF39C12',
+          createdAt: monthStart,
+        ),
+      // 10日: 遅番 14:00-23:00 (9h, 1h残業 + 1h深夜)
+      if (monthStart.add(const Duration(days: 9)).isBefore(today))
+        Schedule(
+          id: 'demo-shift-10',
+          userId: AppConstants.localUserId,
+          title: 'バイト（遅番残業）',
+          scheduleType: ScheduleType.shift,
+          startTime: monthStart.add(const Duration(days: 9, hours: 14)),
+          endTime: monthStart.add(const Duration(days: 9, hours: 23)),
+          shiftTypeId: 'type-parttime',
+          workplaceId: 'wp-1',
+          color: 'FFF39C12',
+          createdAt: monthStart,
+        ),
+      // 12日: 早番 6:00-14:00 (8h)
+      if (monthStart.add(const Duration(days: 11)).isBefore(today))
+        Schedule(
+          id: 'demo-shift-12',
+          userId: AppConstants.localUserId,
+          title: 'バイト（早番）',
+          scheduleType: ScheduleType.shift,
+          startTime: monthStart.add(const Duration(days: 11, hours: 6)),
+          endTime: monthStart.add(const Duration(days: 11, hours: 14)),
+          shiftTypeId: 'type-parttime',
+          workplaceId: 'wp-1',
+          color: 'FFF39C12',
+          createdAt: monthStart,
+        ),
+      // 15日: 遅番 14:00-22:00 (8h)
+      if (monthStart.add(const Duration(days: 14)).isBefore(today))
+        Schedule(
+          id: 'demo-shift-15',
+          userId: AppConstants.localUserId,
+          title: 'バイト（遅番）',
+          scheduleType: ScheduleType.shift,
+          startTime: monthStart.add(const Duration(days: 14, hours: 14)),
+          endTime: monthStart.add(const Duration(days: 14, hours: 22)),
+          shiftTypeId: 'type-parttime',
+          workplaceId: 'wp-1',
+          color: 'FFF39C12',
+          createdAt: monthStart,
+        ),
+      // 17日: 早番 6:00-15:00 (9h, 1h残業)
+      if (monthStart.add(const Duration(days: 16)).isBefore(today))
+        Schedule(
+          id: 'demo-shift-17',
+          userId: AppConstants.localUserId,
+          title: 'バイト（早番残業）',
+          scheduleType: ScheduleType.shift,
+          startTime: monthStart.add(const Duration(days: 16, hours: 6)),
+          endTime: monthStart.add(const Duration(days: 16, hours: 15)),
+          shiftTypeId: 'type-parttime',
+          workplaceId: 'wp-1',
+          color: 'FFF39C12',
+          createdAt: monthStart,
+        ),
+      // 19日: 遅番 14:00-22:00 (8h)
+      if (monthStart.add(const Duration(days: 18)).isBefore(today))
+        Schedule(
+          id: 'demo-shift-19',
+          userId: AppConstants.localUserId,
+          title: 'バイト（遅番）',
+          scheduleType: ScheduleType.shift,
+          startTime: monthStart.add(const Duration(days: 18, hours: 14)),
+          endTime: monthStart.add(const Duration(days: 18, hours: 22)),
+          shiftTypeId: 'type-parttime',
+          workplaceId: 'wp-1',
+          color: 'FFF39C12',
+          createdAt: monthStart,
+        ),
+
+      // ── 今日以降の予定（カレンダー表示用） ──
+      // 今日: バイト（早番）
       Schedule(
         id: 'demo-my-0',
         userId: AppConstants.localUserId,
-        title: 'バイト',
+        title: 'バイト（早番）',
         scheduleType: ScheduleType.shift,
-        startTime: today,
-        endTime: today.add(const Duration(days: 1)),
-        isAllDay: true,
+        startTime: today.add(const Duration(hours: 6)),
+        endTime: today.add(const Duration(hours: 14)),
         shiftTypeId: 'type-parttime',
+        workplaceId: 'wp-1',
         color: 'FFF39C12',
         createdAt: today,
       ),
@@ -366,10 +501,9 @@ abstract class DemoData {
         id: 'demo-my-1',
         userId: AppConstants.localUserId,
         title: '授業',
-        scheduleType: ScheduleType.shift,
-        startTime: today.add(const Duration(days: 1)),
-        endTime: today.add(const Duration(days: 2)),
-        isAllDay: true,
+        scheduleType: ScheduleType.event,
+        startTime: today.add(const Duration(days: 1, hours: 9)),
+        endTime: today.add(const Duration(days: 1, hours: 16)),
         shiftTypeId: 'type-class',
         color: 'FF3498DB',
         createdAt: today,
@@ -387,16 +521,17 @@ abstract class DemoData {
         color: 'FF27AE60',
         createdAt: today,
       ),
-      // 3日後: サークル
+      // 3日後: バイト（遅番）
       Schedule(
         id: 'demo-my-3',
         userId: AppConstants.localUserId,
-        title: 'サークル',
+        title: 'バイト（遅番）',
         scheduleType: ScheduleType.shift,
-        startTime: today.add(const Duration(days: 3, hours: 15)),
-        endTime: today.add(const Duration(days: 3, hours: 18)),
-        shiftTypeId: 'type-club',
-        color: 'FF00B894',
+        startTime: today.add(const Duration(days: 3, hours: 14)),
+        endTime: today.add(const Duration(days: 3, hours: 22)),
+        shiftTypeId: 'type-parttime',
+        workplaceId: 'wp-1',
+        color: 'FFF39C12',
         createdAt: today,
       ),
       // 5日後: 午後空き
@@ -424,7 +559,7 @@ abstract class DemoData {
         color: 'FFFF6B6B',
         createdAt: today,
       ),
-      // 7日後: 一般予定（シフトなし）
+      // 7日後: 歯医者
       Schedule(
         id: 'demo-my-7',
         userId: AppConstants.localUserId,
@@ -434,16 +569,16 @@ abstract class DemoData {
         endTime: today.add(const Duration(days: 7, hours: 11)),
         createdAt: today,
       ),
-      // 8日後: バイト
+      // 8日後: バイト（早番）
       Schedule(
         id: 'demo-my-8',
         userId: AppConstants.localUserId,
-        title: 'バイト',
+        title: 'バイト（早番）',
         scheduleType: ScheduleType.shift,
-        startTime: today.add(const Duration(days: 8)),
-        endTime: today.add(const Duration(days: 9)),
-        isAllDay: true,
+        startTime: today.add(const Duration(days: 8, hours: 6)),
+        endTime: today.add(const Duration(days: 8, hours: 14)),
         shiftTypeId: 'type-parttime',
+        workplaceId: 'wp-1',
         color: 'FFF39C12',
         createdAt: today,
       ),

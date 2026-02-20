@@ -138,8 +138,8 @@ class _GroupSelector extends StatelessWidget {
             isSelected: selectedGroupId == null,
             onTap: () => onSelected(null),
           ),
-          ...groups.map((g) => _buildChip(
-                label: g.name,
+          ...groups.map((g) => _buildGroupChip(
+                group: g,
                 isSelected: selectedGroupId == g.id,
                 onTap: () => onSelected(g.id),
               )),
@@ -171,6 +171,38 @@ class _GroupSelector extends StatelessWidget {
               fontSize: 13,
               fontWeight: FontWeight.w600,
               color: isSelected ? Colors.white : AppColors.textSecondary,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildGroupChip({
+    required Group group,
+    required bool isSelected,
+    required VoidCallback onTap,
+  }) {
+    final color = groupColor(group);
+    return Padding(
+      padding: const EdgeInsets.only(right: 8),
+      child: GestureDetector(
+        onTap: onTap,
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+          decoration: BoxDecoration(
+            color: isSelected ? color : color.withValues(alpha: 0.10),
+            borderRadius: BorderRadius.circular(20),
+            border: isSelected
+                ? null
+                : Border.all(color: color.withValues(alpha: 0.3)),
+          ),
+          child: Text(
+            group.name,
+            style: TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.w600,
+              color: isSelected ? Colors.white : color,
             ),
           ),
         ),
@@ -646,12 +678,15 @@ class _DayDetailSheet extends ConsumerWidget {
               separatorBuilder: (_, _) => const SizedBox(height: 8),
               itemBuilder: (context, index) {
                 final s = suggestions[index];
-                final groupName = groups
+                final matchedGroup = groups
                     .where((g) => g.id == s.groupId)
-                    .map((g) => g.name)
                     .firstOrNull;
                 return _SuggestionTile(
-                    suggestion: s, groupName: groupName)
+                    suggestion: s,
+                    groupName: matchedGroup?.name,
+                    groupColor: matchedGroup != null
+                        ? groupColor(matchedGroup)
+                        : null)
                     .animate()
                     .fadeIn(duration: 300.ms, delay: (60 * index).ms)
                     .slideX(begin: 0.05, duration: 300.ms, delay: (60 * index).ms);
@@ -671,8 +706,13 @@ class _DayDetailSheet extends ConsumerWidget {
 class _SuggestionTile extends ConsumerWidget {
   final Suggestion suggestion;
   final String? groupName;
+  final Color? groupColor;
 
-  const _SuggestionTile({required this.suggestion, this.groupName});
+  const _SuggestionTile({
+    required this.suggestion,
+    this.groupName,
+    this.groupColor,
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -707,14 +747,25 @@ class _SuggestionTile extends ConsumerWidget {
             ? AppColors.warning
             : AppColors.textSecondary;
 
+    final gColor = groupColor;
+
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surfaceContainerLow,
+        color: gColor != null
+            ? gColor.withValues(alpha: 0.14)
+            : Theme.of(context).colorScheme.surfaceContainerLow,
         borderRadius: BorderRadius.circular(14),
-        border: isConfirmed
-            ? Border.all(color: AppColors.success, width: 2)
-            : null,
+        border: Border.all(
+          color: isConfirmed
+              ? AppColors.success
+              : gColor?.withValues(alpha: 0.4) ??
+                  Theme.of(context)
+                      .colorScheme
+                      .outlineVariant
+                      .withValues(alpha: 0.3),
+          width: isConfirmed ? 2 : 1,
+        ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -727,14 +778,15 @@ class _SuggestionTile extends ConsumerWidget {
                   padding:
                       const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                   decoration: BoxDecoration(
-                    color: AppColors.surfaceVariant,
+                    color: gColor?.withValues(alpha: 0.25) ??
+                        AppColors.surfaceVariant,
                     borderRadius: BorderRadius.circular(4),
                   ),
                   child: Text(groupName!,
-                      style: const TextStyle(
+                      style: TextStyle(
                           fontSize: 11,
                           fontWeight: FontWeight.w600,
-                          color: AppColors.textSecondary)),
+                          color: gColor ?? AppColors.textSecondary)),
                 ),
                 const SizedBox(width: 8),
               ],
@@ -1202,29 +1254,31 @@ class _CompactVoteButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final bg = isSelected ? color : Colors.white;
+    final fg = isSelected ? Colors.white : color;
+
     return GestureDetector(
       onTap: onPressed,
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
         decoration: BoxDecoration(
-          color: isSelected ? color : Colors.transparent,
+          color: bg,
           borderRadius: BorderRadius.circular(6),
           border: Border.all(
-            color: isSelected ? color : color.withValues(alpha: 0.4),
+            color: isSelected ? color : color.withValues(alpha: 0.35),
             width: isSelected ? 1.5 : 1,
           ),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(icon,
-                size: 13, color: isSelected ? Colors.white : color),
+            Icon(icon, size: 13, color: fg),
             const SizedBox(width: 3),
             Text(label,
                 style: TextStyle(
                   fontSize: 11,
                   fontWeight: FontWeight.w600,
-                  color: isSelected ? Colors.white : color,
+                  color: fg,
                 )),
           ],
         ),

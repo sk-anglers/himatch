@@ -37,6 +37,7 @@ class GroupsTab extends ConsumerWidget {
       ref.read(localGroupsProvider.notifier).createGroup(
             name: result['name']!,
             description: result['description'],
+            colorHex: result['colorHex'],
           );
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('「${result['name']}」を作成しました')),
@@ -186,8 +187,17 @@ class _GroupCard extends ConsumerWidget {
     final notificationCount =
         ref.watch(groupNotificationCountProvider(group.id));
 
+    final color = groupColor(group);
+
     return Card(
       margin: const EdgeInsets.only(bottom: 8),
+      clipBehavior: Clip.antiAlias,
+      elevation: 0,
+      color: color.withValues(alpha: 0.18),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+        side: BorderSide(color: color.withValues(alpha: 0.4)),
+      ),
       child: InkWell(
         onTap: onTap,
         borderRadius: BorderRadius.circular(16),
@@ -198,13 +208,13 @@ class _GroupCard extends ConsumerWidget {
               // Group avatar
               CircleAvatar(
                 radius: 24,
-                backgroundColor: AppColors.primaryLight.withValues(alpha: 0.3),
+                backgroundColor: color.withValues(alpha: 0.2),
                 child: Text(
                   group.name.isNotEmpty ? group.name[0] : '?',
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
-                    color: AppColors.primary,
+                    color: color,
                   ),
                 ),
               ),

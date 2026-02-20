@@ -59,14 +59,14 @@ class BaseCalendarCell extends StatelessWidget {
     return AnimatedContainer(
       duration: const Duration(milliseconds: 200),
       curve: Curves.easeInOut,
-      margin: const EdgeInsets.all(1),
+      margin: const EdgeInsets.all(0.5),
       decoration: BoxDecoration(
         color: isSelected
-            ? colors.primary.withValues(alpha: 0.12)
+            ? colors.primary.withValues(alpha: 0.08)
             : isToday
-                ? colors.primaryLight.withValues(alpha: 0.10)
+                ? colors.primaryLight.withValues(alpha: 0.06)
                 : isHoliday && !isOutside
-                    ? colors.error.withValues(alpha: 0.04)
+                    ? colors.error.withValues(alpha: 0.03)
                     : null,
         border: Border.all(
           color: isSelected
@@ -76,46 +76,51 @@ class BaseCalendarCell extends StatelessWidget {
                   : colors.surfaceVariant,
           width: isSelected || isToday ? 1.5 : 0.5,
         ),
-        borderRadius: BorderRadius.circular(6),
+        borderRadius: BorderRadius.circular(4),
       ),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          // Day number (top)
-          Text(
-            '${day.day}',
-            style: TextStyle(
-              fontSize: 14,
-              fontWeight: isToday || isSelected || isHoliday
-                  ? FontWeight.bold
-                  : FontWeight.normal,
-              color: dayColor,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 2, vertical: 2),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            // Day number (top)
+            Text(
+              '${day.day}',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 13,
+                fontWeight: isToday || isSelected || isHoliday
+                    ? FontWeight.bold
+                    : FontWeight.normal,
+                color: dayColor,
+              ),
             ),
-          ),
-          // Middle slot (weather icon or holiday abbreviation)
-          SizedBox(
-            height: 16,
-            child: middleContent ??
-                (isHoliday && !isOutside
-                    ? Text(
-                        holidayName!.length > 3
-                            ? holidayName!.substring(0, 3)
-                            : holidayName!,
-                        style: TextStyle(
-                          fontSize: 8,
-                          color: colors.error,
-                          fontWeight: FontWeight.bold,
-                          height: 1.8,
-                        ),
-                      )
-                    : null),
-          ),
-          // Bottom slot (custom content)
-          SizedBox(
-            height: 16,
-            child: bottomContent,
-          ),
-        ],
+            const Spacer(),
+            // Middle slot (weather icon / holiday)
+            if (middleContent != null)
+              Center(child: middleContent!)
+            else if (isHoliday && !isOutside)
+              Text(
+                holidayName!,
+                textAlign: TextAlign.center,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  fontSize: 7,
+                  color: colors.error,
+                  fontWeight: FontWeight.bold,
+                ),
+              )
+            else
+              const SizedBox.shrink(),
+            const SizedBox(height: 2),
+            // Bottom slot (shift badge — full width)
+            if (bottomContent != null)
+              bottomContent!
+            else
+              const SizedBox(height: 18),
+          ],
+        ),
       ),
     );
   }

@@ -308,56 +308,143 @@ class _FeatureButton extends StatelessWidget {
   }
 }
 
-class _GroupInfoCard extends StatelessWidget {
+class _GroupInfoCard extends ConsumerWidget {
   final Group group;
 
   const _GroupInfoCard({required this.group});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    // Watch live state so color changes are reflected immediately
+    final groups = ref.watch(localGroupsProvider);
+    final liveGroup =
+        groups.where((g) => g.id == group.id).firstOrNull ?? group;
+    final color = groupColor(liveGroup);
+
     return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Row(
-          children: [
-            CircleAvatar(
-              radius: 28,
-              backgroundColor: AppColors.primaryLight.withValues(alpha: 0.3),
-              child: Text(
-                group.name.isNotEmpty ? group.name[0] : '?',
-                style: const TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.primary,
+      clipBehavior: Clip.antiAlias,
+      elevation: 0,
+      color: color.withValues(alpha: 0.18),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+        side: BorderSide(color: color.withValues(alpha: 0.4)),
+      ),
+      child: InkWell(
+        onTap: () => _showColorPicker(context, ref, liveGroup),
+        borderRadius: BorderRadius.circular(16),
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Row(
+            children: [
+              CircleAvatar(
+                radius: 28,
+                backgroundColor: color.withValues(alpha: 0.2),
+                child: Text(
+                  liveGroup.name.isNotEmpty ? liveGroup.name[0] : '?',
+                  style: TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                    color: color,
+                  ),
                 ),
               ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    group.name,
-                    style: const TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  if (group.description != null &&
-                      group.description!.isNotEmpty)
-                    Padding(
-                      padding: const EdgeInsets.only(top: 4),
-                      child: Text(
-                        group.description!,
-                        style: const TextStyle(
-                          color: AppColors.textSecondary,
-                          fontSize: 14,
-                        ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      liveGroup.name,
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: color,
                       ),
                     ),
-                ],
+                    if (liveGroup.description != null &&
+                        liveGroup.description!.isNotEmpty)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 4),
+                        child: Text(
+                          liveGroup.description!,
+                          style: TextStyle(
+                            color: color.withValues(alpha: 0.6),
+                            fontSize: 14,
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
               ),
+              Icon(Icons.palette, size: 18, color: color.withValues(alpha: 0.5)),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _showColorPicker(
+      BuildContext context, WidgetRef ref, Group liveGroup) {
+    final currentHex = liveGroup.colorHex;
+    showModalBottomSheet(
+      context: context,
+      builder: (ctx) => Padding(
+        padding: const EdgeInsets.fromLTRB(24, 20, 24, 32),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'グループカラーを変更',
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 16),
+            Wrap(
+              spacing: 12,
+              runSpacing: 12,
+              children: groupColorOptions.map((hex) {
+                final color = Color(int.parse(hex, radix: 16));
+                final isSelected = hex == currentHex;
+                return GestureDetector(
+                  onTap: () {
+                    ref
+                        .read(localGroupsProvider.notifier)
+                        .updateGroupColor(liveGroup.id, hex);
+                    Navigator.pop(ctx);
+                  },
+                  child: Container(
+                    width: 40,
+                    height: 40,
+                    decoration: BoxDecoration(
+                      color: color,
+                      shape: BoxShape.circle,
+                      border: isSelected
+                          ? Border.all(
+                              color: Theme.of(context)
+                                      .textTheme
+                                      .bodyLarge
+                                      ?.color ??
+                                  Colors.black,
+                              width: 3)
+                          : null,
+                      boxShadow: isSelected
+                          ? [
+                              BoxShadow(
+                                color: color.withValues(alpha: 0.4),
+                                blurRadius: 8,
+                                spreadRadius: 1,
+                              )
+                            ]
+                          : null,
+                    ),
+                    child: isSelected
+                        ? const Icon(Icons.check,
+                            color: Colors.white, size: 20)
+                        : null,
+                  ),
+                );
+              }).toList(),
             ),
           ],
         ),

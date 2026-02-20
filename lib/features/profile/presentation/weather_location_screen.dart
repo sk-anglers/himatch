@@ -123,12 +123,21 @@ class _WeatherLocationScreenState
                   : const Icon(Icons.radio_button_unchecked,
                       color: AppColors.textHint),
               onTap: () {
-                ref
-                    .read(weatherLocationProvider.notifier)
-                    .useCurrentLocation();
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('現在地モードに切り替えました')),
-                );
+                if (location.useCurrentLocation) {
+                  ref
+                      .read(weatherLocationProvider.notifier)
+                      .clearCurrentLocation();
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('現在地モードを解除しました')),
+                  );
+                } else {
+                  ref
+                      .read(weatherLocationProvider.notifier)
+                      .useCurrentLocation();
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('現在地モードに切り替えました')),
+                  );
+                }
               },
             ),
           ),

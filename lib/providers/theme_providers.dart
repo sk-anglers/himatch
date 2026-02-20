@@ -3,8 +3,8 @@ import 'package:himatch/core/theme/app_theme.dart';
 
 /// User theme customization settings.
 ///
-/// Stores the selected color [preset] and [isDarkMode] toggle.
-/// Defaults to purple preset with light mode.
+/// Stores the selected color [preset], [isDarkMode] toggle,
+/// and [glassEffectEnabled] for glassmorphism ON/OFF.
 class ThemeSettings {
   /// The selected color preset from [ThemePreset].
   final ThemePreset preset;
@@ -12,23 +12,33 @@ class ThemeSettings {
   /// Whether dark mode is enabled.
   final bool isDarkMode;
 
+  /// Whether glassmorphism effects (BackdropFilter blur) are enabled.
+  /// Disable on low-end devices for better performance.
+  final bool glassEffectEnabled;
+
   const ThemeSettings({
     this.preset = ThemePreset.purple,
     this.isDarkMode = false,
+    this.glassEffectEnabled = true,
   });
 
-  ThemeSettings copyWith({ThemePreset? preset, bool? isDarkMode}) {
+  ThemeSettings copyWith({
+    ThemePreset? preset,
+    bool? isDarkMode,
+    bool? glassEffectEnabled,
+  }) {
     return ThemeSettings(
       preset: preset ?? this.preset,
       isDarkMode: isDarkMode ?? this.isDarkMode,
+      glassEffectEnabled: glassEffectEnabled ?? this.glassEffectEnabled,
     );
   }
 }
 
 /// Notifier that manages theme customization state.
 ///
-/// Provides methods to switch the color preset and toggle dark mode.
-/// Will be persisted to SharedPreferences when connected.
+/// Provides methods to switch the color preset, toggle dark mode,
+/// and control glassmorphism effects.
 class ThemeSettingsNotifier extends Notifier<ThemeSettings> {
   @override
   ThemeSettings build() => const ThemeSettings();
@@ -46,6 +56,16 @@ class ThemeSettingsNotifier extends Notifier<ThemeSettings> {
   /// Explicitly set dark mode on or off.
   void setDarkMode(bool value) {
     state = state.copyWith(isDarkMode: value);
+  }
+
+  /// Toggle glassmorphism effects on or off.
+  void toggleGlassEffect() {
+    state = state.copyWith(glassEffectEnabled: !state.glassEffectEnabled);
+  }
+
+  /// Explicitly set glass effect on or off.
+  void setGlassEffect(bool value) {
+    state = state.copyWith(glassEffectEnabled: value);
   }
 }
 
