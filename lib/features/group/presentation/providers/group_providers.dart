@@ -29,11 +29,13 @@ class LocalGroupsNotifier extends Notifier<List<Group>> {
   Group createGroup({
     required String name,
     String? description,
+    String? colorHex,
   }) {
     final group = Group(
       id: _uuid.v4(),
       name: name,
       description: description,
+      colorHex: colorHex,
       inviteCode: _generateInviteCode(),
       createdBy: AppConstants.localUserId,
       createdAt: DateTime.now(),

@@ -138,8 +138,8 @@ class _GroupSelector extends StatelessWidget {
             isSelected: selectedGroupId == null,
             onTap: () => onSelected(null),
           ),
-          ...groups.map((g) => _buildChip(
-                label: g.name,
+          ...groups.map((g) => _buildGroupChip(
+                group: g,
                 isSelected: selectedGroupId == g.id,
                 onTap: () => onSelected(g.id),
               )),
@@ -171,6 +171,38 @@ class _GroupSelector extends StatelessWidget {
               fontSize: 13,
               fontWeight: FontWeight.w600,
               color: isSelected ? Colors.white : AppColors.textSecondary,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildGroupChip({
+    required Group group,
+    required bool isSelected,
+    required VoidCallback onTap,
+  }) {
+    final color = groupColor(group);
+    return Padding(
+      padding: const EdgeInsets.only(right: 8),
+      child: GestureDetector(
+        onTap: onTap,
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+          decoration: BoxDecoration(
+            color: isSelected ? color : color.withValues(alpha: 0.10),
+            borderRadius: BorderRadius.circular(20),
+            border: isSelected
+                ? null
+                : Border.all(color: color.withValues(alpha: 0.3)),
+          ),
+          child: Text(
+            group.name,
+            style: TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.w600,
+              color: isSelected ? Colors.white : color,
             ),
           ),
         ),

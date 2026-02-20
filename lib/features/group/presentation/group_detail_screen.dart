@@ -322,13 +322,13 @@ class _GroupInfoCard extends StatelessWidget {
           children: [
             CircleAvatar(
               radius: 28,
-              backgroundColor: AppColors.primaryLight.withValues(alpha: 0.3),
+              backgroundColor: groupColor(group).withValues(alpha: 0.15),
               child: Text(
                 group.name.isNotEmpty ? group.name[0] : '?',
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.bold,
-                  color: AppColors.primary,
+                  color: groupColor(group),
                 ),
               ),
             ),

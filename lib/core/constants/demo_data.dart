@@ -16,6 +16,7 @@ abstract class DemoData {
       description: '田中ゼミ 3年メンバー',
       inviteCode: 'ZEMI2026',
       createdBy: AppConstants.localUserId,
+      colorHex: 'FF3498DB',
       createdAt: DateTime(2026, 1, 15),
     ),
     Group(
@@ -24,6 +25,7 @@ abstract class DemoData {
       description: 'カフェ☕ シフト共有用',
       inviteCode: 'CAFE2026',
       createdBy: 'demo-user-a',
+      colorHex: 'FFF39C12',
       createdAt: DateTime(2026, 2, 1),
     ),
   ];
