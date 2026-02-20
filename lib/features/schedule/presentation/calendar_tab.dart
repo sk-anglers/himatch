@@ -745,44 +745,48 @@ class _ShiftPaintPanel extends ConsumerWidget {
                 ),
               ),
               const Spacer(),
-              if (isActive)
-                GestureDetector(
-                  onTap: onDone,
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 10, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: AppColors.primary,
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: const Text(
-                      '完了',
-                      style: TextStyle(
-                        fontSize: 11,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
-                      ),
-                    ),
-                  ),
-                )
-              else
+              if (!isActive)
                 GestureDetector(
                   onTap: onEditShiftTypes,
-                  child: const Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(Icons.tune, size: 14, color: AppColors.textHint),
-                      SizedBox(width: 2),
-                      Text(
-                        '編集',
-                        style: TextStyle(
-                          fontSize: 11,
-                          color: AppColors.textHint,
+                  child: const Padding(
+                    padding: EdgeInsets.only(right: 8),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(Icons.tune, size: 14, color: AppColors.textHint),
+                        SizedBox(width: 2),
+                        Text(
+                          '編集',
+                          style: TextStyle(
+                            fontSize: 11,
+                            color: AppColors.textHint,
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
+              GestureDetector(
+                onTap: onDone,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 10, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: isActive
+                        ? AppColors.primary
+                        : AppColors.textHint.withValues(alpha: 0.15),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Text(
+                    isActive ? '完了' : '閉じる',
+                    style: TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.bold,
+                      color: isActive ? Colors.white : AppColors.textSecondary,
+                    ),
+                  ),
+                ),
+              ),
             ],
           ),
           const SizedBox(height: 8),
